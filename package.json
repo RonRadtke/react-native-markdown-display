@@ -5,11 +5,9 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "scripts": {
-    "lint": "eslint --fix --cache ./src"
+    "lint": "eslint --cache ./src",
+    "lint-fix": "eslint --fix --cache ./src"
   },
-  "pre-commit": [
-    "lint"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RonRadtke/react-native-markdown-display.git"
@@ -51,7 +49,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-native": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "pre-commit": "1.2.2",
     "typescript": "^3.8.3"
   },
   "directories": {
