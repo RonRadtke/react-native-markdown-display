@@ -8,8 +8,8 @@ on:
     branches: [ "master", "main" ]
 
 jobs:
-  eslint:
-    name: ESLint
+  checks:
+    name: Code checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,6 +20,8 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
-        continue-on-error: true
 
-      # TODO: prettier/format checks, type checks...
+      - name: Run Prettier
+        run: npm run format-check
+
+# TODO: type checks...
