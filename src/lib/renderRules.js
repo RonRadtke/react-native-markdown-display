@@ -1,10 +1,5 @@
 import React, {Component} from 'react';
-import {
-  Platform,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import {Pressable, View, Platform, StyleSheet} from 'react-native';
 import FitImage from 'react-native-fit-image';
 
 import openUrl from './util/openUrl';
@@ -239,22 +234,23 @@ const renderRules = (Text: Component) => ({
   ),
   // Links
   link: (node, children, parent, styles, onLinkPress) => (
-    <Text
+    <Pressable
+      accessibilityRole={'link'}
       key={node.key}
-      style={styles.link}
       onPress={() => openUrl(node.attributes.href, onLinkPress)}
     >
-      {children}
-    </Text>
+      <Text style={styles.link}>{children}</Text>
+    </Pressable>
   ),
   blocklink: (node, children, parent, styles, onLinkPress) => (
-    <TouchableWithoutFeedback
+    <Pressable
+      accessibilityRole={'link'}
       key={node.key}
       onPress={() => openUrl(node.attributes.href, onLinkPress)}
       style={styles.blocklink}
     >
       <View style={styles.image}>{children}</View>
-    </TouchableWithoutFeedback>
+    </Pressable>
   ),
   // Images
   image: (
