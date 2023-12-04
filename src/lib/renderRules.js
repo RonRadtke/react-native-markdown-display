@@ -7,7 +7,7 @@ import hasParents from './util/hasParents';
 
 import textStyleProps from './data/textStyleProps';
 
-const renderRules = (Text: Component) => ({
+const renderRules = (Text) => ({
   // when unknown elements are introduced, so it wont break
   unknown: (node, children, parent, styles) => null,
 
