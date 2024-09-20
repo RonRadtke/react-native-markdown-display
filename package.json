@@ -8,7 +8,8 @@
     "format": "prettier -w src",
     "format-check": "prettier --check src",
     "lint": "eslint --cache ./src",
-    "lint-fix": "eslint --fix --cache ./src"
+    "lint-fix": "eslint --fix --cache ./src",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
