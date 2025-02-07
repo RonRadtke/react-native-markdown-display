@@ -275,7 +275,6 @@ const renderRules = (Text) => ({
 
     const imageProps = {
       indicator: true,
-      key: node.key,
       style: styles._VIEW_SAFE_image,
       source: {
         uri: show === true ? src : `${defaultImageHandler}${src}`,
@@ -287,7 +286,7 @@ const renderRules = (Text) => ({
       imageProps.accessibilityLabel = alt;
     }
 
-    return <FitImage {...imageProps} />;
+    return <FitImage key={node.key} {...imageProps} />;
   },
 
   // Text Output
