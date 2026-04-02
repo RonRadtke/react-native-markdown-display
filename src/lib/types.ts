@@ -1,4 +1,3 @@
-import type MarkdownIt from 'markdown-it';
 import type {ComponentType, ReactNode} from 'react';
 import type {
   ImageStyle,
@@ -14,7 +13,6 @@ export type MarkdownStyleMap = Record<string, StyleProp<MarkdownStyle>>;
 export type MarkdownStyleSheet = Record<string, MarkdownStyleObject>;
 export type TextComponent = ComponentType<TextProps>;
 export type MarkdownTokenNesting = -1 | 0 | 1;
-export type MarkdownItToken = MarkdownIt.Token;
 export type MarkdownData =
   | null
   | boolean
@@ -77,5 +75,5 @@ export type RenderRules = Record<string, RenderRule | undefined> & {
 };
 
 export interface MarkdownParser {
-  parse(value: string, env: Record<string, never>): MarkdownItToken[];
+  parse(value: string, env: Record<string, never>): TokenLike[];
 }
