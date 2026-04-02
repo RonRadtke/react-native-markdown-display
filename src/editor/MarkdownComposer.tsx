@@ -4,7 +4,11 @@ import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import MarkdownPreview from './MarkdownPreview';
 import MarkdownTextInput from './MarkdownTextInput';
 
-import type {MarkdownComposerMode, MarkdownComposerProps} from './types';
+import type {
+  MarkdownComposerMode,
+  MarkdownComposerProps,
+  MarkdownTextInputCommandPayload,
+} from './types';
 
 const DEFAULT_COMPACT_TOOLBAR = [
   {command: 'bold', label: 'B'},
@@ -20,6 +24,33 @@ const DEFAULT_EXPANDED_TOOLBAR = [
   {command: 'table', label: 'Table'},
 ] as const;
 
+const DEFAULT_COMPACT_MAX_HEIGHT = 110;
+
+const getDefaultCommandPayload = (
+  command: MarkdownTextInputCommandPayload['command'],
+): MarkdownTextInputCommandPayload => {
+  if (command === 'table') {
+    return {
+      command,
+      table: {
+        columns: 3,
+        rows: 2,
+      },
+    };
+  }
+
+  if (command === 'link') {
+    return {
+      command,
+      link: {
+        url: 'https://',
+      },
+    };
+  }
+
+  return {command};
+};
+
 const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
   function MarkdownComposer(
     {
@@ -31,6 +62,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
       previewEnabled = false,
       previewEmptyState,
       previewLabel,
+      resolveCommandPayload,
       renderExpandButtonLabel,
       style,
       textInputStyle,
@@ -46,6 +78,18 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
       [compactToolbarItems, expandedToolbarItems, mode],
     );
 
+    const handleResolveCommandPayload = async (
+      command: MarkdownTextInputCommandPayload['command'],
+    ): Promise<MarkdownTextInputCommandPayload | null> => {
+      const resolvedPayload = await resolveCommandPayload?.(command);
+
+      if (resolvedPayload === null) {
+        return null;
+      }
+
+      return resolvedPayload ?? getDefaultCommandPayload(command);
+    };
+
     const toggleMode = (): void => {
       const nextMode: MarkdownComposerMode =
         mode === 'compact' ? 'expanded' : 'compact';
@@ -59,12 +103,16 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
         <MarkdownTextInput
           {...textInputProps}
           enableShortcuts
-          multiline={mode === 'expanded'}
+          multiline
           numberOfLines={mode === 'expanded' ? 8 : 1}
           ref={ref}
+          resolveCommandPayload={handleResolveCommandPayload}
           style={[styles.textInput, style, textInputStyle]}
           toolbarItems={toolbarItems}
           value={value}
+          {...(mode === 'compact'
+            ? {compactMaxHeight: DEFAULT_COMPACT_MAX_HEIGHT}
+            : {})}
         />
         {previewEnabled && mode === 'expanded' ? (
           <MarkdownPreview

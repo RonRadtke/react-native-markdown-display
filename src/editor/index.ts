@@ -14,6 +14,7 @@ export {getSelectedText, normalizeSelection} from './utils/selection';
 export type {
   MarkdownBlockFormat,
   MarkdownCommand,
+  MarkdownCommandPayloadResolver,
   MarkdownCommandResult,
   MarkdownComposerMode,
   MarkdownComposerProps,

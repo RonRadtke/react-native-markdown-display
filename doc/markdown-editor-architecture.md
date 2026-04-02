@@ -42,18 +42,20 @@ Implemented:
 - typed editor command model
 - compact and expanded composer modules
 - selection-safe markdown command helpers
+- async command payload resolution hooks for actions like links and tables
 - newline continuation shortcuts for:
   - blockquotes
   - bullet lists
   - ordered lists
 - exit shortcuts for empty list and blockquote markers
+- compact composer auto-grow with a capped height before expansion
 - expanded-mode preview powered by the existing markdown parser and renderer
 
 Still pending:
 
 - native inline attributed styling
 - richer keyboard shortcut handling
-- preview customization beyond current defaults
+- richer built-in dialogs for link and table editing
 
 ## Design Principles
 

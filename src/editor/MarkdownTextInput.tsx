@@ -6,6 +6,7 @@ import {
   TextInput,
   View,
   type NativeSyntheticEvent,
+  type TextInputContentSizeChangeEventData,
   type TextInputSelectionChangeEventData,
 } from 'react-native';
 
@@ -70,9 +71,11 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
       selection,
       style,
       toolbarItems = DEFAULT_TOOLBAR_ITEMS,
+      compactMaxHeight,
       enableShortcuts = true,
       multiline = true,
       numberOfLines,
+      resolveCommandPayload,
       value,
       ...textInputProps
     },
@@ -81,6 +84,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
     const [internalSelection, setInternalSelection] = useState(() =>
       normalizeSelection(value, selection),
     );
+    const [contentHeight, setContentHeight] = useState<number | null>(null);
 
     useEffect(() => {
       if (selection) {
@@ -100,9 +104,15 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
       onSelectionChange?.(event);
     };
 
-    const handleCommandPress = (
-      payload: MarkdownTextInputCommandPayload,
-    ): void => {
+    const handleCommandPress = async (command: MarkdownToolbarItem['command']) => {
+      const resolvedPayload = await resolveCommandPayload?.(command);
+
+      if (resolvedPayload === null) {
+        return;
+      }
+
+      const payload = resolvedPayload ?? {command};
+
       const result = executeCommand(value, normalizedSelection, payload);
 
       if (!selection) {
@@ -112,6 +122,27 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
       onChangeText(result.value);
       onCommand?.(payload, result);
     };
+
+    const handleContentSizeChange = (
+      event: NativeSyntheticEvent<TextInputContentSizeChangeEventData>,
+    ): void => {
+      setContentHeight(event.nativeEvent.contentSize.height);
+      textInputProps.onContentSizeChange?.(event);
+    };
+
+    const computedInputStyle = useMemo(
+      () => [
+        styles.input,
+        compactMaxHeight !== undefined && contentHeight !== null
+          ? {
+              height: Math.min(Math.max(contentHeight, 44), compactMaxHeight),
+              maxHeight: compactMaxHeight,
+            }
+          : null,
+        style,
+      ],
+      [compactMaxHeight, contentHeight, style],
+    );
 
     const handleChangeText = (nextValue: string): void => {
       if (enableShortcuts) {
@@ -141,7 +172,9 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             <Pressable
               accessibilityRole="button"
               key={item.command}
-              onPress={() => handleCommandPress({command: item.command})}
+              onPress={() => {
+                void handleCommandPress(item.command);
+              }}
               style={styles.toolbarButton}
             >
               <Text style={styles.toolbarButtonText}>{item.label}</Text>
@@ -154,9 +187,10 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
           numberOfLines={numberOfLines}
           ref={ref}
           onChangeText={handleChangeText}
+          onContentSizeChange={handleContentSizeChange}
           onSelectionChange={handleSelectionChange}
           selection={normalizedSelection}
-          style={[styles.input, style]}
+          style={computedInputStyle}
           value={value}
         />
       </View>

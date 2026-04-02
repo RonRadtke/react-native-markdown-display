@@ -56,6 +56,13 @@ export interface MarkdownTextInputCommandPayload {
   table?: MarkdownTablePayload;
 }
 
+export type MarkdownCommandPayloadResolver = (
+  command: MarkdownCommand,
+) =>
+  | MarkdownTextInputCommandPayload
+  | Promise<MarkdownTextInputCommandPayload | null>
+  | null;
+
 export interface MarkdownToolbarItem {
   command: MarkdownCommand;
   label: string;
@@ -63,6 +70,7 @@ export interface MarkdownToolbarItem {
 
 export interface MarkdownTextInputProps
   extends Omit<TextInputProps, 'onChangeText' | 'onSelectionChange' | 'value'> {
+  compactMaxHeight?: number;
   enableShortcuts?: boolean;
   onChangeText: (value: string) => void;
   onCommand?: (
@@ -72,6 +80,7 @@ export interface MarkdownTextInputProps
   onSelectionChange?: (
     event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
   ) => void;
+  resolveCommandPayload?: MarkdownCommandPayloadResolver;
   selection?: MarkdownSelection;
   toolbarItems?: readonly MarkdownToolbarItem[];
   value: string;
