@@ -25,6 +25,7 @@ import type {
   TextComponent,
 } from './lib/types';
 import type {ReactNode} from 'react';
+export * from './editor';
 
 export {
   AstRenderer,
