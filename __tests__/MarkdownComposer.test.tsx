@@ -4,6 +4,25 @@ import {Text, TextInput} from 'react-native';
 
 import {MarkdownComposer} from '../src';
 
+const findPressableByLabel = (
+  tree: renderer.ReactTestRenderer,
+  label: string,
+): renderer.ReactTestInstance => {
+  const match = tree.root.findAll((node) => {
+    if (typeof node.props.onPress !== 'function') {
+      return false;
+    }
+
+    return node.findAllByType(Text).some((textNode) => textNode.props.children === label);
+  })[0];
+
+  if (!match) {
+    throw new Error(`Failed to find button with label: ${label}`);
+  }
+
+  return match;
+};
+
 describe('MarkdownComposer', () => {
   test('toggles between compact and expanded mode', () => {
     const onModeChange = jest.fn();
@@ -100,5 +119,114 @@ describe('MarkdownComposer', () => {
     const expandedInput = tree.root.findByType(TextInput);
 
     expect(expandedInput.props.numberOfLines).toBe(8);
+  });
+
+  test('opens the built-in link prompt and applies the entered values', async () => {
+    const onChangeText = jest.fn();
+    let tree: renderer.ReactTestRenderer | undefined;
+
+    renderer.act(() => {
+      tree = renderer.create(
+        <MarkdownComposer
+          onChangeText={onChangeText}
+          selection={{start: 0, end: 4}}
+          value="docs"
+        />,
+      );
+    });
+
+    if (!tree) {
+      throw new Error('Failed to render MarkdownComposer link prompt');
+    }
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Link').props.onPress();
+      await Promise.resolve();
+    });
+
+    const promptInputs = tree.root.findAllByType(TextInput).slice(1);
+
+    renderer.act(() => {
+      promptInputs[0]?.props.onChangeText('Docs');
+      promptInputs[1]?.props.onChangeText('https://example.com');
+    });
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Apply').props.onPress();
+      await Promise.resolve();
+    });
+
+    expect(onChangeText).toHaveBeenCalledWith('[Docs](https://example.com)');
+  });
+
+  test('opens the built-in table prompt and inserts a configured table', async () => {
+    const onChangeText = jest.fn();
+    let tree: renderer.ReactTestRenderer | undefined;
+
+    renderer.act(() => {
+      tree = renderer.create(
+        <MarkdownComposer
+          initialMode="expanded"
+          onChangeText={onChangeText}
+          value=""
+        />,
+      );
+    });
+
+    if (!tree) {
+      throw new Error('Failed to render MarkdownComposer table prompt');
+    }
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Table').props.onPress();
+      await Promise.resolve();
+    });
+
+    const promptInputs = tree.root.findAllByType(TextInput).slice(1);
+
+    renderer.act(() => {
+      promptInputs[0]?.props.onChangeText('2');
+      promptInputs[1]?.props.onChangeText('1');
+    });
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Apply').props.onPress();
+      await Promise.resolve();
+    });
+
+    expect(onChangeText).toHaveBeenCalledWith(
+      '| Column 1 | Column 2 |\n| --- | --- |\n| Value | Value |',
+    );
+  });
+
+  test('cancels the built-in prompt without applying a command', async () => {
+    const onChangeText = jest.fn();
+    let tree: renderer.ReactTestRenderer | undefined;
+
+    renderer.act(() => {
+      tree = renderer.create(
+        <MarkdownComposer
+          onChangeText={onChangeText}
+          selection={{start: 0, end: 4}}
+          value="docs"
+        />,
+      );
+    });
+
+    if (!tree) {
+      throw new Error('Failed to render MarkdownComposer cancel prompt');
+    }
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Link').props.onPress();
+      await Promise.resolve();
+    });
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Cancel').props.onPress();
+      await Promise.resolve();
+    });
+
+    expect(onChangeText).not.toHaveBeenCalled();
   });
 });

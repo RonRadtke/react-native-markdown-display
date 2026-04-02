@@ -43,6 +43,7 @@ Implemented:
 - compact and expanded composer modules
 - selection-safe markdown command helpers
 - async command payload resolution hooks for actions like links and tables
+- built-in native composer prompts for link and table insertion
 - newline continuation shortcuts for:
   - blockquotes
   - bullet lists
@@ -55,7 +56,7 @@ Still pending:
 
 - native inline attributed styling
 - richer keyboard shortcut handling
-- richer built-in dialogs for link and table editing
+- more advanced built-in dialogs and validation for link and table editing
 
 ## Design Principles
 
