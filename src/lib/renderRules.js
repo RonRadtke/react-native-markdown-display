@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {Pressable, View, Platform, StyleSheet} from 'react-native';
 import FitImage from 'react-native-fit-image';
 
@@ -9,7 +9,7 @@ import textStyleProps from './data/textStyleProps';
 
 const renderRules = (Text) => ({
   // when unknown elements are introduced, so it wont break
-  unknown: (node, children, parent, styles) => null,
+  unknown: () => null,
 
   // The main container
   body: (node, children, parent, styles) => (

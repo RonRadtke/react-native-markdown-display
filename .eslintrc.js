@@ -1,6 +1,6 @@
 module.exports = {
   extends: [
-    '@react-native-community',
+    '@react-native',
     'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
@@ -24,5 +24,13 @@ module.exports = {
       version: require('./package.json').peerDependencies.react,
     },
     'import/ignore': ['node_modules'],
-  }
+  },
+  overrides: [
+    {
+      files: ['*.d.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
+  ],
 };

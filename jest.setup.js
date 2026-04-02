@@ -7,3 +7,11 @@ jest.mock('react-native-fit-image', () => {
 
   return FitImage;
 });
+
+if (typeof global.window === 'undefined') {
+  global.window = global;
+}
+
+if (typeof global.window.dispatchEvent !== 'function') {
+  global.window.dispatchEvent = jest.fn();
+}
