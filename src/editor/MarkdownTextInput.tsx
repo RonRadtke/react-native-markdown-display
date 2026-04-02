@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -15,6 +15,8 @@ import {
   applyLinkFormat,
   applyTableFormat,
 } from './commands/formatMarkdown';
+import {applyMarkdownShortcut} from './utils/shortcuts';
+import {normalizeSelection} from './utils/selection';
 
 import type {
   MarkdownCommandResult,
@@ -68,19 +70,33 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
       selection,
       style,
       toolbarItems = DEFAULT_TOOLBAR_ITEMS,
+      enableShortcuts = true,
+      multiline = true,
+      numberOfLines,
       value,
       ...textInputProps
     },
     ref,
   ) {
+    const [internalSelection, setInternalSelection] = useState(() =>
+      normalizeSelection(value, selection),
+    );
+
+    useEffect(() => {
+      if (selection) {
+        setInternalSelection(normalizeSelection(value, selection));
+      }
+    }, [selection, value]);
+
     const normalizedSelection = useMemo(
-      () => selection ?? {start: value.length, end: value.length},
-      [selection, value.length],
+      () => normalizeSelection(value, selection ?? internalSelection),
+      [internalSelection, selection, value],
     );
 
     const handleSelectionChange = (
       event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
     ): void => {
+      setInternalSelection(event.nativeEvent.selection);
       onSelectionChange?.(event);
     };
 
@@ -89,8 +105,33 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
     ): void => {
       const result = executeCommand(value, normalizedSelection, payload);
 
+      if (!selection) {
+        setInternalSelection(result.selection);
+      }
+
       onChangeText(result.value);
       onCommand?.(payload, result);
+    };
+
+    const handleChangeText = (nextValue: string): void => {
+      if (enableShortcuts) {
+        const shortcutResult = applyMarkdownShortcut({
+          nextValue,
+          previousSelection: normalizedSelection,
+          previousValue: value,
+        });
+
+        if (shortcutResult) {
+          if (!selection) {
+            setInternalSelection(shortcutResult.selection);
+          }
+
+          onChangeText(shortcutResult.value);
+          return;
+        }
+      }
+
+      onChangeText(nextValue);
     };
 
     return (
@@ -109,9 +150,10 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
         </View>
         <TextInput
           {...textInputProps}
-          multiline
+          multiline={multiline}
+          numberOfLines={numberOfLines}
           ref={ref}
-          onChangeText={onChangeText}
+          onChangeText={handleChangeText}
           onSelectionChange={handleSelectionChange}
           selection={normalizedSelection}
           style={[styles.input, style]}

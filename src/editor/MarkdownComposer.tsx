@@ -1,6 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 
+import MarkdownPreview from './MarkdownPreview';
 import MarkdownTextInput from './MarkdownTextInput';
 
 import type {MarkdownComposerMode, MarkdownComposerProps} from './types';
@@ -27,9 +28,13 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
       expandedToolbarItems = DEFAULT_EXPANDED_TOOLBAR,
       initialMode = 'compact',
       onModeChange,
+      previewEnabled = false,
+      previewEmptyState,
+      previewLabel,
       renderExpandButtonLabel,
       style,
       textInputStyle,
+      value,
       ...textInputProps
     },
     ref,
@@ -53,12 +58,21 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
       <View style={[styles.container, composerStyle]}>
         <MarkdownTextInput
           {...textInputProps}
+          enableShortcuts
           multiline={mode === 'expanded'}
           numberOfLines={mode === 'expanded' ? 8 : 1}
           ref={ref}
           style={[styles.textInput, style, textInputStyle]}
           toolbarItems={toolbarItems}
+          value={value}
         />
+        {previewEnabled && mode === 'expanded' ? (
+          <MarkdownPreview
+            {...(previewEmptyState ? {emptyState: previewEmptyState} : {})}
+            {...(previewLabel ? {label: previewLabel} : {})}
+            value={value}
+          />
+        ) : null}
         <View style={styles.footer}>
           <Pressable
             accessibilityRole="button"

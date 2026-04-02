@@ -6,7 +6,9 @@ export {
   createMarkdownTable,
 } from './commands/formatMarkdown';
 export {default as MarkdownComposer} from './MarkdownComposer';
+export {default as MarkdownPreview} from './MarkdownPreview';
 export {default as MarkdownTextInput} from './MarkdownTextInput';
+export {applyMarkdownShortcut} from './utils/shortcuts';
 export {getSelectedText, normalizeSelection} from './utils/selection';
 
 export type {
@@ -17,6 +19,7 @@ export type {
   MarkdownComposerProps,
   MarkdownInlineFormat,
   MarkdownLinkPayload,
+  MarkdownPreviewProps,
   MarkdownSelection,
   MarkdownTablePayload,
   MarkdownTextInputCommandPayload,

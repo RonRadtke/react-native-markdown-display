@@ -1,9 +1,10 @@
 import MarkdownIt from 'markdown-it';
 import React, {useMemo} from 'react';
-import {StyleSheet, Text} from 'react-native';
+import {Text} from 'react-native';
 import FitImage from 'react-native-fit-image';
 
 import AstRenderer from './lib/AstRenderer';
+import {getRenderer} from './lib/createRenderer';
 import parser from './lib/parser';
 import renderRules from './lib/renderRules';
 import {styles as defaultStyles} from './lib/styles';
@@ -50,92 +51,6 @@ export type {
   MarkdownStyleObject,
   OnLinkPress,
   RenderRules,
-};
-
-const getStyle = (
-  mergeStyle: boolean,
-  style: MarkdownStyleMap | null,
-): MarkdownStyleMap => {
-  const useStyles: Record<string, MarkdownStyleObject> = {};
-
-  if (mergeStyle && style !== null) {
-    Object.keys(style).forEach((styleName) => {
-      useStyles[styleName] = {
-        ...(StyleSheet.flatten(style[styleName]) ?? {}),
-      };
-    });
-
-    Object.keys(defaultStyles).forEach((styleName) => {
-      useStyles[styleName] = {
-        ...defaultStyles[styleName],
-        ...(StyleSheet.flatten(style[styleName]) ?? {}),
-      };
-    });
-  } else {
-    Object.assign(useStyles, defaultStyles);
-
-    if (style !== null) {
-      Object.keys(style).forEach((styleName) => {
-        useStyles[styleName] = {
-          ...(StyleSheet.flatten(style[styleName]) ?? {}),
-        };
-      });
-    }
-  }
-
-  Object.keys(useStyles).forEach((styleName) => {
-    useStyles[`_VIEW_SAFE_${styleName}`] = removeTextStyleProps(
-      useStyles[styleName] ?? {},
-    );
-  });
-
-  return StyleSheet.create(useStyles);
-};
-
-const getRenderer = (
-  textComponent: TextComponent,
-  renderer: AstRenderer | null,
-  rules: RenderRules | null,
-  style: MarkdownStyleMap | null,
-  mergeStyle: boolean,
-  onLinkPress: OnLinkPress | undefined,
-  maxTopLevelChildren: number | null,
-  topLevelMaxExceededItem: ReactNode,
-  allowedImageHandlers: string[],
-  defaultImageHandler: string | null,
-  debugPrintTree: boolean,
-): AstRenderer => {
-  if (renderer && rules) {
-    console.warn(
-      'react-native-markdown-display you are using renderer and rules at the same time. This is not possible, props.rules is ignored',
-    );
-  }
-
-  if (renderer && style) {
-    console.warn(
-      'react-native-markdown-display you are using renderer and style at the same time. This is not possible, props.style is ignored',
-    );
-  }
-
-  if (renderer) {
-    return renderer;
-  }
-
-  const useStyles = getStyle(mergeStyle, style);
-
-  return new AstRenderer(
-    {
-      ...renderRules(textComponent),
-      ...(rules ?? {}),
-    },
-    useStyles,
-    onLinkPress,
-    maxTopLevelChildren,
-    topLevelMaxExceededItem,
-    allowedImageHandlers,
-    defaultImageHandler,
-    debugPrintTree,
-  );
 };
 
 export interface MarkdownProps {

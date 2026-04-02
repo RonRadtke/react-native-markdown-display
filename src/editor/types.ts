@@ -7,6 +7,7 @@ import type {
   TextStyle,
   ViewStyle,
 } from 'react-native';
+import type {MarkdownStyleMap} from '../lib/types';
 
 export interface MarkdownSelection {
   start: number;
@@ -62,6 +63,7 @@ export interface MarkdownToolbarItem {
 
 export interface MarkdownTextInputProps
   extends Omit<TextInputProps, 'onChangeText' | 'onSelectionChange' | 'value'> {
+  enableShortcuts?: boolean;
   onChangeText: (value: string) => void;
   onCommand?: (
     payload: MarkdownTextInputCommandPayload,
@@ -87,6 +89,17 @@ export interface MarkdownComposerProps
   expandedToolbarItems?: readonly MarkdownToolbarItem[];
   initialMode?: MarkdownComposerMode;
   onModeChange?: (mode: MarkdownComposerMode) => void;
+  previewEnabled?: boolean;
+  previewEmptyState?: string;
+  previewLabel?: ReactNode;
   renderExpandButtonLabel?: (mode: MarkdownComposerMode) => ReactNode;
   textInputStyle?: StyleProp<TextStyle>;
+}
+
+export interface MarkdownPreviewProps {
+  emptyState?: string;
+  label?: ReactNode;
+  previewContainerStyle?: StyleProp<ViewStyle>;
+  style?: MarkdownStyleMap | null;
+  value: string;
 }

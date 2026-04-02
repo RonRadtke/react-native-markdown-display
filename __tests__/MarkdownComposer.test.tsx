@@ -41,4 +41,30 @@ describe('MarkdownComposer', () => {
       tree.root.findAllByType(Text).some((node) => node.props.children === 'Collapse'),
     ).toBe(true);
   });
+
+  test('renders preview in expanded mode when enabled', () => {
+    let tree: renderer.ReactTestRenderer | undefined;
+
+    renderer.act(() => {
+      tree = renderer.create(
+        <MarkdownComposer
+          initialMode="expanded"
+          onChangeText={() => {}}
+          previewEnabled
+          value="# Title"
+        />,
+      );
+    });
+
+    if (!tree) {
+      throw new Error('Failed to render MarkdownComposer preview');
+    }
+
+    expect(
+      tree.root.findAllByType(Text).some((node) => node.props.children === 'Preview'),
+    ).toBe(true);
+    expect(
+      tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
+    ).toBe(true);
+  });
 });

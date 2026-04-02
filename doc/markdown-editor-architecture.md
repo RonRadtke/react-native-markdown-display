@@ -35,6 +35,26 @@ Not included yet:
 - image or file support
 - advanced table editing UI
 
+## Current Implementation Status
+
+Implemented:
+
+- typed editor command model
+- compact and expanded composer modules
+- selection-safe markdown command helpers
+- newline continuation shortcuts for:
+  - blockquotes
+  - bullet lists
+  - ordered lists
+- exit shortcuts for empty list and blockquote markers
+- expanded-mode preview powered by the existing markdown parser and renderer
+
+Still pending:
+
+- native inline attributed styling
+- richer keyboard shortcut handling
+- preview customization beyond current defaults
+
 ## Design Principles
 
 - Native inputs only
