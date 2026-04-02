@@ -44,6 +44,7 @@ Implemented:
 - selection-safe markdown command helpers
 - async command payload resolution hooks for actions like links and tables
 - built-in native composer prompts for link and table insertion
+- prompt validation and normalization for URLs and table dimensions
 - newline continuation shortcuts for:
   - blockquotes
   - bullet lists
@@ -51,12 +52,13 @@ Implemented:
 - exit shortcuts for empty list and blockquote markers
 - compact composer auto-grow with a capped height before expansion
 - expanded-mode preview powered by the existing markdown parser and renderer
+- expanded-mode preview visibility toggle
 
 Still pending:
 
 - native inline attributed styling
 - richer keyboard shortcut handling
-- more advanced built-in dialogs and validation for link and table editing
+- more advanced built-in dialogs and field-level UX polish
 
 ## Design Principles
 

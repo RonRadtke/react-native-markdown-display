@@ -26,6 +26,12 @@ const DEFAULT_EXPANDED_TOOLBAR = [
 
 const DEFAULT_COMPACT_MAX_HEIGHT = 110;
 const DEFAULT_LINK_URL = 'https://';
+const MAX_TABLE_COLUMNS = 10;
+const MAX_TABLE_ROWS = 20;
+const DEFAULT_PREVIEW_TOGGLE_LABELS = {
+  hide: 'Hide preview',
+  show: 'Show preview',
+} as const;
 
 interface LinkPromptState {
   command: 'link';
@@ -41,6 +47,33 @@ interface TablePromptState {
 
 type ComposerPromptState = LinkPromptState | TablePromptState | null;
 type PromptResolver = (payload: MarkdownTextInputCommandPayload | null) => void;
+
+const normalizeUrl = (value: string): string => {
+  const trimmedValue = value.trim();
+
+  if (trimmedValue.length === 0) {
+    return DEFAULT_LINK_URL;
+  }
+
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(trimmedValue)) {
+    return trimmedValue;
+  }
+
+  if (/^mailto:/i.test(trimmedValue) || /^tel:/i.test(trimmedValue)) {
+    return trimmedValue;
+  }
+
+  return `https://${trimmedValue.replace(/^\/+/, '')}`;
+};
+
+const parsePositiveInteger = (value: string): number | null => {
+  const parsedValue = Number.parseInt(value, 10);
+
+  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : null;
+};
+
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(Math.max(value, min), max);
 
 const getDefaultCommandPayload = (
   command: MarkdownTextInputCommandPayload['command'],
@@ -78,6 +111,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
       previewEnabled = false,
       previewEmptyState,
       previewLabel,
+      previewToggleLabels = DEFAULT_PREVIEW_TOGGLE_LABELS,
       resolveCommandPayload,
       renderExpandButtonLabel,
       style,
@@ -89,7 +123,41 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
   ) {
     const [mode, setMode] = useState<MarkdownComposerMode>(initialMode);
     const [promptState, setPromptState] = useState<ComposerPromptState>(null);
+    const [isPreviewVisible, setIsPreviewVisible] = useState(previewEnabled);
     const promptResolverRef = useRef<PromptResolver | null>(null);
+
+    const promptError = useMemo(() => {
+      if (!promptState) {
+        return null;
+      }
+
+      if (promptState.command === 'link') {
+        const url = promptState.url.trim();
+
+        if (url.length === 0) {
+          return null;
+        }
+
+        if (/\s/.test(url)) {
+          return 'URLs cannot contain spaces.';
+        }
+
+        return null;
+      }
+
+      const parsedColumns = parsePositiveInteger(promptState.columns);
+      const parsedRows = parsePositiveInteger(promptState.rows);
+
+      if (parsedColumns === null || parsedRows === null) {
+        return 'Columns and rows must be positive numbers.';
+      }
+
+      if (parsedColumns > MAX_TABLE_COLUMNS || parsedRows > MAX_TABLE_ROWS) {
+        return `Tables are limited to ${MAX_TABLE_COLUMNS} columns and ${MAX_TABLE_ROWS} rows.`;
+      }
+
+      return null;
+    }, [promptState]);
 
     const toolbarItems = useMemo(
       () => (mode === 'compact' ? compactToolbarItems : expandedToolbarItems),
@@ -145,7 +213,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
     };
 
     const handleApplyPrompt = (): void => {
-      if (!promptState) {
+      if (!promptState || promptError) {
         return;
       }
 
@@ -156,10 +224,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
             ...(promptState.title.trim().length > 0
               ? {title: promptState.title.trim()}
               : {}),
-            url:
-              promptState.url.trim().length > 0
-                ? promptState.url.trim()
-                : DEFAULT_LINK_URL,
+            url: normalizeUrl(promptState.url),
           },
         });
         closePrompt();
@@ -172,8 +237,14 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
       promptResolverRef.current?.({
         command: 'table',
         table: {
-          columns: Number.isFinite(columns) && columns > 0 ? columns : 3,
-          rows: Number.isFinite(rows) && rows > 0 ? rows : 2,
+          columns:
+            Number.isFinite(columns) && columns > 0
+              ? clamp(columns, 1, MAX_TABLE_COLUMNS)
+              : 3,
+          rows:
+            Number.isFinite(rows) && rows > 0
+              ? clamp(rows, 1, MAX_TABLE_ROWS)
+              : 2,
         },
       });
       closePrompt();
@@ -268,6 +339,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
                 />
               </>
             )}
+            {promptError ? <Text style={styles.promptError}>{promptError}</Text> : null}
             <View style={styles.promptActions}>
               <Pressable
                 accessibilityRole="button"
@@ -279,6 +351,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
               <Pressable
                 accessibilityRole="button"
                 onPress={handleApplyPrompt}
+                disabled={promptError !== null}
                 style={[styles.promptButton, styles.promptButtonPrimary]}
               >
                 <Text style={styles.promptButtonPrimaryText}>Apply</Text>
@@ -286,14 +359,20 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
             </View>
           </View>
         ) : null}
-        {previewEnabled && mode === 'expanded' ? (
-          <MarkdownPreview
-            {...(previewEmptyState ? {emptyState: previewEmptyState} : {})}
-            {...(previewLabel ? {label: previewLabel} : {})}
-            value={value}
-          />
-        ) : null}
         <View style={styles.footer}>
+          {previewEnabled && mode === 'expanded' ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setIsPreviewVisible((currentValue) => !currentValue)}
+              style={styles.previewToggle}
+            >
+              <Text style={styles.previewToggleText}>
+                {isPreviewVisible
+                  ? previewToggleLabels.hide
+                  : previewToggleLabels.show}
+              </Text>
+            </Pressable>
+          ) : null}
           <Pressable
             accessibilityRole="button"
             onPress={toggleMode}
@@ -305,6 +384,13 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
             </Text>
           </Pressable>
         </View>
+        {previewEnabled && mode === 'expanded' && isPreviewVisible ? (
+          <MarkdownPreview
+            {...(previewEmptyState ? {emptyState: previewEmptyState} : {})}
+            {...(previewLabel ? {label: previewLabel} : {})}
+            value={value}
+          />
+        ) : null}
       </View>
     );
   },
@@ -324,7 +410,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   footer: {
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    width: '100%',
+  },
+  previewToggle: {
+    paddingVertical: 8,
+  },
+  previewToggleText: {
+    color: '#5D6B79',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  promptError: {
+    color: '#B42318',
     marginTop: 8,
   },
   promptActions: {

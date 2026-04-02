@@ -85,6 +85,9 @@ describe('MarkdownComposer', () => {
     expect(
       tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
     ).toBe(true);
+    expect(
+      tree.root.findAllByType(Text).some((node) => node.props.children === 'Hide preview'),
+    ).toBe(true);
   });
 
   test('uses a single-row multiline input in compact mode and a taller input when expanded', () => {
@@ -159,6 +162,43 @@ describe('MarkdownComposer', () => {
     expect(onChangeText).toHaveBeenCalledWith('[Docs](https://example.com)');
   });
 
+  test('normalizes bare domains in the built-in link prompt', async () => {
+    const onChangeText = jest.fn();
+    let tree: renderer.ReactTestRenderer | undefined;
+
+    renderer.act(() => {
+      tree = renderer.create(
+        <MarkdownComposer
+          onChangeText={onChangeText}
+          selection={{start: 0, end: 4}}
+          value="docs"
+        />,
+      );
+    });
+
+    if (!tree) {
+      throw new Error('Failed to render MarkdownComposer domain normalization');
+    }
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Link').props.onPress();
+      await Promise.resolve();
+    });
+
+    const promptInputs = tree.root.findAllByType(TextInput).slice(1);
+
+    renderer.act(() => {
+      promptInputs[1]?.props.onChangeText('example.com/docs');
+    });
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Apply').props.onPress();
+      await Promise.resolve();
+    });
+
+    expect(onChangeText).toHaveBeenCalledWith('[docs](https://example.com/docs)');
+  });
+
   test('opens the built-in table prompt and inserts a configured table', async () => {
     const onChangeText = jest.fn();
     let tree: renderer.ReactTestRenderer | undefined;
@@ -197,6 +237,77 @@ describe('MarkdownComposer', () => {
     expect(onChangeText).toHaveBeenCalledWith(
       '| Column 1 | Column 2 |\n| --- | --- |\n| Value | Value |',
     );
+  });
+
+  test('blocks invalid link prompt values until corrected', async () => {
+    const onChangeText = jest.fn();
+    let tree: renderer.ReactTestRenderer | undefined;
+
+    renderer.act(() => {
+      tree = renderer.create(
+        <MarkdownComposer
+          onChangeText={onChangeText}
+          selection={{start: 0, end: 4}}
+          value="docs"
+        />,
+      );
+    });
+
+    if (!tree) {
+      throw new Error('Failed to render MarkdownComposer invalid link state');
+    }
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Link').props.onPress();
+      await Promise.resolve();
+    });
+
+    const promptInputs = tree.root.findAllByType(TextInput).slice(1);
+
+    renderer.act(() => {
+      promptInputs[1]?.props.onChangeText('bad url');
+    });
+
+    expect(
+      tree.root.findAllByType(Text).some((node) => node.props.children === 'URLs cannot contain spaces.'),
+    ).toBe(true);
+
+    await renderer.act(async () => {
+      findPressableByLabel(tree, 'Apply').props.onPress();
+      await Promise.resolve();
+    });
+
+    expect(onChangeText).not.toHaveBeenCalled();
+  });
+
+  test('shows and hides preview in expanded mode', () => {
+    let tree: renderer.ReactTestRenderer | undefined;
+
+    renderer.act(() => {
+      tree = renderer.create(
+        <MarkdownComposer
+          initialMode="expanded"
+          onChangeText={() => {}}
+          previewEnabled
+          value="# Title"
+        />,
+      );
+    });
+
+    if (!tree) {
+      throw new Error('Failed to render MarkdownComposer preview toggle');
+    }
+
+    renderer.act(() => {
+      findPressableByLabel(tree, 'Hide preview').props.onPress();
+    });
+
+    expect(
+      tree.root.findAllByType(Text).some((node) => node.props.children === 'Show preview'),
+    ).toBe(true);
+    expect(
+      tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
+    ).toBe(false);
   });
 
   test('cancels the built-in prompt without applying a command', async () => {

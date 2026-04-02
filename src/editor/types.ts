@@ -101,6 +101,10 @@ export interface MarkdownComposerProps
   previewEnabled?: boolean;
   previewEmptyState?: string;
   previewLabel?: ReactNode;
+  previewToggleLabels?: {
+    hide: ReactNode;
+    show: ReactNode;
+  };
   renderExpandButtonLabel?: (mode: MarkdownComposerMode) => ReactNode;
   textInputStyle?: StyleProp<TextStyle>;
 }
