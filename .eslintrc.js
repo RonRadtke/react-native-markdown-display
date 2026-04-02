@@ -27,9 +27,9 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*.d.ts'],
+      files: ['*.ts', '*.tsx'],
       rules: {
-        '@typescript-eslint/no-explicit-any': 'off',
+        'react/prop-types': 'off',
       },
     },
   ],
