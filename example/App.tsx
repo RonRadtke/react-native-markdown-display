@@ -243,6 +243,7 @@ function App(): React.JSX.Element {
                         <View style={styles.composerCard}>
                             <MarkdownComposer
                                 expandedToolbarItems={composerToolbarItems}
+                                minimizedToolbarItems={[]}
                                 onChangeText={setDraft}
                                 placeholder="Write a markdown message..."
                                 previewEnabled

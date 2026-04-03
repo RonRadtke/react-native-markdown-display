@@ -113,10 +113,11 @@ const getDefaultCommandPayload = (
 const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
     function MarkdownComposer(
         {
-            compactToolbarItems = DEFAULT_COMPACT_TOOLBAR,
+            compactToolbarItems,
             composerStyle,
             expandedToolbarItems = DEFAULT_EXPANDED_TOOLBAR,
             initialMode = 'compact',
+            minimizedToolbarItems,
             onModeChange,
             previewEnabled = false,
             previewEmptyState,
@@ -133,8 +134,12 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
     ) {
         const [mode, setMode] = useState<MarkdownComposerMode>(initialMode);
         const [promptState, setPromptState] = useState<ComposerPromptState>(null);
-        const [isPreviewVisible, setIsPreviewVisible] = useState(previewEnabled);
+        const [isPreviewVisible, setIsPreviewVisible] = useState(false);
         const promptResolverRef = useRef<PromptResolver | null>(null);
+        const resolvedCompactToolbarItems =
+            minimizedToolbarItems ??
+            compactToolbarItems ??
+            DEFAULT_COMPACT_TOOLBAR;
 
         const promptError = useMemo(() => {
             if (!promptState) {
@@ -170,8 +175,11 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
         }, [promptState]);
 
         const toolbarItems = useMemo(
-            () => (mode === 'compact' ? compactToolbarItems : expandedToolbarItems),
-            [compactToolbarItems, expandedToolbarItems, mode],
+            () =>
+                mode === 'compact'
+                    ? resolvedCompactToolbarItems
+                    : expandedToolbarItems,
+            [expandedToolbarItems, mode, resolvedCompactToolbarItems],
         );
 
         const handleResolveCommandPayload = async (

@@ -202,93 +202,95 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
 
         return (
             <View style={styles.container}>
-                <View style={styles.toolbar}>
-                    {toolbarItems.map((item) => {
-                        if (isToolbarMenuItem(item)) {
-                            const isMenuOpen = openMenuLabel === item.label;
+                {toolbarItems.length > 0 ? (
+                    <View style={styles.toolbar}>
+                        {toolbarItems.map((item) => {
+                            if (isToolbarMenuItem(item)) {
+                                const isMenuOpen = openMenuLabel === item.label;
+
+                                return (
+                                    <View
+                                        key={`menu:${item.label}`}
+                                        style={styles.toolbarMenuContainer}
+                                    >
+                                        <Pressable
+                                            accessibilityLabel={
+                                                item.accessibilityLabel ??
+                                                `${item.label} menu`
+                                            }
+                                            accessibilityRole="button"
+                                            accessibilityState={{expanded: isMenuOpen}}
+                                            onPress={() =>
+                                                setOpenMenuLabel((currentLabel) =>
+                                                    currentLabel === item.label
+                                                        ? null
+                                                        : item.label,
+                                                )
+                                            }
+                                            style={[
+                                                styles.toolbarButton,
+                                                isMenuOpen
+                                                    ? styles.toolbarButtonActive
+                                                    : null,
+                                            ]}
+                                        >
+                                            <Text style={styles.toolbarButtonText}>
+                                                {item.label}
+                                            </Text>
+                                        </Pressable>
+                                        {isMenuOpen ? (
+                                            <View style={styles.toolbarMenu}>
+                                                {item.items.map((menuItem) => (
+                                                    <Pressable
+                                                        accessibilityLabel={
+                                                            menuItem.accessibilityLabel ??
+                                                            DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[
+                                                            menuItem.command
+                                                            ]
+                                                        }
+                                                        accessibilityRole="button"
+                                                        key={menuItem.command}
+                                                        onPress={() => {
+                                                            handleCommandPress(
+                                                                menuItem.command,
+                                                            );
+                                                        }}
+                                                        style={styles.toolbarMenuButton}
+                                                    >
+                                                        <Text
+                                                            style={
+                                                                styles.toolbarButtonText
+                                                            }
+                                                        >
+                                                            {menuItem.label}
+                                                        </Text>
+                                                    </Pressable>
+                                                ))}
+                                            </View>
+                                        ) : null}
+                                    </View>
+                                );
+                            }
 
                             return (
-                                <View
-                                    key={`menu:${item.label}`}
-                                    style={styles.toolbarMenuContainer}
+                                <Pressable
+                                    accessibilityLabel={
+                                        item.accessibilityLabel ??
+                                        DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[item.command]
+                                    }
+                                    accessibilityRole="button"
+                                    key={item.command}
+                                    onPress={() => {
+                                        handleCommandPress(item.command);
+                                    }}
+                                    style={styles.toolbarButton}
                                 >
-                                    <Pressable
-                                        accessibilityLabel={
-                                            item.accessibilityLabel ??
-                                            `${item.label} menu`
-                                        }
-                                        accessibilityRole="button"
-                                        accessibilityState={{expanded: isMenuOpen}}
-                                        onPress={() =>
-                                            setOpenMenuLabel((currentLabel) =>
-                                                currentLabel === item.label
-                                                    ? null
-                                                    : item.label,
-                                            )
-                                        }
-                                        style={[
-                                            styles.toolbarButton,
-                                            isMenuOpen
-                                                ? styles.toolbarButtonActive
-                                                : null,
-                                        ]}
-                                    >
-                                        <Text style={styles.toolbarButtonText}>
-                                            {item.label}
-                                        </Text>
-                                    </Pressable>
-                                    {isMenuOpen ? (
-                                        <View style={styles.toolbarMenu}>
-                                            {item.items.map((menuItem) => (
-                                                <Pressable
-                                                    accessibilityLabel={
-                                                        menuItem.accessibilityLabel ??
-                                                        DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[
-                                                        menuItem.command
-                                                        ]
-                                                    }
-                                                    accessibilityRole="button"
-                                                    key={menuItem.command}
-                                                    onPress={() => {
-                                                        handleCommandPress(
-                                                            menuItem.command,
-                                                        );
-                                                    }}
-                                                    style={styles.toolbarMenuButton}
-                                                >
-                                                    <Text
-                                                        style={
-                                                            styles.toolbarButtonText
-                                                        }
-                                                    >
-                                                        {menuItem.label}
-                                                    </Text>
-                                                </Pressable>
-                                            ))}
-                                        </View>
-                                    ) : null}
-                                </View>
+                                    <Text style={styles.toolbarButtonText}>{item.label}</Text>
+                                </Pressable>
                             );
-                        }
-
-                        return (
-                            <Pressable
-                                accessibilityLabel={
-                                    item.accessibilityLabel ??
-                                    DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[item.command]
-                                }
-                                accessibilityRole="button"
-                                key={item.command}
-                                onPress={() => {
-                                    handleCommandPress(item.command);
-                                }}
-                                style={styles.toolbarButton}
-                            >
-                                <Text style={styles.toolbarButtonText}>{item.label}</Text>
-                            </Pressable>
-                        );
-                    })}
-                </View>
+                        })}
+                    </View>
+                ) : null}
                 {InputComponent ? (
                     <InputComponent {...inputProps} ref={ref}/>
                 ) : (

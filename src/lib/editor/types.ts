@@ -120,6 +120,7 @@ export interface MarkdownComposerProps extends Omit<
     composerStyle?: StyleProp<ViewStyle>;
     expandedToolbarItems?: readonly MarkdownToolbarItem[];
     initialMode?: MarkdownComposerMode;
+    minimizedToolbarItems?: readonly MarkdownToolbarItem[];
     onModeChange?: (mode: MarkdownComposerMode) => void;
     previewEnabled?: boolean;
     previewEmptyState?: string;

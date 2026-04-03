@@ -61,7 +61,7 @@ describe('MarkdownComposer', () => {
         ).toBe(true);
     });
 
-    test('renders preview in expanded mode when enabled', () => {
+    test('keeps preview hidden by default in expanded mode', () => {
         let tree: renderer.ReactTestRenderer | undefined;
 
         renderer.act(() => {
@@ -81,13 +81,66 @@ describe('MarkdownComposer', () => {
 
         expect(
             tree.root.findAllByType(Text).some((node) => node.props.children === 'Preview'),
+        ).toBe(false);
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'Show preview'),
         ).toBe(true);
         expect(
             tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
+        ).toBe(false);
+    });
+
+    test('uses the minimized toolbar items prop in compact mode', () => {
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    minimizedToolbarItems={[{command: 'inline-code', label: '</>'}]}
+                    onChangeText={() => {}}
+                    value=""
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownComposer minimized toolbar');
+        }
+
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === '</>'),
         ).toBe(true);
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'Hide preview'),
-        ).toBe(true);
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'B'),
+        ).toBe(false);
+    });
+
+    test('hides the compact toolbar row when no minimized toolbar items are provided', () => {
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    minimizedToolbarItems={[]}
+                    onChangeText={() => {}}
+                    value=""
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownComposer without toolbar');
+        }
+
+        expect(
+            tree.root.findAll((node) => typeof node.props.onPress === 'function'),
+        ).toHaveLength(1);
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'B'),
+        ).toBe(false);
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'I'),
+        ).toBe(false);
     });
 
     test('uses a single-row multiline input in compact mode and a taller input when expanded', () => {
@@ -480,16 +533,23 @@ describe('MarkdownComposer', () => {
             throw new Error('Failed to render MarkdownComposer preview toggle');
         }
 
-        renderer.act(() => {
-            findPressableByLabel(tree, 'Hide preview').props.onPress();
-        });
-
         expect(
             tree.root.findAllByType(Text).some((node) => node.props.children === 'Show preview'),
         ).toBe(true);
         expect(
             tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
         ).toBe(false);
+
+        renderer.act(() => {
+            findPressableByLabel(tree, 'Show preview').props.onPress();
+        });
+
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'Hide preview'),
+        ).toBe(true);
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
+        ).toBe(true);
     });
 
     test('cancels the built-in prompt without applying a command', async () => {
