@@ -17,6 +17,7 @@ const DEFAULT_EXPANDED_TOOLBAR = [
     {accessibilityLabel: 'Strikethrough', command: 'strikethrough', label: 'S'},
     {accessibilityLabel: 'Heading two', command: 'heading-two', label: 'H2'},
     {accessibilityLabel: 'Bullet list', command: 'bullet-list', label: 'List'},
+    {accessibilityLabel: 'Numbered list', command: 'ordered-list', label: '1.'},
     {accessibilityLabel: 'Code block', command: 'code-block', label: 'Code'},
     {accessibilityLabel: 'Insert table', command: 'table', label: 'Table'},
 ] as const;

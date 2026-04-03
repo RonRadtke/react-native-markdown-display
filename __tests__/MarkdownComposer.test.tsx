@@ -267,6 +267,33 @@ describe('MarkdownComposer', () => {
         expect(onChangeText).toHaveBeenCalledWith('~~docs~~');
     });
 
+    test('applies ordered lists from the expanded toolbar', async () => {
+        const onChangeText = jest.fn();
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    initialMode="expanded"
+                    onChangeText={onChangeText}
+                    selection={{start: 0, end: 5}}
+                    value="first"
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownComposer ordered list');
+        }
+
+        await renderer.act(async () => {
+            findPressableByLabel(tree, '1.').props.onPress();
+            await Promise.resolve();
+        });
+
+        expect(onChangeText).toHaveBeenCalledWith('1. first');
+    });
+
     test('blocks invalid link prompt values until corrected', async () => {
         const onChangeText = jest.fn();
         let tree: renderer.ReactTestRenderer | undefined;

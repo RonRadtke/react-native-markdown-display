@@ -148,6 +148,7 @@ function App(): React.JSX.Element {
             {command: 'strikethrough' as const, label: 'S'},
             {command: 'link' as const, label: 'Link'},
             {command: 'bullet-list' as const, label: 'List'},
+            {command: 'ordered-list' as const, label: '1.'},
             {command: 'table' as const, label: 'Table'},
         ],
         [],
