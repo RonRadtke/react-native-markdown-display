@@ -15,17 +15,17 @@ Markdown remains the source of truth. The renderer already present in this repo 
 - Add a compact composer with an expand button
 - Add an expanded composer mode
 - Add pure markdown command utilities for:
-  - bold
-  - italic
-  - strikethrough
-  - inline code
-  - headings
-  - blockquote
-  - bullet lists
-  - ordered lists
-  - fenced code blocks
-  - links
-  - tables
+    - bold
+    - italic
+    - strikethrough
+    - inline code
+    - headings
+    - blockquote
+    - bullet lists
+    - ordered lists
+    - fenced code blocks
+    - links
+    - tables
 - Add tests for command behavior and initial component behavior
 
 Not included yet:
@@ -46,9 +46,9 @@ Implemented:
 - built-in native composer prompts for link and table insertion
 - prompt validation and normalization for URLs and table dimensions
 - newline continuation shortcuts for:
-  - blockquotes
-  - bullet lists
-  - ordered lists
+    - blockquotes
+    - bullet lists
+    - ordered lists
 - exit shortcuts for empty list and blockquote markers
 - compact composer auto-grow with a capped height before expansion
 - expanded-mode preview powered by the existing markdown parser and renderer

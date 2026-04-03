@@ -1,4 +1,5 @@
-import type { MarkdownTokenNesting, TokenLike } from '../types';
+import type {MarkdownTokenNesting, TokenLike} from '../types';
+
 export default class Token implements TokenLike {
     attrs: null;
     block: boolean;
@@ -10,7 +11,9 @@ export default class Token implements TokenLike {
     nesting: MarkdownTokenNesting;
     tag: string;
     type: string;
+
     constructor(type: string, nesting?: MarkdownTokenNesting, children?: TokenLike[] | null, block?: boolean);
+
     attrIndex(): number;
 }
 //# sourceMappingURL=Token.d.ts.map

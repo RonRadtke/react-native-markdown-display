@@ -1,4 +1,5 @@
 import MarkdownIt from 'markdown-it';
+import type {ReactNode} from 'react';
 import React, {useMemo} from 'react';
 import {Text} from 'react-native';
 import FitImage from 'react-native-fit-image';
@@ -16,120 +17,113 @@ import removeTextStyleProps from './lib/util/removeTextStyleProps';
 import {stringToTokens} from './lib/util/stringToTokens';
 import tokensToAST from './lib/util/tokensToAST';
 
-import type {
-  ASTNode,
-  MarkdownParser,
-  MarkdownStyleMap,
-  MarkdownStyleObject,
-  OnLinkPress,
-  RenderRules,
-  TextComponent,
-} from './lib/types';
-import type {ReactNode} from 'react';
+import type {ASTNode, MarkdownParser, MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRules, TextComponent,} from './lib/types';
+
 export * from './editor';
 
 export {
-  AstRenderer,
-  FitImage,
-  getUniqueID,
-  hasParents,
-  MarkdownIt,
-  openUrl,
-  parser,
-  renderRules,
-  removeTextStyleProps,
-  stringToTokens,
-  defaultStyles as styles,
-  textStyleProps,
-  tokensToAST,
+    AstRenderer,
+    FitImage,
+    getUniqueID,
+    hasParents,
+    MarkdownIt,
+    openUrl,
+    parser,
+    renderRules,
+    removeTextStyleProps,
+    stringToTokens,
+    defaultStyles as styles,
+    textStyleProps,
+    tokensToAST,
 };
 
 export type {
-  ASTNode,
-  MarkdownParser,
-  MarkdownStyleMap,
-  MarkdownStyleObject,
-  OnLinkPress,
-  RenderRules,
+    ASTNode,
+    MarkdownParser,
+    MarkdownStyleMap,
+    MarkdownStyleObject,
+    OnLinkPress,
+    RenderRules,
 };
 
 export interface MarkdownProps {
-  allowedImageHandlers?: string[];
-  children: string | ASTNode[];
-  debugPrintTree?: boolean;
-  defaultImageHandler?: string | null;
-  markdownit?: MarkdownParser;
-  maxTopLevelChildren?: number | null;
-  mergeStyle?: boolean;
-  onLinkPress?: OnLinkPress;
-  renderer?: AstRenderer | null;
-  rules?: RenderRules | null;
-  style?: MarkdownStyleMap | null;
-  textcomponent?: TextComponent;
-  topLevelMaxExceededItem?: ReactNode;
+    allowedImageHandlers?: string[];
+    children: string | ASTNode[];
+    debugPrintTree?: boolean;
+    defaultImageHandler?: string | null;
+    markdownit?: MarkdownParser;
+    maxTopLevelChildren?: number | null;
+    mergeStyle?: boolean;
+    onLinkPress?: OnLinkPress;
+    renderer?: AstRenderer | null;
+    rules?: RenderRules | null;
+    style?: MarkdownStyleMap | null;
+    textcomponent?: TextComponent;
+    topLevelMaxExceededItem?: ReactNode;
 }
 
 const MarkdownComponent = React.memo(function MarkdownMemo({
-    children,
-    textcomponent = Text,
-    renderer = null,
-    rules = null,
-    style = null,
-    mergeStyle = true,
-    markdownit = MarkdownIt({
-      typographer: true,
-    }),
-    onLinkPress,
-    maxTopLevelChildren = null,
-    topLevelMaxExceededItem = <Text key="dotdotdot">...</Text>,
-    allowedImageHandlers = [
-      'data:image/png;base64',
-      'data:image/gif;base64',
-      'data:image/jpeg;base64',
-      'https://',
-      'http://',
-    ],
-    defaultImageHandler = 'https://',
-    debugPrintTree = false,
-  }: MarkdownProps) {
-    const memoizedRenderer = useMemo(
-      () =>
-        getRenderer(
-          textcomponent,
-          renderer,
-          rules,
-          style,
-          mergeStyle,
-          onLinkPress,
-          maxTopLevelChildren,
-          topLevelMaxExceededItem,
-          allowedImageHandlers,
-          defaultImageHandler,
-          debugPrintTree,
-        ),
-      [
-        allowedImageHandlers,
-        debugPrintTree,
-        defaultImageHandler,
-        maxTopLevelChildren,
-        mergeStyle,
-        onLinkPress,
-        renderer,
-        rules,
-        style,
-        textcomponent,
-        topLevelMaxExceededItem,
-      ],
-    );
+                                                               children,
+                                                               textcomponent = Text,
+                                                               renderer = null,
+                                                               rules = null,
+                                                               style = null,
+                                                               mergeStyle = true,
+                                                               markdownit = MarkdownIt({
+                                                                   typographer: true,
+                                                               }),
+                                                               onLinkPress,
+                                                               maxTopLevelChildren = null,
+                                                               topLevelMaxExceededItem =
+                                                               <Text key="dotdotdot">...</Text>,
+                                                               allowedImageHandlers = [
+                                                                   'data:image/png;base64',
+                                                                   'data:image/gif;base64',
+                                                                   'data:image/jpeg;base64',
+                                                                   'https://',
+                                                                   'http://',
+                                                               ],
+                                                               defaultImageHandler = 'https://',
+                                                               debugPrintTree = false,
+                                                           }: MarkdownProps) {
+        const memoizedRenderer = useMemo(
+            () =>
+                getRenderer(
+                    textcomponent,
+                    renderer,
+                    rules,
+                    style,
+                    mergeStyle,
+                    onLinkPress,
+                    maxTopLevelChildren,
+                    topLevelMaxExceededItem,
+                    allowedImageHandlers,
+                    defaultImageHandler,
+                    debugPrintTree,
+                ),
+            [
+                allowedImageHandlers,
+                debugPrintTree,
+                defaultImageHandler,
+                maxTopLevelChildren,
+                mergeStyle,
+                onLinkPress,
+                renderer,
+                rules,
+                style,
+                textcomponent,
+                topLevelMaxExceededItem,
+            ],
+        );
 
-    const memoizedParser = useMemo(() => markdownit, [markdownit]);
+        const memoizedParser = useMemo(() => markdownit, [markdownit]);
 
-    return parser(children, memoizedRenderer.render, memoizedParser);
-  },
+        return parser(children, memoizedRenderer.render, memoizedParser);
+    },
 );
 
 const Markdown = MarkdownComponent as React.NamedExoticComponent<MarkdownProps> & {
-  displayName?: string;
+    displayName?: string;
 };
 
 Markdown.displayName = 'Markdown';
