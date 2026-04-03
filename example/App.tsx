@@ -9,6 +9,9 @@ interface ChatMessage {
     markdown: string;
 }
 
+const STRUCTURED_MARKDOWN_LINE_PATTERN =
+    /^(?:[-*+]\s+.+|\d+\.\s+.+|\|.*\|)$/;
+
 const INITIAL_MESSAGES: ChatMessage[] = [
     {
         author: 'demo',
@@ -27,8 +30,24 @@ const isTestEnvironment = typeof jest !== 'undefined';
 
 const createMessageId = (value: number): string => `message-${value}`;
 
+export const usesStructuredBubbleLayout = (markdown: string): boolean => {
+    const lines = markdown
+        .trim()
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+    return (
+        lines.length > 0 &&
+        lines.every(line => STRUCTURED_MARKDOWN_LINE_PATTERN.test(line))
+    );
+};
+
 const getMarkdownStyles = (isOwnMessage: boolean): MarkdownStyleMap => ({
     body: {
+        width: '100%',
+    },
+    bullet_list: {
         width: '100%',
     },
     bullet_list_content: {
@@ -65,6 +84,12 @@ const getMarkdownStyles = (isOwnMessage: boolean): MarkdownStyleMap => ({
         color: isOwnMessage ? '#FFFFFF' : '#0A66C2',
         textDecorationLine: 'underline',
     },
+    list_item: {
+        width: '100%',
+    },
+    ordered_list: {
+        width: '100%',
+    },
     ordered_list_content: {
         flex: 1,
     },
@@ -77,12 +102,22 @@ const getMarkdownStyles = (isOwnMessage: boolean): MarkdownStyleMap => ({
         fontWeight: '700',
     },
     table: {
+        width: '100%',
         borderColor: isOwnMessage ? 'rgba(255,255,255,0.28)' : '#CCD6E0',
+    },
+    tbody: {
+        width: '100%',
     },
     text: {
         color: isOwnMessage ? '#F8FBFF' : '#10212E',
         fontSize: 15,
         lineHeight: 22,
+    },
+    thead: {
+        width: '100%',
+    },
+    tr: {
+        width: '100%',
     },
 });
 
@@ -137,6 +172,7 @@ function App(): React.JSX.Element {
 
     const renderMessage = ({item}: ListRenderItemInfo<ChatMessage>) => {
         const isOwnMessage = item.author === 'you';
+        const usesWideBubble = usesStructuredBubbleLayout(item.markdown);
 
         return (
             <View
@@ -148,6 +184,7 @@ function App(): React.JSX.Element {
                 <View
                     style={[
                         styles.messageBubble,
+                        usesWideBubble ? styles.structuredMessageBubble : null,
                         isOwnMessage ? styles.ownMessageBubble : styles.demoMessageBubble,
                     ]}
                 >
@@ -264,7 +301,7 @@ const styles = StyleSheet.create({
         paddingVertical: 18,
     },
     messageAuthor: {
-        color: '#5B6773',
+        color: 'orange',
         fontSize: 12,
         fontWeight: '700',
         marginBottom: 8,
@@ -303,6 +340,9 @@ const styles = StyleSheet.create({
     screen: {
         backgroundColor: '#EAF0F5',
         flex: 1,
+    },
+    structuredMessageBubble: {
+        width: '86%',
     },
     sendButton: {
         alignItems: 'center',
