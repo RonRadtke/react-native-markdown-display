@@ -4,22 +4,22 @@ import React, {useMemo} from 'react';
 import {Text} from 'react-native';
 import FitImage from 'react-native-fit-image';
 
-import AstRenderer from './lib/AstRenderer';
-import {getRenderer} from './lib/createRenderer';
-import parser from './lib/parser';
-import renderRules from './lib/renderRules';
-import {styles as defaultStyles} from './lib/styles';
-import textStyleProps from './lib/data/textStyleProps';
-import getUniqueID from './lib/util/getUniqueID';
-import hasParents from './lib/util/hasParents';
-import openUrl from './lib/util/openUrl';
-import removeTextStyleProps from './lib/util/removeTextStyleProps';
-import {stringToTokens} from './lib/util/stringToTokens';
-import tokensToAST from './lib/util/tokensToAST';
+import AstRenderer from './lib/view/AstRenderer';
+import {getRenderer} from './lib/view/createRenderer';
+import parser from './lib/view/parser';
+import renderRules from './lib/view/renderRules';
+import {styles as defaultStyles} from './lib/view/styles';
+import textStyleProps from './lib/view/data/textStyleProps';
+import getUniqueID from './lib/view/util/getUniqueID';
+import hasParents from './lib/view/util/hasParents';
+import openUrl from './lib/view/util/openUrl';
+import removeTextStyleProps from './lib/view/util/removeTextStyleProps';
+import {stringToTokens} from './lib/view/util/stringToTokens';
+import tokensToAST from './lib/view/util/tokensToAST';
 
-import type {ASTNode, MarkdownParser, MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRules, TextComponent,} from './lib/types';
+import type {ASTNode, MarkdownParser, MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRules, TextComponent,} from './lib/view/types';
 
-export * from './editor';
+export * from './lib/editor';
 
 export {
     AstRenderer,

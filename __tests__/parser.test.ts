@@ -1,7 +1,7 @@
 import {type ASTNode, MarkdownIt, stringToTokens, tokensToAST,} from '../src';
-import {cleanupTokens} from '../src/lib/util/cleanupTokens';
-import groupTextTokens from '../src/lib/util/groupTextTokens';
-import omitListItemParagraph from '../src/lib/util/omitListItemParagraph';
+import {cleanupTokens} from '../src/lib/view/util/cleanupTokens';
+import groupTextTokens from '../src/lib/view/util/groupTextTokens';
+import omitListItemParagraph from '../src/lib/view/util/omitListItemParagraph';
 
 const createAst = (source: string): ASTNode[] => {
     const markdownIt = MarkdownIt({typographer: true});

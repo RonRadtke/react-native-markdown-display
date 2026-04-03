@@ -1,1 +1,0 @@
-{"version":3,"file":"getUniqueID.js","sourceRoot":"","sources":["../../../src/lib/util/getUniqueID.ts"],"names":[],"mappings":";;AAEA,8BAGC;AALD,IAAI,IAAI,GAAG,IAAI,CAAC,GAAG,EAAE,CAAC;AAEtB,SAAwB,WAAW;IACjC,IAAI,IAAI,CAAC,CAAC;IACV,OAAO,QAAQ,IAAI,CAAC,QAAQ,CAAC,EAAE,CAAC,EAAE,CAAC;AACrC,CAAC"}
