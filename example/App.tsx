@@ -145,6 +145,7 @@ function App(): React.JSX.Element {
         () => [
             {command: 'bold' as const, label: 'B'},
             {command: 'italic' as const, label: 'I'},
+            {command: 'strikethrough' as const, label: 'S'},
             {command: 'link' as const, label: 'Link'},
             {command: 'bullet-list' as const, label: 'List'},
             {command: 'table' as const, label: 'Table'},

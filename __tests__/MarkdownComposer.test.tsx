@@ -240,6 +240,33 @@ describe('MarkdownComposer', () => {
         );
     });
 
+    test('applies strikethrough from the expanded toolbar', async () => {
+        const onChangeText = jest.fn();
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    initialMode="expanded"
+                    onChangeText={onChangeText}
+                    selection={{start: 0, end: 4}}
+                    value="docs"
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownComposer strikethrough');
+        }
+
+        await renderer.act(async () => {
+            findPressableByLabel(tree, 'S').props.onPress();
+            await Promise.resolve();
+        });
+
+        expect(onChangeText).toHaveBeenCalledWith('~~docs~~');
+    });
+
     test('blocks invalid link prompt values until corrected', async () => {
         const onChangeText = jest.fn();
         let tree: renderer.ReactTestRenderer | undefined;
