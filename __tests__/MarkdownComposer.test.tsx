@@ -294,6 +294,55 @@ describe('MarkdownComposer', () => {
         expect(onChangeText).toHaveBeenCalledWith('1. first');
     });
 
+    test('applies heading one from the expanded toolbar', async () => {
+        const onChangeText = jest.fn();
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    initialMode="expanded"
+                    onChangeText={onChangeText}
+                    selection={{start: 0, end: 5}}
+                    value="Title"
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownComposer heading one');
+        }
+
+        await renderer.act(async () => {
+            findPressableByLabel(tree, 'H1').props.onPress();
+            await Promise.resolve();
+        });
+
+        expect(onChangeText).toHaveBeenCalledWith('# Title');
+    });
+
+    test('renders heading three in the expanded toolbar', () => {
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    initialMode="expanded"
+                    onChangeText={() => {}}
+                    value=""
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownComposer heading three');
+        }
+
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'H3'),
+        ).toBe(true);
+    });
+
     test('blocks invalid link prompt values until corrected', async () => {
         const onChangeText = jest.fn();
         let tree: renderer.ReactTestRenderer | undefined;

@@ -15,7 +15,9 @@ const DEFAULT_COMPACT_TOOLBAR = [
 const DEFAULT_EXPANDED_TOOLBAR = [
     ...DEFAULT_COMPACT_TOOLBAR,
     {accessibilityLabel: 'Strikethrough', command: 'strikethrough', label: 'S'},
+    {accessibilityLabel: 'Heading one', command: 'heading-one', label: 'H1'},
     {accessibilityLabel: 'Heading two', command: 'heading-two', label: 'H2'},
+    {accessibilityLabel: 'Heading three', command: 'heading-three', label: 'H3'},
     {accessibilityLabel: 'Bullet list', command: 'bullet-list', label: 'List'},
     {accessibilityLabel: 'Numbered list', command: 'ordered-list', label: '1.'},
     {accessibilityLabel: 'Code block', command: 'code-block', label: 'Code'},
