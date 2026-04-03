@@ -1,6 +1,6 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
-import {TextInput} from 'react-native';
+import {Text, TextInput} from 'react-native';
 
 import {type MarkdownManagedTextInputProps, MarkdownTextInput} from '../src';
 
@@ -131,6 +131,32 @@ describe('MarkdownTextInput', () => {
         expect(input.props.value).toBe('Hello');
         expect(input.props.numberOfLines).toBe(3);
         expect(input.props.placeholder).toBe('Write here');
+    });
+
+    test('renders JSX toolbar labels', () => {
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownTextInput
+                    onChangeText={() => {}}
+                    toolbarItems={[
+                        {
+                            accessibilityLabel: 'Bold icon',
+                            command: 'bold',
+                            label: <Text testID="bold-icon">B</Text>,
+                        },
+                    ]}
+                    value=""
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownTextInput JSX toolbar label');
+        }
+
+        expect(tree.root.findByProps({testID: 'bold-icon'})).toBeTruthy();
     });
 
     test('keeps the caret after an auto-continued ordered list when value updates are delayed', () => {

@@ -35,7 +35,7 @@ export interface MarkdownTextInputCommandPayload {
 export type MarkdownCommandPayloadResolver = (command: MarkdownCommand) => MarkdownTextInputCommandPayload | Promise<MarkdownTextInputCommandPayload | null> | null;
 interface MarkdownToolbarBaseItem {
     accessibilityLabel?: string;
-    label: string;
+    label: ReactNode;
 }
 export interface MarkdownToolbarCommandItem extends MarkdownToolbarBaseItem {
     command: MarkdownCommand;

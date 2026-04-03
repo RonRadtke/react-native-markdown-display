@@ -36,6 +36,19 @@ const isToolbarMenuItem = (
     item: MarkdownToolbarItem,
 ): item is MarkdownToolbarMenuItem => 'items' in item;
 
+const getToolbarMenuAccessibilityLabel = (
+    item: MarkdownToolbarMenuItem,
+): string =>
+    item.accessibilityLabel ??
+    (typeof item.label === 'string' ? `${item.label} menu` : 'Toolbar menu');
+
+const renderToolbarLabel = (label: MarkdownToolbarItem['label']): React.ReactNode =>
+    typeof label === 'string' || typeof label === 'number' ? (
+        <Text style={styles.toolbarButtonText}>{label}</Text>
+    ) : (
+        <View style={styles.toolbarButtonContent}>{label}</View>
+    );
+
 const executeCommand = (
     value: string,
     selection: MarkdownTextInputProps['selection'],
@@ -92,7 +105,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             normalizeSelection(value, selection),
         );
         const [contentHeight, setContentHeight] = useState<number | null>(null);
-        const [openMenuLabel, setOpenMenuLabel] = useState<string | null>(null);
+        const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
         const pendingSelectionValueRef = useRef<string | null>(null);
 
         const normalizedSelection = useMemo(
@@ -124,7 +137,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
         const handleCommandPress = async (
             command: MarkdownCommand,
         ): Promise<void> => {
-            setOpenMenuLabel(null);
+            setOpenMenuIndex(null);
 
             const resolvedPayload = await resolveCommandPayload?.(command);
 
@@ -204,27 +217,26 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             <View style={styles.container}>
                 {toolbarItems.length > 0 ? (
                     <View style={styles.toolbar}>
-                        {toolbarItems.map((item) => {
+                        {toolbarItems.map((item, index) => {
                             if (isToolbarMenuItem(item)) {
-                                const isMenuOpen = openMenuLabel === item.label;
+                                const isMenuOpen = openMenuIndex === index;
 
                                 return (
                                     <View
-                                        key={`menu:${item.label}`}
+                                        key={`menu:${index}`}
                                         style={styles.toolbarMenuContainer}
                                     >
                                         <Pressable
-                                            accessibilityLabel={
-                                                item.accessibilityLabel ??
-                                                `${item.label} menu`
-                                            }
+                                            accessibilityLabel={getToolbarMenuAccessibilityLabel(
+                                                item,
+                                            )}
                                             accessibilityRole="button"
                                             accessibilityState={{expanded: isMenuOpen}}
                                             onPress={() =>
-                                                setOpenMenuLabel((currentLabel) =>
-                                                    currentLabel === item.label
+                                                setOpenMenuIndex((currentIndex) =>
+                                                    currentIndex === index
                                                         ? null
-                                                        : item.label,
+                                                        : index,
                                                 )
                                             }
                                             style={[
@@ -234,9 +246,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
                                                     : null,
                                             ]}
                                         >
-                                            <Text style={styles.toolbarButtonText}>
-                                                {item.label}
-                                            </Text>
+                                            {renderToolbarLabel(item.label)}
                                         </Pressable>
                                         {isMenuOpen ? (
                                             <View style={styles.toolbarMenu}>
@@ -257,13 +267,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
                                                         }}
                                                         style={styles.toolbarMenuButton}
                                                     >
-                                                        <Text
-                                                            style={
-                                                                styles.toolbarButtonText
-                                                            }
-                                                        >
-                                                            {menuItem.label}
-                                                        </Text>
+                                                        {renderToolbarLabel(menuItem.label)}
                                                     </Pressable>
                                                 ))}
                                             </View>
@@ -285,7 +289,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
                                     }}
                                     style={styles.toolbarButton}
                                 >
-                                    <Text style={styles.toolbarButtonText}>{item.label}</Text>
+                                    {renderToolbarLabel(item.label)}
                                 </Pressable>
                             );
                         })}
@@ -320,15 +324,21 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     toolbarButton: {
+        alignItems: 'center',
         borderColor: '#C7CCD1',
         borderRadius: 6,
         borderWidth: 1,
+        justifyContent: 'center',
         paddingHorizontal: 10,
         paddingVertical: 6,
     },
     toolbarButtonActive: {
         backgroundColor: '#EFF4F8',
         borderColor: '#0A66C2',
+    },
+    toolbarButtonContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     toolbarButtonText: {
         fontSize: 14,
@@ -349,7 +359,9 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     toolbarMenuButton: {
+        alignItems: 'center',
         borderRadius: 6,
+        justifyContent: 'center',
         paddingHorizontal: 10,
         paddingVertical: 6,
     },

@@ -74,7 +74,7 @@ export type MarkdownCommandPayloadResolver = (
 
 interface MarkdownToolbarBaseItem {
     accessibilityLabel?: string;
-    label: string;
+    label: ReactNode;
 }
 
 export interface MarkdownToolbarCommandItem extends MarkdownToolbarBaseItem {

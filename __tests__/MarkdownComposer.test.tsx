@@ -115,6 +115,55 @@ describe('MarkdownComposer', () => {
         ).toBe(false);
     });
 
+    test('renders JSX labels for minimized and expanded toolbar items', () => {
+        let compactTree: renderer.ReactTestRenderer | undefined;
+        let expandedTree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            compactTree = renderer.create(
+                <MarkdownComposer
+                    minimizedToolbarItems={[
+                        {
+                            accessibilityLabel: 'Bold icon',
+                            command: 'bold',
+                            label: <Text testID="compact-bold-icon">B</Text>,
+                        },
+                    ]}
+                    onChangeText={() => {}}
+                    value=""
+                />,
+            );
+        });
+
+        renderer.act(() => {
+            expandedTree = renderer.create(
+                <MarkdownComposer
+                    expandedToolbarItems={[
+                        {
+                            accessibilityLabel: 'Code icon',
+                            command: 'inline-code',
+                            label: <Text testID="expanded-code-icon">{'</>'}</Text>,
+                        },
+                    ]}
+                    initialMode="expanded"
+                    onChangeText={() => {}}
+                    value=""
+                />,
+            );
+        });
+
+        if (!compactTree || !expandedTree) {
+            throw new Error('Failed to render MarkdownComposer JSX toolbar labels');
+        }
+
+        expect(
+            compactTree.root.findByProps({testID: 'compact-bold-icon'}),
+        ).toBeTruthy();
+        expect(
+            expandedTree.root.findByProps({testID: 'expanded-code-icon'}),
+        ).toBeTruthy();
+    });
+
     test('hides the compact toolbar row when no minimized toolbar items are provided', () => {
         let tree: renderer.ReactTestRenderer | undefined;
 
