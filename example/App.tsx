@@ -151,6 +151,7 @@ function App(): React.JSX.Element {
             {command: 'heading-three' as const, label: 'H3'},
             {command: 'link' as const, label: 'Link'},
             {command: 'blockquote' as const, label: 'Quote'},
+            {command: 'inline-code' as const, label: '</>'},
             {command: 'bullet-list' as const, label: 'List'},
             {command: 'ordered-list' as const, label: '1.'},
             {command: 'table' as const, label: 'Table'},
