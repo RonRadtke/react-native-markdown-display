@@ -286,7 +286,6 @@ const renderRules = (Text: TextComponent): RenderRules => ({
     onLinkPress?: RenderRuleExtra,
   ): ReactNode => (
     <Pressable
-      accessibilityLabel={getBlockLinkAccessibilityLabel(node)}
       accessibilityRole="link"
       key={node.key}
       onPress={() => openUrl(node.attributes.href, getOnLinkPress(onLinkPress))}
@@ -302,6 +301,7 @@ const renderRules = (Text: TextComponent): RenderRules => ({
     onLinkPress?: RenderRuleExtra,
   ): ReactNode => (
     <Pressable
+      accessibilityLabel={getBlockLinkAccessibilityLabel(node)}
       accessibilityRole="link"
       key={node.key}
       onPress={() => openUrl(node.attributes.href, getOnLinkPress(onLinkPress))}
