@@ -1,7 +1,8 @@
-import type {ReactNode} from 'react';
+import type {ForwardRefExoticComponent, ReactNode, RefAttributes} from 'react';
 import type {
   NativeSyntheticEvent,
   StyleProp,
+  TextInput,
   TextInputProps,
   TextInputSelectionChangeEventData,
   TextStyle,
@@ -18,6 +19,22 @@ export interface MarkdownCommandResult {
   selection: MarkdownSelection;
   value: string;
 }
+
+export interface MarkdownManagedTextInputProps extends Omit<
+  TextInputProps,
+  'onChangeText' | 'onSelectionChange' | 'selection' | 'value'
+> {
+  onChangeText: (value: string) => void;
+  onSelectionChange?: (
+    event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
+  ) => void;
+  selection: MarkdownSelection;
+  value: string;
+}
+
+export type MarkdownInputComponent = ForwardRefExoticComponent<
+  MarkdownManagedTextInputProps & RefAttributes<TextInput>
+>;
 
 export type MarkdownInlineFormat =
   | 'bold'
@@ -64,14 +81,18 @@ export type MarkdownCommandPayloadResolver = (
   | null;
 
 export interface MarkdownToolbarItem {
+  accessibilityLabel?: string;
   command: MarkdownCommand;
   label: string;
 }
 
-export interface MarkdownTextInputProps
-  extends Omit<TextInputProps, 'onChangeText' | 'onSelectionChange' | 'value'> {
+export interface MarkdownTextInputProps extends Omit<
+  TextInputProps,
+  'onChangeText' | 'onSelectionChange' | 'value'
+> {
   compactMaxHeight?: number;
   enableShortcuts?: boolean;
+  inputComponent?: MarkdownInputComponent;
   onChangeText: (value: string) => void;
   onCommand?: (
     payload: MarkdownTextInputCommandPayload,
@@ -88,11 +109,10 @@ export interface MarkdownTextInputProps
 
 export type MarkdownComposerMode = 'compact' | 'expanded';
 
-export interface MarkdownComposerProps
-  extends Omit<
-    MarkdownTextInputProps,
-    'multiline' | 'numberOfLines' | 'toolbarItems'
-  > {
+export interface MarkdownComposerProps extends Omit<
+  MarkdownTextInputProps,
+  'multiline' | 'numberOfLines' | 'toolbarItems'
+> {
   compactToolbarItems?: readonly MarkdownToolbarItem[];
   composerStyle?: StyleProp<ViewStyle>;
   expandedToolbarItems?: readonly MarkdownToolbarItem[];

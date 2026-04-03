@@ -7,6 +7,7 @@ import hasParents from './util/hasParents';
 import openUrl from './util/openUrl';
 
 import type {
+  ASTNode,
   MarkdownStyleObject,
   OnLinkPress,
   RenderRuleExtra,
@@ -20,9 +21,7 @@ type StylePropertyValue = MarkdownStyleObject[keyof MarkdownStyleObject];
 const trimTrailingNewLine = (content: string): string =>
   content.endsWith('\n') ? content.slice(0, -1) : content;
 
-const getStyleObject = (
-  value?: RenderRuleExtra,
-): MarkdownStyleObject => {
+const getStyleObject = (value?: RenderRuleExtra): MarkdownStyleObject => {
   if (
     value &&
     typeof value === 'object' &&
@@ -39,7 +38,9 @@ const getOnLinkPress = (value?: RenderRuleExtra): OnLinkPress | undefined =>
   typeof value === 'function' ? value : undefined;
 
 const getAllowedImageHandlers = (value?: RenderRuleExtra): string[] =>
-  Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+  Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
 
 const getDefaultImageHandler = (value?: RenderRuleExtra): string | null =>
   typeof value === 'string' ? value : value === null ? null : null;
@@ -58,6 +59,25 @@ const pickTextStyles = (
   }
 
   return textStyles;
+};
+
+const getBlockLinkAccessibilityLabel = (node: ASTNode): string | undefined => {
+  const imageAlt = node.children.find((child) => child.type === 'image')
+    ?.attributes.alt;
+
+  if (imageAlt && imageAlt.trim().length > 0) {
+    return imageAlt;
+  }
+
+  const title = node.attributes.title;
+
+  if (title && title.trim().length > 0) {
+    return title;
+  }
+
+  const href = node.attributes.href;
+
+  return href && href.trim().length > 0 ? href : undefined;
 };
 
 const renderRules = (Text: TextComponent): RenderRules => ({
@@ -214,7 +234,13 @@ const renderRules = (Text: TextComponent): RenderRules => ({
       {trimTrailingNewLine(node.content)}
     </Text>
   ),
-  fence: (node, _children, _parent, styles, inheritedStyles?: RenderRuleExtra) => (
+  fence: (
+    node,
+    _children,
+    _parent,
+    styles,
+    inheritedStyles?: RenderRuleExtra,
+  ) => (
     <Text
       key={node.key}
       style={[getStyleObject(inheritedStyles), styles.fence]}
@@ -260,6 +286,7 @@ const renderRules = (Text: TextComponent): RenderRules => ({
     onLinkPress?: RenderRuleExtra,
   ): ReactNode => (
     <Pressable
+      accessibilityLabel={getBlockLinkAccessibilityLabel(node)}
       accessibilityRole="link"
       key={node.key}
       onPress={() => openUrl(node.attributes.href, getOnLinkPress(onLinkPress))}
@@ -323,11 +350,14 @@ const renderRules = (Text: TextComponent): RenderRules => ({
 
     return <FitImage key={node.key} {...imageProps} />;
   },
-  text: (node, _children, _parent, styles, inheritedStyles?: RenderRuleExtra) => (
-    <Text
-      key={node.key}
-      style={[getStyleObject(inheritedStyles), styles.text]}
-    >
+  text: (
+    node,
+    _children,
+    _parent,
+    styles,
+    inheritedStyles?: RenderRuleExtra,
+  ) => (
+    <Text key={node.key} style={[getStyleObject(inheritedStyles), styles.text]}>
       {node.content}
     </Text>
   ),

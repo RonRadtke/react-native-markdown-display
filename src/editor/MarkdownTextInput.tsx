@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -21,16 +21,36 @@ import {normalizeSelection} from './utils/selection';
 
 import type {
   MarkdownCommandResult,
+  MarkdownManagedTextInputProps,
   MarkdownTextInputCommandPayload,
   MarkdownTextInputProps,
   MarkdownToolbarItem,
 } from './types';
 
 const DEFAULT_TOOLBAR_ITEMS: readonly MarkdownToolbarItem[] = [
-  {command: 'bold', label: 'B'},
-  {command: 'italic', label: 'I'},
-  {command: 'inline-code', label: '</>'},
+  {accessibilityLabel: 'Bold', command: 'bold', label: 'B'},
+  {accessibilityLabel: 'Italic', command: 'italic', label: 'I'},
+  {accessibilityLabel: 'Inline code', command: 'inline-code', label: '</>'},
 ];
+
+const DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS: Record<
+  MarkdownToolbarItem['command'],
+  string
+> = {
+  bold: 'Bold',
+  italic: 'Italic',
+  strikethrough: 'Strikethrough',
+  'inline-code': 'Inline code',
+  'heading-one': 'Heading one',
+  'heading-two': 'Heading two',
+  'heading-three': 'Heading three',
+  blockquote: 'Block quote',
+  'bullet-list': 'Bullet list',
+  'ordered-list': 'Ordered list',
+  'code-block': 'Code block',
+  link: 'Insert link',
+  table: 'Insert table',
+};
 
 const executeCommand = (
   value: string,
@@ -57,7 +77,9 @@ const executeCommand = (
       return applyTableFormat(value, selection, payload.table);
     default: {
       const exhaustiveCheck: never = payload.command;
-      throw new Error(`Unsupported markdown command: ${String(exhaustiveCheck)}`);
+      throw new Error(
+        `Unsupported markdown command: ${String(exhaustiveCheck)}`,
+      );
     }
   }
 };
@@ -68,6 +90,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
       onChangeText,
       onCommand,
       onSelectionChange,
+      inputComponent: InputComponent,
       selection,
       style,
       toolbarItems = DEFAULT_TOOLBAR_ITEMS,
@@ -86,12 +109,6 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
     );
     const [contentHeight, setContentHeight] = useState<number | null>(null);
 
-    useEffect(() => {
-      if (selection) {
-        setInternalSelection(normalizeSelection(value, selection));
-      }
-    }, [selection, value]);
-
     const normalizedSelection = useMemo(
       () => normalizeSelection(value, selection ?? internalSelection),
       [internalSelection, selection, value],
@@ -100,11 +117,16 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
     const handleSelectionChange = (
       event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
     ): void => {
-      setInternalSelection(event.nativeEvent.selection);
+      if (!selection) {
+        setInternalSelection(event.nativeEvent.selection);
+      }
+
       onSelectionChange?.(event);
     };
 
-    const handleCommandPress = async (command: MarkdownToolbarItem['command']) => {
+    const handleCommandPress = async (
+      command: MarkdownToolbarItem['command'],
+    ) => {
       const resolvedPayload = await resolveCommandPayload?.(command);
 
       if (resolvedPayload === null) {
@@ -165,15 +187,31 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
       onChangeText(nextValue);
     };
 
+    const inputProps: MarkdownManagedTextInputProps = {
+      ...textInputProps,
+      multiline,
+      numberOfLines,
+      onChangeText: handleChangeText,
+      onContentSizeChange: handleContentSizeChange,
+      onSelectionChange: handleSelectionChange,
+      selection: normalizedSelection,
+      style: computedInputStyle,
+      value,
+    };
+
     return (
       <View style={styles.container}>
         <View style={styles.toolbar}>
           {toolbarItems.map((item) => (
             <Pressable
+              accessibilityLabel={
+                item.accessibilityLabel ??
+                DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[item.command]
+              }
               accessibilityRole="button"
               key={item.command}
               onPress={() => {
-                void handleCommandPress(item.command);
+                handleCommandPress(item.command);
               }}
               style={styles.toolbarButton}
             >
@@ -181,18 +219,11 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             </Pressable>
           ))}
         </View>
-        <TextInput
-          {...textInputProps}
-          multiline={multiline}
-          numberOfLines={numberOfLines}
-          ref={ref}
-          onChangeText={handleChangeText}
-          onContentSizeChange={handleContentSizeChange}
-          onSelectionChange={handleSelectionChange}
-          selection={normalizedSelection}
-          style={computedInputStyle}
-          value={value}
-        />
+        {InputComponent ? (
+          <InputComponent {...inputProps} ref={ref} />
+        ) : (
+          <TextInput {...inputProps} ref={ref} />
+        )}
       </View>
     );
   },

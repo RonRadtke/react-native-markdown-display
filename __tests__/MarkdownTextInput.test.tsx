@@ -2,7 +2,7 @@ import React from 'react';
 import renderer from 'react-test-renderer';
 import {TextInput} from 'react-native';
 
-import {MarkdownTextInput} from '../src';
+import {MarkdownTextInput, type MarkdownManagedTextInputProps} from '../src';
 
 describe('MarkdownTextInput', () => {
   test('uses the command payload resolver for link commands', async () => {
@@ -31,7 +31,9 @@ describe('MarkdownTextInput', () => {
       throw new Error('Failed to render MarkdownTextInput');
     }
 
-    const button = tree.root.find((node) => typeof node.props.onPress === 'function');
+    const button = tree.root.find(
+      (node) => typeof node.props.onPress === 'function',
+    );
 
     await renderer.act(async () => {
       button.props.onPress();
@@ -62,7 +64,9 @@ describe('MarkdownTextInput', () => {
       throw new Error('Failed to render MarkdownTextInput');
     }
 
-    const button = tree.root.find((node) => typeof node.props.onPress === 'function');
+    const button = tree.root.find(
+      (node) => typeof node.props.onPress === 'function',
+    );
 
     await renderer.act(async () => {
       button.props.onPress();
@@ -94,5 +98,38 @@ describe('MarkdownTextInput', () => {
 
     expect(input.props.multiline).toBe(true);
     expect(input.props.numberOfLines).toBe(1);
+  });
+
+  test('renders a custom input component when provided', () => {
+    const CustomInput = React.forwardRef<
+      TextInput,
+      MarkdownManagedTextInputProps
+    >(function CustomInput(props, ref) {
+      return <TextInput {...props} ref={ref} testID="custom-input" />;
+    });
+    let tree: renderer.ReactTestRenderer | undefined;
+
+    renderer.act(() => {
+      tree = renderer.create(
+        <MarkdownTextInput
+          inputComponent={CustomInput}
+          multiline
+          numberOfLines={3}
+          onChangeText={() => {}}
+          placeholder="Write here"
+          value="Hello"
+        />,
+      );
+    });
+
+    if (!tree) {
+      throw new Error('Failed to render MarkdownTextInput with a custom input');
+    }
+
+    const input = tree.root.findByProps({testID: 'custom-input'});
+
+    expect(input.props.value).toBe('Hello');
+    expect(input.props.numberOfLines).toBe(3);
+    expect(input.props.placeholder).toBe('Write here');
   });
 });

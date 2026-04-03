@@ -1,1 +1,1 @@
-{"version":3,"file":"removeTextStyleProps.d.ts","sourceRoot":"","sources":["../../../src/lib/util/removeTextStyleProps.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAC,mBAAmB,EAAC,MAAM,UAAU,CAAC;AAElD,MAAM,CAAC,OAAO,UAAU,oBAAoB,CAC1C,KAAK,EAAE,mBAAmB,GACzB,mBAAmB,CAQrB"}
+{"version":3,"file":"removeTextStyleProps.d.ts","sourceRoot":"","sources":["../../../src/lib/util/removeTextStyleProps.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAC,mBAAmB,EAAC,MAAM,UAAU,CAAC;AAElD,MAAM,CAAC,OAAO,UAAU,oBAAoB,CAC1C,KAAK,EAAE,mBAAmB,GACzB,mBAAmB,CAUrB"}

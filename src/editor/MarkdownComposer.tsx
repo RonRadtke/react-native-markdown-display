@@ -11,17 +11,17 @@ import type {
 } from './types';
 
 const DEFAULT_COMPACT_TOOLBAR = [
-  {command: 'bold', label: 'B'},
-  {command: 'italic', label: 'I'},
-  {command: 'link', label: 'Link'},
+  {accessibilityLabel: 'Bold', command: 'bold', label: 'B'},
+  {accessibilityLabel: 'Italic', command: 'italic', label: 'I'},
+  {accessibilityLabel: 'Insert link', command: 'link', label: 'Link'},
 ] as const;
 
 const DEFAULT_EXPANDED_TOOLBAR = [
   ...DEFAULT_COMPACT_TOOLBAR,
-  {command: 'heading-two', label: 'H2'},
-  {command: 'bullet-list', label: 'List'},
-  {command: 'code-block', label: 'Code'},
-  {command: 'table', label: 'Table'},
+  {accessibilityLabel: 'Heading two', command: 'heading-two', label: 'H2'},
+  {accessibilityLabel: 'Bullet list', command: 'bullet-list', label: 'List'},
+  {accessibilityLabel: 'Code block', command: 'code-block', label: 'Code'},
+  {accessibilityLabel: 'Insert table', command: 'table', label: 'Table'},
 ] as const;
 
 const DEFAULT_COMPACT_MAX_HEIGHT = 110;
@@ -178,25 +178,29 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
       }
 
       if (command === 'link') {
-        return new Promise<MarkdownTextInputCommandPayload | null>((resolve) => {
-          promptResolverRef.current = resolve;
-          setPromptState({
-            command,
-            title: '',
-            url: DEFAULT_LINK_URL,
-          });
-        });
+        return new Promise<MarkdownTextInputCommandPayload | null>(
+          (resolve) => {
+            promptResolverRef.current = resolve;
+            setPromptState({
+              command,
+              title: '',
+              url: DEFAULT_LINK_URL,
+            });
+          },
+        );
       }
 
       if (command === 'table') {
-        return new Promise<MarkdownTextInputCommandPayload | null>((resolve) => {
-          promptResolverRef.current = resolve;
-          setPromptState({
-            command,
-            columns: '3',
-            rows: '2',
-          });
-        });
+        return new Promise<MarkdownTextInputCommandPayload | null>(
+          (resolve) => {
+            promptResolverRef.current = resolve;
+            setPromptState({
+              command,
+              columns: '3',
+              rows: '2',
+            });
+          },
+        );
       }
 
       return getDefaultCommandPayload(command);
@@ -282,6 +286,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
             {promptState.command === 'link' ? (
               <>
                 <TextInput
+                  accessibilityLabel="Link text"
                   onChangeText={(title) =>
                     setPromptState((currentState) =>
                       currentState?.command === 'link'
@@ -294,6 +299,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
                   value={promptState.title}
                 />
                 <TextInput
+                  accessibilityLabel="Link URL"
                   autoCapitalize="none"
                   autoCorrect={false}
                   keyboardType="url"
@@ -312,6 +318,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
             ) : (
               <>
                 <TextInput
+                  accessibilityLabel="Table columns"
                   keyboardType="number-pad"
                   onChangeText={(columns) =>
                     setPromptState((currentState) =>
@@ -325,6 +332,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
                   value={promptState.columns}
                 />
                 <TextInput
+                  accessibilityLabel="Table rows"
                   keyboardType="number-pad"
                   onChangeText={(rows) =>
                     setPromptState((currentState) =>
@@ -339,10 +347,13 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
                 />
               </>
             )}
-            {promptError ? <Text style={styles.promptError}>{promptError}</Text> : null}
+            {promptError ? (
+              <Text style={styles.promptError}>{promptError}</Text>
+            ) : null}
             <View style={styles.promptActions}>
               <Pressable
                 accessibilityRole="button"
+                accessibilityState={{disabled: false}}
                 onPress={handleCancelPrompt}
                 style={[styles.promptButton, styles.promptButtonSecondary]}
               >
@@ -350,6 +361,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
               </Pressable>
               <Pressable
                 accessibilityRole="button"
+                accessibilityState={{disabled: promptError !== null}}
                 onPress={handleApplyPrompt}
                 disabled={promptError !== null}
                 style={[styles.promptButton, styles.promptButtonPrimary]}
@@ -363,7 +375,10 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
           {previewEnabled && mode === 'expanded' ? (
             <Pressable
               accessibilityRole="button"
-              onPress={() => setIsPreviewVisible((currentValue) => !currentValue)}
+              accessibilityState={{expanded: isPreviewVisible}}
+              onPress={() =>
+                setIsPreviewVisible((currentValue) => !currentValue)
+              }
               style={styles.previewToggle}
             >
               <Text style={styles.previewToggleText}>
@@ -375,6 +390,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
           ) : null}
           <Pressable
             accessibilityRole="button"
+            accessibilityState={{expanded: mode === 'expanded'}}
             onPress={toggleMode}
             style={styles.expandButton}
           >

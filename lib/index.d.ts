@@ -14,6 +14,7 @@ import { stringToTokens } from './lib/util/stringToTokens';
 import tokensToAST from './lib/util/tokensToAST';
 import type { ASTNode, MarkdownParser, MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRules, TextComponent } from './lib/types';
 import type { ReactNode } from 'react';
+export * from './editor';
 export { AstRenderer, FitImage, getUniqueID, hasParents, MarkdownIt, openUrl, parser, renderRules, removeTextStyleProps, stringToTokens, defaultStyles as styles, textStyleProps, tokensToAST, };
 export type { ASTNode, MarkdownParser, MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRules, };
 export interface MarkdownProps {

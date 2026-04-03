@@ -1,0 +1,1 @@
+{"version":3,"file":"shortcuts.d.ts","sourceRoot":"","sources":["../../../src/editor/utils/shortcuts.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAC,qBAAqB,EAAE,iBAAiB,EAAC,MAAM,UAAU,CAAC;AAEvE,UAAU,eAAe;IACvB,SAAS,EAAE,MAAM,CAAC;IAClB,iBAAiB,EAAE,iBAAiB,CAAC;IACrC,aAAa,EAAE,MAAM,CAAC;CACvB;AA0DD,eAAO,MAAM,qBAAqB,GAChC,SAAS,eAAe,KACvB,qBAAqB,GAAG,IAmC1B,CAAC"}
