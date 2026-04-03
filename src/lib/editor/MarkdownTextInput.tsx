@@ -1,20 +1,20 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useRef, useState} from 'react';
 import {type NativeSyntheticEvent, Pressable, StyleSheet, Text, TextInput, type TextInputContentSizeChangeEventData, type TextInputSelectionChangeEventData, View,} from 'react-native';
 
 import {applyBlockFormat, applyInlineFormat, applyLinkFormat, applyTableFormat,} from './commands/formatMarkdown';
 import {applyMarkdownShortcut} from './utils/shortcuts';
 import {normalizeSelection} from './utils/selection';
 
-import type {MarkdownCommandResult, MarkdownManagedTextInputProps, MarkdownTextInputCommandPayload, MarkdownTextInputProps, MarkdownToolbarItem,} from './types';
+import type {MarkdownCommand, MarkdownCommandResult, MarkdownManagedTextInputProps, MarkdownTextInputCommandPayload, MarkdownTextInputProps, MarkdownToolbarCommandItem, MarkdownToolbarItem, MarkdownToolbarMenuItem,} from './types';
 
-const DEFAULT_TOOLBAR_ITEMS: readonly MarkdownToolbarItem[] = [
+const DEFAULT_TOOLBAR_ITEMS: readonly MarkdownToolbarCommandItem[] = [
     {accessibilityLabel: 'Bold', command: 'bold', label: 'B'},
     {accessibilityLabel: 'Italic', command: 'italic', label: 'I'},
     {accessibilityLabel: 'Inline code', command: 'inline-code', label: '</>'},
 ];
 
 const DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS: Record<
-    MarkdownToolbarItem['command'],
+    MarkdownCommand,
     string
 > = {
     bold: 'Bold',
@@ -31,6 +31,10 @@ const DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS: Record<
     link: 'Insert link',
     table: 'Insert table',
 };
+
+const isToolbarMenuItem = (
+    item: MarkdownToolbarItem,
+): item is MarkdownToolbarMenuItem => 'items' in item;
 
 const executeCommand = (
     value: string,
@@ -88,6 +92,8 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             normalizeSelection(value, selection),
         );
         const [contentHeight, setContentHeight] = useState<number | null>(null);
+        const [openMenuLabel, setOpenMenuLabel] = useState<string | null>(null);
+        const pendingSelectionValueRef = useRef<string | null>(null);
 
         const normalizedSelection = useMemo(
             () => normalizeSelection(value, selection ?? internalSelection),
@@ -97,6 +103,17 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
         const handleSelectionChange = (
             event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
         ): void => {
+            const pendingSelectionValue = pendingSelectionValueRef.current;
+
+            if (pendingSelectionValue && pendingSelectionValue !== value) {
+                onSelectionChange?.(event);
+                return;
+            }
+
+            if (pendingSelectionValue === value) {
+                pendingSelectionValueRef.current = null;
+            }
+
             if (!selection) {
                 setInternalSelection(event.nativeEvent.selection);
             }
@@ -105,8 +122,10 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
         };
 
         const handleCommandPress = async (
-            command: MarkdownToolbarItem['command'],
-        ) => {
+            command: MarkdownCommand,
+        ): Promise<void> => {
+            setOpenMenuLabel(null);
+
             const resolvedPayload = await resolveCommandPayload?.(command);
 
             if (resolvedPayload === null) {
@@ -118,6 +137,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             const result = executeCommand(value, normalizedSelection, payload);
 
             if (!selection) {
+                pendingSelectionValueRef.current = result.value;
                 setInternalSelection(result.selection);
             }
 
@@ -156,6 +176,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
 
                 if (shortcutResult) {
                     if (!selection) {
+                        pendingSelectionValueRef.current = shortcutResult.value;
                         setInternalSelection(shortcutResult.selection);
                     }
 
@@ -182,22 +203,91 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
         return (
             <View style={styles.container}>
                 <View style={styles.toolbar}>
-                    {toolbarItems.map((item) => (
-                        <Pressable
-                            accessibilityLabel={
-                                item.accessibilityLabel ??
-                                DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[item.command]
-                            }
-                            accessibilityRole="button"
-                            key={item.command}
-                            onPress={() => {
-                                handleCommandPress(item.command);
-                            }}
-                            style={styles.toolbarButton}
-                        >
-                            <Text style={styles.toolbarButtonText}>{item.label}</Text>
-                        </Pressable>
-                    ))}
+                    {toolbarItems.map((item) => {
+                        if (isToolbarMenuItem(item)) {
+                            const isMenuOpen = openMenuLabel === item.label;
+
+                            return (
+                                <View
+                                    key={`menu:${item.label}`}
+                                    style={styles.toolbarMenuContainer}
+                                >
+                                    <Pressable
+                                        accessibilityLabel={
+                                            item.accessibilityLabel ??
+                                            `${item.label} menu`
+                                        }
+                                        accessibilityRole="button"
+                                        accessibilityState={{expanded: isMenuOpen}}
+                                        onPress={() =>
+                                            setOpenMenuLabel((currentLabel) =>
+                                                currentLabel === item.label
+                                                    ? null
+                                                    : item.label,
+                                            )
+                                        }
+                                        style={[
+                                            styles.toolbarButton,
+                                            isMenuOpen
+                                                ? styles.toolbarButtonActive
+                                                : null,
+                                        ]}
+                                    >
+                                        <Text style={styles.toolbarButtonText}>
+                                            {item.label}
+                                        </Text>
+                                    </Pressable>
+                                    {isMenuOpen ? (
+                                        <View style={styles.toolbarMenu}>
+                                            {item.items.map((menuItem) => (
+                                                <Pressable
+                                                    accessibilityLabel={
+                                                        menuItem.accessibilityLabel ??
+                                                        DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[
+                                                        menuItem.command
+                                                        ]
+                                                    }
+                                                    accessibilityRole="button"
+                                                    key={menuItem.command}
+                                                    onPress={() => {
+                                                        handleCommandPress(
+                                                            menuItem.command,
+                                                        );
+                                                    }}
+                                                    style={styles.toolbarMenuButton}
+                                                >
+                                                    <Text
+                                                        style={
+                                                            styles.toolbarButtonText
+                                                        }
+                                                    >
+                                                        {menuItem.label}
+                                                    </Text>
+                                                </Pressable>
+                                            ))}
+                                        </View>
+                                    ) : null}
+                                </View>
+                            );
+                        }
+
+                        return (
+                            <Pressable
+                                accessibilityLabel={
+                                    item.accessibilityLabel ??
+                                    DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[item.command]
+                                }
+                                accessibilityRole="button"
+                                key={item.command}
+                                onPress={() => {
+                                    handleCommandPress(item.command);
+                                }}
+                                style={styles.toolbarButton}
+                            >
+                                <Text style={styles.toolbarButtonText}>{item.label}</Text>
+                            </Pressable>
+                        );
+                    })}
                 </View>
                 {InputComponent ? (
                     <InputComponent {...inputProps} ref={ref}/>
@@ -223,6 +313,7 @@ const styles = StyleSheet.create({
     },
     toolbar: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         gap: 8,
         marginBottom: 8,
     },
@@ -233,9 +324,35 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 6,
     },
+    toolbarButtonActive: {
+        backgroundColor: '#EFF4F8',
+        borderColor: '#0A66C2',
+    },
     toolbarButtonText: {
         fontSize: 14,
         fontWeight: '600',
+    },
+    toolbarMenu: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#C7CCD1',
+        borderRadius: 8,
+        borderWidth: 1,
+        elevation: 3,
+        gap: 6,
+        left: 0,
+        minWidth: 64,
+        padding: 6,
+        position: 'absolute',
+        top: 38,
+        zIndex: 1,
+    },
+    toolbarMenuButton: {
+        borderRadius: 6,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+    },
+    toolbarMenuContainer: {
+        position: 'relative',
     },
 });
 

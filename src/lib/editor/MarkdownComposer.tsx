@@ -4,7 +4,7 @@ import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import MarkdownPreview from './MarkdownPreview';
 import MarkdownTextInput from './MarkdownTextInput';
 
-import type {MarkdownComposerMode, MarkdownComposerProps, MarkdownTextInputCommandPayload,} from './types';
+import type {MarkdownComposerMode, MarkdownComposerProps, MarkdownTextInputCommandPayload, MarkdownToolbarCommandItem,} from './types';
 
 const DEFAULT_COMPACT_TOOLBAR = [
     {accessibilityLabel: 'Bold', command: 'bold', label: 'B'},
@@ -12,12 +12,20 @@ const DEFAULT_COMPACT_TOOLBAR = [
     {accessibilityLabel: 'Insert link', command: 'link', label: 'Link'},
 ] as const;
 
-const DEFAULT_EXPANDED_TOOLBAR = [
-    ...DEFAULT_COMPACT_TOOLBAR,
-    {accessibilityLabel: 'Strikethrough', command: 'strikethrough', label: 'S'},
+const DEFAULT_HEADING_TOOLBAR_ITEMS: readonly MarkdownToolbarCommandItem[] = [
     {accessibilityLabel: 'Heading one', command: 'heading-one', label: 'H1'},
     {accessibilityLabel: 'Heading two', command: 'heading-two', label: 'H2'},
     {accessibilityLabel: 'Heading three', command: 'heading-three', label: 'H3'},
+] as const;
+
+const DEFAULT_EXPANDED_TOOLBAR = [
+    ...DEFAULT_COMPACT_TOOLBAR,
+    {accessibilityLabel: 'Strikethrough', command: 'strikethrough', label: 'S'},
+    {
+        accessibilityLabel: 'Insert heading',
+        items: DEFAULT_HEADING_TOOLBAR_ITEMS,
+        label: 'H',
+    },
     {accessibilityLabel: 'Quote', command: 'blockquote', label: 'Quote'},
     {accessibilityLabel: 'Inline code', command: 'inline-code', label: '</>'},
     {accessibilityLabel: 'Bullet list', command: 'bullet-list', label: 'List'},

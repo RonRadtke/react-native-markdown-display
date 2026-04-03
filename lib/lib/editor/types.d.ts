@@ -33,11 +33,17 @@ export interface MarkdownTextInputCommandPayload {
     table?: MarkdownTablePayload;
 }
 export type MarkdownCommandPayloadResolver = (command: MarkdownCommand) => MarkdownTextInputCommandPayload | Promise<MarkdownTextInputCommandPayload | null> | null;
-export interface MarkdownToolbarItem {
+interface MarkdownToolbarBaseItem {
     accessibilityLabel?: string;
-    command: MarkdownCommand;
     label: string;
 }
+export interface MarkdownToolbarCommandItem extends MarkdownToolbarBaseItem {
+    command: MarkdownCommand;
+}
+export interface MarkdownToolbarMenuItem extends MarkdownToolbarBaseItem {
+    items: readonly MarkdownToolbarCommandItem[];
+}
+export type MarkdownToolbarItem = MarkdownToolbarCommandItem | MarkdownToolbarMenuItem;
 export interface MarkdownTextInputProps extends Omit<TextInputProps, 'onChangeText' | 'onSelectionChange' | 'value'> {
     compactMaxHeight?: number;
     enableShortcuts?: boolean;
@@ -74,4 +80,5 @@ export interface MarkdownPreviewProps {
     style?: MarkdownStyleMap | null;
     value: string;
 }
+export {};
 //# sourceMappingURL=types.d.ts.map

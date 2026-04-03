@@ -132,4 +132,60 @@ describe('MarkdownTextInput', () => {
         expect(input.props.numberOfLines).toBe(3);
         expect(input.props.placeholder).toBe('Write here');
     });
+
+    test('keeps the caret after an auto-continued ordered list when value updates are delayed', () => {
+        jest.useFakeTimers();
+
+        function DelayedValueHarness(): React.JSX.Element {
+            const [value, setValue] = React.useState('1. TEST');
+
+            return (
+                <MarkdownTextInput
+                    multiline
+                    numberOfLines={1}
+                    onChangeText={(nextValue) => {
+                        setTimeout(() => {
+                            setValue(nextValue);
+                        }, 0);
+                    }}
+                    value={value}
+                />
+            );
+        }
+
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(<DelayedValueHarness/>);
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render delayed MarkdownTextInput harness');
+        }
+
+        const input = tree.root.findByType(TextInput);
+
+        renderer.act(() => {
+            input.props.onChangeText('1. TEST\n');
+        });
+
+        renderer.act(() => {
+            input.props.onSelectionChange({
+                nativeEvent: {
+                    selection: {start: 8, end: 8},
+                },
+            });
+        });
+
+        renderer.act(() => {
+            jest.runAllTimers();
+        });
+
+        const updatedInput = tree.root.findByType(TextInput);
+
+        expect(updatedInput.props.value).toBe('1. TEST\n2. ');
+        expect(updatedInput.props.selection).toEqual({start: 11, end: 11});
+
+        jest.useRealTimers();
+    });
 });

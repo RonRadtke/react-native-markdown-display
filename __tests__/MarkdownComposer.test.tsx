@@ -294,7 +294,46 @@ describe('MarkdownComposer', () => {
         expect(onChangeText).toHaveBeenCalledWith('1. first');
     });
 
-    test('applies heading one from the expanded toolbar', async () => {
+    test('shows heading options in an expanded toolbar submenu', () => {
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    initialMode="expanded"
+                    onChangeText={() => {}}
+                    value=""
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownComposer heading submenu');
+        }
+
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'H'),
+        ).toBe(true);
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'H3'),
+        ).toBe(false);
+
+        renderer.act(() => {
+            findPressableByLabel(tree, 'H').props.onPress();
+        });
+
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'H1'),
+        ).toBe(true);
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'H2'),
+        ).toBe(true);
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'H3'),
+        ).toBe(true);
+    });
+
+    test('applies heading one from the expanded toolbar submenu', async () => {
         const onChangeText = jest.fn();
         let tree: renderer.ReactTestRenderer | undefined;
 
@@ -314,33 +353,18 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
+            findPressableByLabel(tree, 'H').props.onPress();
+        });
+
+        await renderer.act(async () => {
             findPressableByLabel(tree, 'H1').props.onPress();
             await Promise.resolve();
         });
 
         expect(onChangeText).toHaveBeenCalledWith('# Title');
-    });
-
-    test('renders heading three in the expanded toolbar', () => {
-        let tree: renderer.ReactTestRenderer | undefined;
-
-        renderer.act(() => {
-            tree = renderer.create(
-                <MarkdownComposer
-                    initialMode="expanded"
-                    onChangeText={() => {}}
-                    value=""
-                />,
-            );
-        });
-
-        if (!tree) {
-            throw new Error('Failed to render MarkdownComposer heading three');
-        }
-
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'H3'),
-        ).toBe(true);
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'H1'),
+        ).toBe(false);
     });
 
     test('applies block quotes from the expanded toolbar', async () => {

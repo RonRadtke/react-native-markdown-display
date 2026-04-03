@@ -25,7 +25,9 @@ export type {
     MarkdownPreviewProps,
     MarkdownSelection,
     MarkdownTablePayload,
+    MarkdownToolbarCommandItem,
     MarkdownTextInputCommandPayload,
+    MarkdownToolbarMenuItem,
     MarkdownTextInputProps,
     MarkdownToolbarItem,
 } from './types';

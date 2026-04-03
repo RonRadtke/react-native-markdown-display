@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, View,} from 'react-native';
 
-import Markdown, {MarkdownComposer, type MarkdownStyleMap} from '../src';
+import Markdown, {MarkdownComposer, type MarkdownStyleMap, type MarkdownToolbarItem} from '../src';
 
 interface ChatMessage {
     author: 'demo' | 'you';
@@ -141,14 +141,20 @@ function App(): React.JSX.Element {
 
     const canSend = draft.trim().length > 0;
 
-    const composerToolbarItems = useMemo(
+    const composerToolbarItems = useMemo<readonly MarkdownToolbarItem[]>(
         () => [
             {command: 'bold' as const, label: 'B'},
             {command: 'italic' as const, label: 'I'},
             {command: 'strikethrough' as const, label: 'S'},
-            {command: 'heading-one' as const, label: 'H1'},
-            {command: 'heading-two' as const, label: 'H2'},
-            {command: 'heading-three' as const, label: 'H3'},
+            {
+                accessibilityLabel: 'Insert heading',
+                items: [
+                    {command: 'heading-one' as const, label: 'H1'},
+                    {command: 'heading-two' as const, label: 'H2'},
+                    {command: 'heading-three' as const, label: 'H3'},
+                ],
+                label: 'H',
+            },
             {command: 'link' as const, label: 'Link'},
             {command: 'blockquote' as const, label: 'Quote'},
             {command: 'inline-code' as const, label: '</>'},

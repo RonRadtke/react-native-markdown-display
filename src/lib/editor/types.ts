@@ -72,11 +72,22 @@ export type MarkdownCommandPayloadResolver = (
     | Promise<MarkdownTextInputCommandPayload | null>
     | null;
 
-export interface MarkdownToolbarItem {
+interface MarkdownToolbarBaseItem {
     accessibilityLabel?: string;
-    command: MarkdownCommand;
     label: string;
 }
+
+export interface MarkdownToolbarCommandItem extends MarkdownToolbarBaseItem {
+    command: MarkdownCommand;
+}
+
+export interface MarkdownToolbarMenuItem extends MarkdownToolbarBaseItem {
+    items: readonly MarkdownToolbarCommandItem[];
+}
+
+export type MarkdownToolbarItem =
+    | MarkdownToolbarCommandItem
+    | MarkdownToolbarMenuItem;
 
 export interface MarkdownTextInputProps extends Omit<
     TextInputProps,
