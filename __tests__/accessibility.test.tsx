@@ -3,6 +3,65 @@ import renderer, {type ReactTestRenderer} from 'react-test-renderer';
 
 import Markdown, {MarkdownComposer, MarkdownTextInput} from '../src';
 
+const COMPLEX_MARKDOWN_VALUE = [
+    '# Accessible title',
+    '',
+    'Paragraph with **bold**, _italic_, ~~strikethrough~~, `inline code`, and [Docs](https://example.com/docs).',
+    '',
+    '> Quoted text with a [reference](https://example.com/reference).',
+    '',
+    '- Bullet item one',
+    '- Bullet item two',
+    '',
+    '1. Ordered item one',
+    '2. Ordered item two',
+    '',
+    '| Feature | Status |',
+    '| --- | --- |',
+    '| Links | [Docs](https://example.com/table) |',
+    '| Code | `const value = 1;` |',
+    '',
+    '```',
+    'const answer = 42;',
+    '```',
+    '',
+    '[![Example image](https://example.com/image.png)](https://example.com/image-target)',
+].join('\n');
+
+const COMPLEX_EDITOR_VALUE = [
+    '## Draft response',
+    '',
+    'Review docs before sending.',
+    '',
+    '- Add examples',
+    '- Check quotes',
+    '',
+    '1. Confirm tables',
+    '2. Confirm code blocks',
+    '',
+    '| Item | Status |',
+    '| --- | --- |',
+    '| Accessibility | pending |',
+].join('\n');
+
+const getSelectionForSubstring = (
+    value: string,
+    substring: string,
+): {end: number; start: number} => {
+    const start = value.indexOf(substring);
+
+    if (start === -1) {
+        throw new Error(`Failed to find substring: ${substring}`);
+    }
+
+    return {
+        end: start + substring.length,
+        start,
+    };
+};
+
+const DOCS_SELECTION = getSelectionForSubstring(COMPLEX_EDITOR_VALUE, 'docs');
+
 const renderTree = (element: React.ReactElement): ReactTestRenderer => {
     let tree: ReactTestRenderer | undefined;
 
@@ -39,13 +98,9 @@ const findPressableByText = (
 };
 
 describe('accessibility', () => {
-    test('renders block links accessibly', () => {
+    test('renders complex markdown accessibly', () => {
         const tree = renderTree(
-            <Markdown>
-                {
-                    '[![Example image](https://example.com/image.png)](https://example.com)'
-                }
-            </Markdown>,
+            <Markdown>{COMPLEX_MARKDOWN_VALUE}</Markdown>,
         );
 
         expect(tree.root).toBeAccessible();
@@ -56,7 +111,7 @@ describe('accessibility', () => {
             <MarkdownTextInput
                 onChangeText={() => {}}
                 placeholder="Write a markdown message"
-                value="Hello **world**"
+                value={COMPLEX_EDITOR_VALUE}
             />,
         );
 
@@ -69,9 +124,13 @@ describe('accessibility', () => {
                 initialMode="expanded"
                 onChangeText={() => {}}
                 previewEnabled
-                value="# Accessible title"
+                value={COMPLEX_MARKDOWN_VALUE}
             />,
         );
+
+        renderer.act(() => {
+            findPressableByText(tree, 'Show preview').props.onPress();
+        });
 
         expect(tree.root).toBeAccessible();
     });
@@ -80,8 +139,8 @@ describe('accessibility', () => {
         const tree = renderTree(
             <MarkdownComposer
                 onChangeText={() => {}}
-                selection={{start: 0, end: 4}}
-                value="docs"
+                selection={DOCS_SELECTION}
+                value={COMPLEX_EDITOR_VALUE}
             />,
         );
 
