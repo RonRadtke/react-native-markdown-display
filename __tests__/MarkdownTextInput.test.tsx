@@ -159,6 +159,139 @@ describe('MarkdownTextInput', () => {
         expect(tree.root.findByProps({testID: 'bold-icon'})).toBeTruthy();
     });
 
+    test('applies custom wrap toolbar actions', () => {
+        jest.useFakeTimers();
+
+        function DelayedActionHarness(): React.JSX.Element {
+            const [value, setValue] = React.useState('');
+
+            return (
+                <MarkdownTextInput
+                    onChangeText={(nextValue) => {
+                        setTimeout(() => {
+                            setValue(nextValue);
+                        }, 0);
+                    }}
+                    toolbarItems={[
+                        {
+                            accessibilityLabel: 'Insert warning',
+                            action: {
+                                placeholder: 'Warning text',
+                                prefix: '::: warning\n',
+                                suffix: '\n:::',
+                                type: 'wrap',
+                            },
+                            label: 'Warn',
+                        },
+                    ]}
+                    value={value}
+                />
+            );
+        }
+
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <DelayedActionHarness/>,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownTextInput custom wrap action');
+        }
+
+        const button = tree.root.find(
+            (node) =>
+                typeof node.props.onPress === 'function' &&
+                node.findAllByType(Text).some(
+                    (textNode) => textNode.props.children === 'Warn',
+                ),
+        );
+
+        renderer.act(() => {
+            button.props.onPress();
+        });
+
+        renderer.act(() => {
+            jest.runAllTimers();
+        });
+
+        const input = tree.root.findByType(TextInput);
+
+        expect(input.props.value).toBe('::: warning\nWarning text\n:::');
+        expect(input.props.selection).toEqual({
+            end: 24,
+            start: 12,
+        });
+
+        jest.useRealTimers();
+    });
+
+    test('applies custom insert actions from toolbar menus', () => {
+        const onChangeText = jest.fn();
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownTextInput
+                    onChangeText={onChangeText}
+                    toolbarItems={[
+                        {
+                            accessibilityLabel: 'Insert block',
+                            items: [
+                                {
+                                    accessibilityLabel: 'Insert warning',
+                                    action: {
+                                        markdown: '::: warning\nWarning text\n:::',
+                                        selectionEndOffset: 24,
+                                        selectionStartOffset: 12,
+                                        type: 'insert',
+                                    },
+                                    label: 'Warn',
+                                },
+                            ],
+                            label: 'More',
+                        },
+                    ]}
+                    value=""
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownTextInput custom menu action');
+        }
+
+        const menuButton = tree.root.find(
+            (node) =>
+                typeof node.props.onPress === 'function' &&
+                node.findAllByType(Text).some(
+                    (textNode) => textNode.props.children === 'More',
+                ),
+        );
+
+        renderer.act(() => {
+            menuButton.props.onPress();
+        });
+
+        const actionButton = tree.root.find(
+            (node) =>
+                typeof node.props.onPress === 'function' &&
+                node.findAllByType(Text).some(
+                    (textNode) => textNode.props.children === 'Warn',
+                ),
+        );
+
+        renderer.act(() => {
+            actionButton.props.onPress();
+        });
+
+        expect(onChangeText).toHaveBeenCalledWith(
+            '::: warning\nWarning text\n:::',
+        );
+    });
+
     test('keeps the caret after an auto-continued ordered list when value updates are delayed', () => {
         jest.useFakeTimers();
 

@@ -199,6 +199,16 @@ function App(): React.JSX.Element {
             },
             {command: 'link' as const, label: 'Link'},
             {command: 'blockquote' as const, label: 'Quote'},
+            {
+                accessibilityLabel: 'Insert warning block',
+                action: {
+                    placeholder: 'Warning text',
+                    prefix: '::: warning\n',
+                    suffix: '\n:::',
+                    type: 'wrap',
+                },
+                label: 'Warn',
+            },
             {command: 'inline-code' as const, label: '</>'},
             {command: 'bullet-list' as const, label: 'List'},
             {command: 'ordered-list' as const, label: '1.'},

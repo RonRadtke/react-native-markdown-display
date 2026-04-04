@@ -1,4 +1,7 @@
 export {
+    applyToolbarAction,
+    applyToolbarInsertAction,
+    applyToolbarWrapAction,
     applyBlockFormat,
     applyInlineFormat,
     applyLinkFormat,
@@ -26,9 +29,14 @@ export type {
     MarkdownRenderOptions,
     MarkdownSelection,
     MarkdownTablePayload,
+    MarkdownToolbarAction,
+    MarkdownToolbarActionItem,
+    MarkdownToolbarButtonItem,
     MarkdownToolbarCommandItem,
+    MarkdownToolbarInsertAction,
     MarkdownTextInputCommandPayload,
     MarkdownToolbarMenuItem,
     MarkdownTextInputProps,
     MarkdownToolbarItem,
+    MarkdownToolbarWrapAction,
 } from './types';

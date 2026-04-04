@@ -131,7 +131,8 @@ Important composer behavior:
 Toolbar items accept either:
 
 - a command button
-- a single-level menu containing command buttons
+- a custom action button
+- a single-level menu containing command and custom action buttons
 
 The shared type is `MarkdownToolbarItem`.
 
@@ -157,6 +158,50 @@ Menu item shape:
         {command: 'heading-three', label: 'H3'},
     ],
 }
+```
+
+Custom action item shape:
+
+```tsx
+{
+    accessibilityLabel: 'Insert warning block',
+    action: {
+        type: 'wrap',
+        prefix: '::: warning\n',
+        suffix: '\n:::',
+        placeholder: 'Warning text',
+    },
+    label: 'Warn',
+}
+```
+
+Custom actions are declarative and support two forms:
+
+- `type: 'wrap'` to wrap the current selection or insert a placeholder between `prefix` and `suffix`
+- `type: 'insert'` to insert a markdown snippet directly, with optional caret offsets
+
+Example warning button:
+
+```tsx
+import React from 'react';
+import {
+    MarkdownComposer,
+    type MarkdownToolbarItem,
+} from '@ronradtke/react-native-markdown-display';
+
+const expandedToolbarItems: readonly MarkdownToolbarItem[] = [
+    {command: 'bold', label: 'B'},
+    {
+        accessibilityLabel: 'Insert warning block',
+        action: {
+            type: 'wrap',
+            prefix: '::: warning\n',
+            suffix: '\n:::',
+            placeholder: 'Warning text',
+        },
+        label: 'Warn',
+    },
+];
 ```
 
 ### Icon Labels

@@ -1,11 +1,11 @@
 import React, {useMemo, useRef, useState} from 'react';
 import {type NativeSyntheticEvent, Pressable, StyleSheet, Text, TextInput, type TextInputContentSizeChangeEventData, type TextInputSelectionChangeEventData, View,} from 'react-native';
 
-import {applyBlockFormat, applyInlineFormat, applyLinkFormat, applyTableFormat,} from './commands/formatMarkdown';
+import {applyBlockFormat, applyInlineFormat, applyLinkFormat, applyTableFormat, applyToolbarAction,} from './commands/formatMarkdown';
 import {applyMarkdownShortcut} from './utils/shortcuts';
 import {normalizeSelection} from './utils/selection';
 
-import type {MarkdownCommand, MarkdownCommandResult, MarkdownManagedTextInputProps, MarkdownTextInputCommandPayload, MarkdownTextInputProps, MarkdownToolbarCommandItem, MarkdownToolbarItem, MarkdownToolbarMenuItem,} from './types';
+import type {MarkdownCommand, MarkdownCommandResult, MarkdownManagedTextInputProps, MarkdownTextInputCommandPayload, MarkdownTextInputProps, MarkdownToolbarButtonItem, MarkdownToolbarCommandItem, MarkdownToolbarItem, MarkdownToolbarMenuItem,} from './types';
 
 const DEFAULT_TOOLBAR_ITEMS: readonly MarkdownToolbarCommandItem[] = [
     {accessibilityLabel: 'Bold', command: 'bold', label: 'B'},
@@ -36,11 +36,43 @@ const isToolbarMenuItem = (
     item: MarkdownToolbarItem,
 ): item is MarkdownToolbarMenuItem => 'items' in item;
 
+const isToolbarCommandItem = (
+    item: MarkdownToolbarButtonItem,
+): item is MarkdownToolbarCommandItem => 'command' in item;
+
 const getToolbarMenuAccessibilityLabel = (
     item: MarkdownToolbarMenuItem,
 ): string =>
     item.accessibilityLabel ??
-    (typeof item.label === 'string' ? `${item.label} menu` : 'Toolbar menu');
+    (typeof item.label === 'string' || typeof item.label === 'number'
+        ? `${item.label} menu`
+        : 'Toolbar menu');
+
+const getToolbarButtonAccessibilityLabel = (
+    item: MarkdownToolbarButtonItem,
+): string => {
+    if (item.accessibilityLabel) {
+        return item.accessibilityLabel;
+    }
+
+    if (isToolbarCommandItem(item)) {
+        return DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[item.command];
+    }
+
+    if (typeof item.label === 'string' || typeof item.label === 'number') {
+        return String(item.label);
+    }
+
+    return 'Toolbar action';
+};
+
+const getToolbarButtonKey = (
+    item: MarkdownToolbarButtonItem,
+    index: number,
+): string =>
+    isToolbarCommandItem(item)
+        ? `command:${item.command}:${index}`
+        : `action:${index}`;
 
 const renderToolbarLabel = (label: MarkdownToolbarItem['label']): React.ReactNode =>
     typeof label === 'string' || typeof label === 'number' ? (
@@ -158,6 +190,30 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             onCommand?.(payload, result);
         };
 
+        const handleToolbarButtonPress = async (
+            item: MarkdownToolbarButtonItem,
+        ): Promise<void> => {
+            if (isToolbarCommandItem(item)) {
+                await handleCommandPress(item.command);
+                return;
+            }
+
+            setOpenMenuIndex(null);
+
+            const result = applyToolbarAction(
+                value,
+                normalizedSelection,
+                item.action,
+            );
+
+            if (!selection) {
+                pendingSelectionValueRef.current = result.value;
+                setInternalSelection(result.selection);
+            }
+
+            onChangeText(result.value);
+        };
+
         const handleContentSizeChange = (
             event: NativeSyntheticEvent<TextInputContentSizeChangeEventData>,
         ): void => {
@@ -250,20 +306,18 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
                                         </Pressable>
                                         {isMenuOpen ? (
                                             <View style={styles.toolbarMenu}>
-                                                {item.items.map((menuItem) => (
+                                                {item.items.map((menuItem, menuItemIndex) => (
                                                     <Pressable
-                                                        accessibilityLabel={
-                                                            menuItem.accessibilityLabel ??
-                                                            DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[
-                                                            menuItem.command
-                                                            ]
-                                                        }
+                                                        accessibilityLabel={getToolbarButtonAccessibilityLabel(
+                                                            menuItem,
+                                                        )}
                                                         accessibilityRole="button"
-                                                        key={menuItem.command}
+                                                        key={getToolbarButtonKey(
+                                                            menuItem,
+                                                            menuItemIndex,
+                                                        )}
                                                         onPress={() => {
-                                                            handleCommandPress(
-                                                                menuItem.command,
-                                                            );
+                                                            handleToolbarButtonPress(menuItem);
                                                         }}
                                                         style={styles.toolbarMenuButton}
                                                     >
@@ -278,14 +332,13 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
 
                             return (
                                 <Pressable
-                                    accessibilityLabel={
-                                        item.accessibilityLabel ??
-                                        DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS[item.command]
-                                    }
+                                    accessibilityLabel={getToolbarButtonAccessibilityLabel(
+                                        item,
+                                    )}
                                     accessibilityRole="button"
-                                    key={item.command}
+                                    key={getToolbarButtonKey(item, index)}
                                     onPress={() => {
-                                        handleCommandPress(item.command);
+                                        handleToolbarButtonPress(item);
                                     }}
                                     style={styles.toolbarButton}
                                 >

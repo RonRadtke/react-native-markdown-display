@@ -1,4 +1,4 @@
-import type {MarkdownBlockFormat, MarkdownCommandResult, MarkdownInlineFormat, MarkdownLinkPayload, MarkdownSelection, MarkdownTablePayload,} from '../types';
+import type {MarkdownBlockFormat, MarkdownCommandResult, MarkdownInlineFormat, MarkdownLinkPayload, MarkdownSelection, MarkdownTablePayload, MarkdownToolbarAction, MarkdownToolbarInsertAction, MarkdownToolbarWrapAction,} from '../types';
 import {normalizeSelection} from '../utils/selection';
 
 const INLINE_MARKERS: Record<MarkdownInlineFormat, string> = {
@@ -42,6 +42,16 @@ const replaceSelection = (
         start: normalizedSelection.start + selectionStartOffset,
         end: normalizedSelection.start + selectionEndOffset,
     });
+};
+
+const normalizeOffset = (
+    value: number | undefined,
+    fallbackValue: number,
+    maxValue: number,
+): number => {
+    const nextValue = value ?? fallbackValue;
+
+    return Math.min(Math.max(nextValue, 0), maxValue);
 };
 
 const isWrappedWithMarker = (
@@ -202,4 +212,74 @@ export const applyTableFormat = (
     const table = createMarkdownTable(payload);
 
     return replaceSelection(value, selection, table);
+};
+
+export const applyToolbarInsertAction = (
+    value: string,
+    selection: MarkdownSelection | undefined,
+    action: MarkdownToolbarInsertAction,
+): MarkdownCommandResult => {
+    const selectionStartOffset = normalizeOffset(
+        action.selectionStartOffset,
+        action.markdown.length,
+        action.markdown.length,
+    );
+    const selectionEndOffset = normalizeOffset(
+        action.selectionEndOffset,
+        selectionStartOffset,
+        action.markdown.length,
+    );
+
+    return replaceSelection(
+        value,
+        selection,
+        action.markdown,
+        selectionStartOffset,
+        selectionEndOffset,
+    );
+};
+
+export const applyToolbarWrapAction = (
+    value: string,
+    selection: MarkdownSelection | undefined,
+    action: MarkdownToolbarWrapAction,
+): MarkdownCommandResult => {
+    const normalizedSelection = normalizeSelection(value, selection);
+    const selectedText = value.slice(
+        normalizedSelection.start,
+        normalizedSelection.end,
+    );
+    const replacementText =
+        selectedText.length > 0
+            ? selectedText
+            : (action.placeholder ?? 'text');
+    const suffix = action.suffix ?? action.prefix;
+    const replacement = `${action.prefix}${replacementText}${suffix}`;
+
+    return replaceSelection(
+        value,
+        normalizedSelection,
+        replacement,
+        action.prefix.length,
+        action.prefix.length + replacementText.length,
+    );
+};
+
+export const applyToolbarAction = (
+    value: string,
+    selection: MarkdownSelection | undefined,
+    action: MarkdownToolbarAction,
+): MarkdownCommandResult => {
+    switch (action.type) {
+        case 'insert':
+            return applyToolbarInsertAction(value, selection, action);
+        case 'wrap':
+            return applyToolbarWrapAction(value, selection, action);
+        default: {
+            const exhaustiveCheck: never = action;
+            throw new Error(
+                `Unsupported toolbar action: ${String(exhaustiveCheck)}`,
+            );
+        }
+    }
 };

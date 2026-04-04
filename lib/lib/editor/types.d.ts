@@ -41,10 +41,27 @@ interface MarkdownToolbarBaseItem {
 export interface MarkdownToolbarCommandItem extends MarkdownToolbarBaseItem {
     command: MarkdownCommand;
 }
-export interface MarkdownToolbarMenuItem extends MarkdownToolbarBaseItem {
-    items: readonly MarkdownToolbarCommandItem[];
+export interface MarkdownToolbarInsertAction {
+    markdown: string;
+    selectionEndOffset?: number;
+    selectionStartOffset?: number;
+    type: 'insert';
 }
-export type MarkdownToolbarItem = MarkdownToolbarCommandItem | MarkdownToolbarMenuItem;
+export interface MarkdownToolbarWrapAction {
+    placeholder?: string;
+    prefix: string;
+    suffix?: string;
+    type: 'wrap';
+}
+export type MarkdownToolbarAction = MarkdownToolbarInsertAction | MarkdownToolbarWrapAction;
+export interface MarkdownToolbarActionItem extends MarkdownToolbarBaseItem {
+    action: MarkdownToolbarAction;
+}
+export type MarkdownToolbarButtonItem = MarkdownToolbarActionItem | MarkdownToolbarCommandItem;
+export interface MarkdownToolbarMenuItem extends MarkdownToolbarBaseItem {
+    items: readonly MarkdownToolbarButtonItem[];
+}
+export type MarkdownToolbarItem = MarkdownToolbarButtonItem | MarkdownToolbarMenuItem;
 export interface MarkdownRenderOptions {
     allowedImageHandlers?: string[];
     debugPrintTree?: boolean;

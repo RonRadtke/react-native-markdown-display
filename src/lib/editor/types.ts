@@ -82,12 +82,38 @@ export interface MarkdownToolbarCommandItem extends MarkdownToolbarBaseItem {
     command: MarkdownCommand;
 }
 
+export interface MarkdownToolbarInsertAction {
+    markdown: string;
+    selectionEndOffset?: number;
+    selectionStartOffset?: number;
+    type: 'insert';
+}
+
+export interface MarkdownToolbarWrapAction {
+    placeholder?: string;
+    prefix: string;
+    suffix?: string;
+    type: 'wrap';
+}
+
+export type MarkdownToolbarAction =
+    | MarkdownToolbarInsertAction
+    | MarkdownToolbarWrapAction;
+
+export interface MarkdownToolbarActionItem extends MarkdownToolbarBaseItem {
+    action: MarkdownToolbarAction;
+}
+
+export type MarkdownToolbarButtonItem =
+    | MarkdownToolbarActionItem
+    | MarkdownToolbarCommandItem;
+
 export interface MarkdownToolbarMenuItem extends MarkdownToolbarBaseItem {
-    items: readonly MarkdownToolbarCommandItem[];
+    items: readonly MarkdownToolbarButtonItem[];
 }
 
 export type MarkdownToolbarItem =
-    | MarkdownToolbarCommandItem
+    | MarkdownToolbarButtonItem
     | MarkdownToolbarMenuItem;
 
 export interface MarkdownRenderOptions {
