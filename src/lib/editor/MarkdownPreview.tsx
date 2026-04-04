@@ -5,53 +5,72 @@ import {StyleSheet, Text, View} from 'react-native';
 import {getRenderer} from '../view/createRenderer';
 import parser from '../view/parser';
 
-import type {MarkdownParser} from '../view/types';
 import type {MarkdownPreviewProps} from './types';
 
 const MarkdownPreview = React.memo(function MarkdownPreview({
+                                                                allowedImageHandlers = [
+                                                                    'data:image/png;base64',
+                                                                    'data:image/gif;base64',
+                                                                    'data:image/jpeg;base64',
+                                                                    'https://',
+                                                                    'http://',
+                                                                ],
+                                                                debugPrintTree = false,
+                                                                defaultImageHandler = 'https://',
                                                                 emptyState = 'Nothing to preview yet.',
                                                                 label = 'Preview',
+                                                                markdownit = MarkdownIt({
+                                                                    typographer: true,
+                                                                }),
+                                                                maxTopLevelChildren = null,
+                                                                mergeStyle = true,
+                                                                onLinkPress,
                                                                 previewContainerStyle,
+                                                                renderer = null,
+                                                                rules = null,
                                                                 style = null,
+                                                                textcomponent = Text,
+                                                                topLevelMaxExceededItem =
+                                                                <Text key="dotdotdot">...</Text>,
                                                                 value,
                                                             }: MarkdownPreviewProps) {
-    const renderer = useMemo(
+    const memoizedRenderer = useMemo(
         () =>
             getRenderer(
-                Text,
-                null,
-                null,
+                textcomponent,
+                renderer,
+                rules,
                 style,
-                true,
-                undefined,
-                null,
-                <Text key="dotdotdot">...</Text>,
-                [
-                    'data:image/png;base64',
-                    'data:image/gif;base64',
-                    'data:image/jpeg;base64',
-                    'https://',
-                    'http://',
-                ],
-                'https://',
-                false,
+                mergeStyle,
+                onLinkPress,
+                maxTopLevelChildren,
+                topLevelMaxExceededItem,
+                allowedImageHandlers,
+                defaultImageHandler,
+                debugPrintTree,
             ),
-        [style],
+        [
+            allowedImageHandlers,
+            debugPrintTree,
+            defaultImageHandler,
+            maxTopLevelChildren,
+            mergeStyle,
+            onLinkPress,
+            renderer,
+            rules,
+            style,
+            textcomponent,
+            topLevelMaxExceededItem,
+        ],
     );
 
-    const markdownit = useMemo<MarkdownParser>(
-        () =>
-            MarkdownIt({
-                typographer: true,
-            }),
-        [],
-    );
+    const memoizedParser = useMemo(() => markdownit, [markdownit]);
 
     return (
         <View style={[styles.container, previewContainerStyle]}>
             <Text style={styles.label}>{label}</Text>
             {value.trim().length > 0 ? (
-                parser(value, renderer.render, markdownit)
+                parser(value, memoizedRenderer.render, memoizedParser)
             ) : (
                 <Text style={styles.emptyState}>{emptyState}</Text>
             )}

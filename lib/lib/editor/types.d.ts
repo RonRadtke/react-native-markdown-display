@@ -1,6 +1,7 @@
 import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import type { NativeSyntheticEvent, StyleProp, TextInput, TextInputProps, TextInputSelectionChangeEventData, TextStyle, ViewStyle } from 'react-native';
-import type { MarkdownStyleMap } from '../view/types';
+import type AstRenderer from '../view/AstRenderer';
+import type { MarkdownParser, MarkdownStyleMap, OnLinkPress, RenderRules, TextComponent } from '../view/types';
 export interface MarkdownSelection {
     start: number;
     end: number;
@@ -44,6 +45,20 @@ export interface MarkdownToolbarMenuItem extends MarkdownToolbarBaseItem {
     items: readonly MarkdownToolbarCommandItem[];
 }
 export type MarkdownToolbarItem = MarkdownToolbarCommandItem | MarkdownToolbarMenuItem;
+export interface MarkdownRenderOptions {
+    allowedImageHandlers?: string[];
+    debugPrintTree?: boolean;
+    defaultImageHandler?: string | null;
+    markdownit?: MarkdownParser;
+    maxTopLevelChildren?: number | null;
+    mergeStyle?: boolean;
+    onLinkPress?: OnLinkPress;
+    renderer?: AstRenderer | null;
+    rules?: RenderRules | null;
+    style?: MarkdownStyleMap | null;
+    textcomponent?: TextComponent;
+    topLevelMaxExceededItem?: ReactNode;
+}
 export interface MarkdownTextInputProps extends Omit<TextInputProps, 'onChangeText' | 'onSelectionChange' | 'value'> {
     compactMaxHeight?: number;
     enableShortcuts?: boolean;
@@ -67,6 +82,7 @@ export interface MarkdownComposerProps extends Omit<MarkdownTextInputProps, 'mul
     previewEnabled?: boolean;
     previewEmptyState?: string;
     previewLabel?: ReactNode;
+    previewProps?: Omit<MarkdownPreviewProps, 'value'>;
     previewToggleLabels?: {
         hide: ReactNode;
         show: ReactNode;
@@ -74,11 +90,10 @@ export interface MarkdownComposerProps extends Omit<MarkdownTextInputProps, 'mul
     renderExpandButtonLabel?: (mode: MarkdownComposerMode) => ReactNode;
     textInputStyle?: StyleProp<TextStyle>;
 }
-export interface MarkdownPreviewProps {
+export interface MarkdownPreviewProps extends MarkdownRenderOptions {
     emptyState?: string;
     label?: ReactNode;
     previewContainerStyle?: StyleProp<ViewStyle>;
-    style?: MarkdownStyleMap | null;
     value: string;
 }
 export {};

@@ -4,6 +4,7 @@
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
+import {Text} from 'react-native';
 import App, {usesStructuredBubbleLayout} from '../App';
 
 test('renders correctly', async () => {
@@ -11,6 +12,22 @@ test('renders correctly', async () => {
         ReactTestRenderer.create(
             <App/>);
     });
+});
+
+test('renders warning blocks from the example plugin setup', async () => {
+    let tree: ReactTestRenderer.ReactTestRenderer | undefined;
+
+    await ReactTestRenderer.act(() => {
+        tree = ReactTestRenderer.create(<App/>);
+    });
+
+    if (!tree) {
+        throw new Error('Failed to render example app');
+    }
+
+    expect(
+        tree.root.findAllByType(Text).some((node) => node.props.children === 'Warning'),
+    ).toBe(true);
 });
 
 test('uses wide bubble layout for pure list and table messages', () => {

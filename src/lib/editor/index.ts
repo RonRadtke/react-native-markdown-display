@@ -23,6 +23,7 @@ export type {
     MarkdownLinkPayload,
     MarkdownManagedTextInputProps,
     MarkdownPreviewProps,
+    MarkdownRenderOptions,
     MarkdownSelection,
     MarkdownTablePayload,
     MarkdownToolbarCommandItem,

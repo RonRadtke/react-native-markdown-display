@@ -1,3 +1,4 @@
+import MarkdownIt from 'markdown-it';
 import React from 'react';
 import renderer from 'react-test-renderer';
 import {Text, TextInput} from 'react-native';
@@ -88,6 +89,56 @@ describe('MarkdownComposer', () => {
         expect(
             tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
         ).toBe(false);
+    });
+
+    test('uses previewProps markdownit for expanded preview rendering', () => {
+        const markdownit = MarkdownIt({typographer: true});
+
+        markdownit.core.ruler.push('replace-plugin-target', (state) => {
+            state.tokens.forEach((token) => {
+                if (token.type !== 'inline') {
+                    return;
+                }
+
+                token.content = token.content.replace(/plugin target/g, 'plugin output');
+                token.children?.forEach((childToken) => {
+                    if (childToken.type === 'text') {
+                        childToken.content = childToken.content.replace(
+                            /plugin target/g,
+                            'plugin output',
+                        );
+                    }
+                });
+            });
+        });
+
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    initialMode="expanded"
+                    onChangeText={() => {}}
+                    previewEnabled
+                    previewProps={{markdownit}}
+                    value="plugin target"
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownComposer plugin preview');
+        }
+
+        renderer.act(() => {
+            findPressableByLabel(tree, 'Show preview').props.onPress();
+        });
+
+        expect(
+            tree.root.findAllByType(Text).some(
+                (node) => node.props.children === 'plugin output',
+            ),
+        ).toBe(true);
     });
 
     test('uses the minimized toolbar items prop in compact mode', () => {

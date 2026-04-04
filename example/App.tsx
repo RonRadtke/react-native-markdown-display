@@ -1,7 +1,8 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, View,} from 'react-native';
+import markdownItContainer from 'markdown-it-container';
 
-import Markdown, {MarkdownComposer, type MarkdownStyleMap, type MarkdownToolbarItem} from '../src';
+import Markdown, {MarkdownComposer, MarkdownIt, type MarkdownStyleMap, type MarkdownToolbarItem, type RenderRules} from '../src';
 
 interface ChatMessage {
     author: 'demo' | 'you';
@@ -23,10 +24,28 @@ const INITIAL_MESSAGES: ChatMessage[] = [
         author: 'demo',
         id: 'message-2',
         markdown:
-            'Try `**bold**`, `_italic_`, lists, tables, links, or expand the input for preview.\n\n- Native input\n- Expandable composer\n- Markdown render on send',
+            'Try `**bold**`, `_italic_`, lists, tables, links, warning blocks, or expand the input for preview.\n\n- Native input\n- Expandable composer\n- Markdown render on send',
+    },
+    {
+        author: 'demo',
+        id: 'message-3',
+        markdown:
+            '::: warning\nThis warning block is rendered through `markdown-it-container` in both the chat bubbles and the composer preview.\n:::',
     },
 ];
 const isTestEnvironment = typeof jest !== 'undefined';
+const warningMarkdownIt = MarkdownIt({typographer: true}).use(
+    markdownItContainer,
+    'warning',
+);
+const warningRules: RenderRules = {
+    container_warning: (node, children, _parent, styles) => (
+        <View key={node.key} style={styles.container_warning}>
+            <Text style={styles.container_warning_title}>Warning</Text>
+            <View style={styles.container_warning_content}>{children}</View>
+        </View>
+    ),
+};
 
 const createMessageId = (value: number): string => `message-${value}`;
 
@@ -62,6 +81,28 @@ const getMarkdownStyles = (isOwnMessage: boolean): MarkdownStyleMap => ({
         backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.16)' : '#EFF4F8',
         borderColor: isOwnMessage ? 'rgba(255,255,255,0.22)' : '#CCD6E0',
         color: isOwnMessage ? '#F8FBFF' : '#16202A',
+    },
+    container_warning: {
+        backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.12)' : '#FFF4E5',
+        borderColor: isOwnMessage ? 'rgba(255,255,255,0.34)' : '#F5B041',
+        borderLeftWidth: 4,
+        borderRadius: 12,
+        borderWidth: 1,
+        marginBottom: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        width: '100%',
+    },
+    container_warning_content: {
+        width: '100%',
+    },
+    container_warning_title: {
+        color: isOwnMessage ? '#FFFFFF' : '#8A3B12',
+        fontSize: 12,
+        fontWeight: '800',
+        letterSpacing: 0.6,
+        marginBottom: 6,
+        textTransform: 'uppercase',
     },
     fence: {
         backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.16)' : '#EFF4F8',
@@ -126,6 +167,7 @@ function App(): React.JSX.Element {
     const messageCountRef = useRef(INITIAL_MESSAGES.length + 1);
     const [draft, setDraft] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
+    const composerPreviewStyle = useMemo(() => getMarkdownStyles(false), []);
 
     useEffect(() => {
         if (isTestEnvironment) {
@@ -204,7 +246,11 @@ function App(): React.JSX.Element {
                     <Text style={styles.messageAuthor}>
                         {isOwnMessage ? 'You' : 'Demo'}
                     </Text>
-                    <Markdown style={getMarkdownStyles(isOwnMessage)}>
+                    <Markdown
+                        markdownit={warningMarkdownIt}
+                        rules={warningRules}
+                        style={getMarkdownStyles(isOwnMessage)}
+                    >
                         {item.markdown}
                     </Markdown>
                 </View>
@@ -248,6 +294,11 @@ function App(): React.JSX.Element {
                                 placeholder="Write a markdown message..."
                                 previewEnabled
                                 previewLabel="Message preview"
+                                previewProps={{
+                                    markdownit: warningMarkdownIt,
+                                    rules: warningRules,
+                                    style: composerPreviewStyle,
+                                }}
                                 previewToggleLabels={{
                                     hide: 'Hide message preview',
                                     show: 'Show message preview',

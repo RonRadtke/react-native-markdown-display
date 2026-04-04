@@ -122,6 +122,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
             previewEnabled = false,
             previewEmptyState,
             previewLabel,
+            previewProps,
             previewToggleLabels = DEFAULT_PREVIEW_TOGGLE_LABELS,
             resolveCommandPayload,
             renderExpandButtonLabel,
@@ -420,6 +421,7 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
                 </View>
                 {previewEnabled && mode === 'expanded' && isPreviewVisible ? (
                     <MarkdownPreview
+                        {...previewProps}
                         {...(previewEmptyState ? {emptyState: previewEmptyState} : {})}
                         {...(previewLabel ? {label: previewLabel} : {})}
                         value={value}

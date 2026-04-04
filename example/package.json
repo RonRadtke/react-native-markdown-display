@@ -10,6 +10,7 @@
         "test": "jest"
     },
     "dependencies": {
+        "markdown-it-container": "^4.0.0",
         "react": "19.2.3",
         "react-native": "0.84.1"
     },
@@ -25,6 +26,7 @@
         "@react-native/metro-config": "0.84.1",
         "@react-native/typescript-config": "0.84.1",
         "@types/jest": "^29.5.13",
+        "@types/markdown-it-container": "^4.0.0",
         "@types/react": "^19.2.0",
         "@types/react-test-renderer": "^19.1.0",
         "eslint": "^8.19.0",
