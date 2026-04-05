@@ -38,6 +38,9 @@ export const styles: MarkdownStyleSheet = {
     em: {
         fontStyle: 'italic',
     },
+    ins: {
+        textDecorationLine: 'underline',
+    },
     s: {
         textDecorationLine: 'line-through',
     },

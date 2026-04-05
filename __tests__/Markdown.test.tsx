@@ -1,8 +1,8 @@
 import React from 'react';
 import renderer, {type ReactTestRenderer} from 'react-test-renderer';
-import {Linking} from 'react-native';
+import {Linking, StyleSheet, Text} from 'react-native';
 
-import Markdown from '../src';
+import Markdown, {createMarkdownIt} from '../src';
 
 const renderMarkdown = (
     props: React.ComponentProps<typeof Markdown>,
@@ -63,5 +63,31 @@ describe('Markdown component', () => {
 
         expect(json).not.toBeNull();
         expect(JSON.stringify(json)).toContain('...');
+    });
+
+    test('does not enable underline syntax in the default parser configuration', () => {
+        const tree = renderMarkdown({}, '++underlined++');
+
+        expect(
+            tree.root.findAllByType(Text).some((node) => node.props.children === 'underlined'),
+        ).toBe(false);
+    });
+
+    test('renders underline syntax when the shipped underline plugin is activated', () => {
+        const tree = renderMarkdown(
+            {markdownit: createMarkdownIt({underline: true})},
+            '++underlined++',
+        );
+        const underlinedText = tree.root.findAllByType(Text).find(
+            (node) => node.props.children === 'underlined',
+        );
+
+        if (!underlinedText) {
+            throw new Error('Failed to find underlined text node');
+        }
+
+        expect(StyleSheet.flatten(underlinedText.props.style)).toMatchObject({
+            textDecorationLine: 'underline',
+        });
     });
 });

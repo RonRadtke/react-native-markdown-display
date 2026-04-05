@@ -15,8 +15,22 @@ describe('editor command utilities', () => {
         });
     });
 
+    test('wraps selected text with underline markers', () => {
+        expect(applyInlineFormat('hello world', {start: 6, end: 11}, 'underline')).toEqual({
+            value: 'hello ++world++',
+            selection: {start: 8, end: 13},
+        });
+    });
+
     test('unwraps text when the selection is already inside inline markers', () => {
         expect(applyInlineFormat('hello **world**', {start: 8, end: 13}, 'bold')).toEqual({
+            value: 'hello world',
+            selection: {start: 6, end: 11},
+        });
+    });
+
+    test('unwraps text when the selection is already inside underline markers', () => {
+        expect(applyInlineFormat('hello ++world++', {start: 8, end: 13}, 'underline')).toEqual({
             value: 'hello world',
             selection: {start: 6, end: 11},
         });

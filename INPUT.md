@@ -51,6 +51,7 @@ Inline commands:
 
 - `bold`
 - `italic`
+- `underline`
 - `strikethrough`
 - `inline-code`
 
@@ -97,6 +98,8 @@ The default `MarkdownTextInput` toolbar contains:
 - italic
 - inline code
 
+Underline is available as a shipped opt-in plugin and command, but it is not shown in the default toolbar.
+
 ## Basic `MarkdownComposer`
 
 ```tsx
@@ -125,6 +128,7 @@ Important composer behavior:
 - expanded mode uses a taller input
 - if `previewEnabled` is `true`, the preview toggle is shown in expanded mode
 - preview is hidden by default until the user taps `Show preview`
+- underline uses `++text++` syntax when you activate the shipped underline plugin
 
 ## Toolbar Items
 
@@ -272,6 +276,48 @@ If the active toolbar item list is empty, the toolbar row is hidden.
 Viewer plugin support already works through `<Markdown markdownit={...} />`.
 For input, composer preview can now use the same parser and renderer configuration through `previewProps`.
 
+## Built-In Underline Plugin
+
+Underline support is shipped with the package, but it is opt-in.
+
+To activate it:
+
+1. Create a parser with `createMarkdownIt({underline: true})`
+2. Pass that parser into `previewProps.markdownit`
+3. Add an underline toolbar item yourself if you want an editor button
+
+Example:
+
+```tsx
+import React from 'react';
+import {
+    createMarkdownIt,
+    MarkdownComposer,
+    type MarkdownToolbarItem,
+} from '@ronradtke/react-native-markdown-display';
+
+const markdownit = createMarkdownIt({underline: true});
+
+const expandedToolbarItems: readonly MarkdownToolbarItem[] = [
+    {command: 'bold', label: 'B'},
+    {command: 'underline', label: 'U'},
+];
+
+export default function Example(): React.JSX.Element {
+    const [value, setValue] = React.useState('++underlined++');
+
+    return (
+        <MarkdownComposer
+            expandedToolbarItems={expandedToolbarItems}
+            onChangeText={setValue}
+            previewEnabled
+            previewProps={{markdownit}}
+            value={value}
+        />
+    );
+}
+```
+
 Example with an emoji plugin:
 
 ### 1. Install the plugin
@@ -290,9 +336,9 @@ yarn add markdown-it-emoji
 
 ```tsx
 import markdownItEmoji from 'markdown-it-emoji';
-import {MarkdownIt} from '@ronradtke/react-native-markdown-display';
+import {createMarkdownIt} from '@ronradtke/react-native-markdown-display';
 
-const markdownit = MarkdownIt({typographer: true}).use(markdownItEmoji);
+const markdownit = createMarkdownIt().use(markdownItEmoji);
 ```
 
 ### 3. Pass it into composer preview
@@ -301,11 +347,11 @@ const markdownit = MarkdownIt({typographer: true}).use(markdownItEmoji);
 import React from 'react';
 import markdownItEmoji from 'markdown-it-emoji';
 import {
+    createMarkdownIt,
     MarkdownComposer,
-    MarkdownIt,
 } from '@ronradtke/react-native-markdown-display';
 
-const markdownit = MarkdownIt({typographer: true}).use(markdownItEmoji);
+const markdownit = createMarkdownIt().use(markdownItEmoji);
 
 export default function Example(): React.JSX.Element {
     const [value, setValue] = React.useState('Hello :wave:');
@@ -487,7 +533,7 @@ Composer-specific props:
 | `emptyState` | `'Nothing to preview yet.'` | Empty preview copy |
 | `style` | `null` | Viewer style overrides for the preview content |
 | `previewContainerStyle` | `undefined` | Style for the preview card container |
-| `markdownit` | `MarkdownIt({ typographer: true })` | Custom parser instance used for preview rendering |
+| `markdownit` | `createMarkdownIt()` | Custom parser instance used for preview rendering; opt-in features like underline must be enabled on that instance |
 | `rules` | default viewer rules | Custom render rules for preview |
 | `renderer` | internal renderer | Custom renderer instance for preview |
 | `mergeStyle` | `true` | Merge preview styles with defaults instead of replacing them |

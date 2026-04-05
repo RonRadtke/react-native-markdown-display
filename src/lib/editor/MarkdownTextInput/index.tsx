@@ -1,11 +1,12 @@
 import React, {useMemo, useRef, useState} from 'react';
-import {type NativeSyntheticEvent, Pressable, StyleSheet, Text, TextInput, type TextInputContentSizeChangeEventData, type TextInputSelectionChangeEventData, View,} from 'react-native';
+import {type NativeSyntheticEvent, Pressable, Text, TextInput, type TextInputContentSizeChangeEventData, type TextInputSelectionChangeEventData, View,} from 'react-native';
 
-import {applyBlockFormat, applyInlineFormat, applyLinkFormat, applyTableFormat, applyToolbarAction,} from './commands/formatMarkdown';
-import {applyMarkdownShortcut} from './utils/shortcuts';
-import {normalizeSelection} from './utils/selection';
+import {applyBlockFormat, applyInlineFormat, applyLinkFormat, applyTableFormat, applyToolbarAction,} from '../commands/formatMarkdown';
+import styles from './style';
+import {applyMarkdownShortcut} from '../utils/shortcuts';
+import {normalizeSelection} from '../utils/selection';
 
-import type {MarkdownCommand, MarkdownCommandResult, MarkdownManagedTextInputProps, MarkdownTextInputCommandPayload, MarkdownTextInputProps, MarkdownToolbarButtonItem, MarkdownToolbarCommandItem, MarkdownToolbarItem, MarkdownToolbarMenuItem,} from './types';
+import type {MarkdownCommand, MarkdownCommandResult, MarkdownManagedTextInputProps, MarkdownTextInputCommandPayload, MarkdownTextInputProps, MarkdownToolbarButtonItem, MarkdownToolbarCommandItem, MarkdownToolbarItem, MarkdownToolbarMenuItem,} from '../types';
 
 const DEFAULT_TOOLBAR_ITEMS: readonly MarkdownToolbarCommandItem[] = [
     {accessibilityLabel: 'Bold', command: 'bold', label: 'B'},
@@ -19,6 +20,7 @@ const DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS: Record<
 > = {
     bold: 'Bold',
     italic: 'Italic',
+    underline: 'Underline',
     strikethrough: 'Strikethrough',
     'inline-code': 'Inline code',
     'heading-one': 'Heading one',
@@ -89,6 +91,7 @@ const executeCommand = (
     switch (payload.command) {
         case 'bold':
         case 'italic':
+        case 'underline':
         case 'strikethrough':
         case 'inline-code':
             return applyInlineFormat(value, selection, payload.command);
@@ -357,71 +360,6 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
         );
     },
 );
-
-const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-    },
-    input: {
-        borderColor: '#C7CCD1',
-        borderRadius: 8,
-        borderWidth: 1,
-        minHeight: 44,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-    },
-    toolbar: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-        marginBottom: 8,
-    },
-    toolbarButton: {
-        alignItems: 'center',
-        borderColor: '#C7CCD1',
-        borderRadius: 6,
-        borderWidth: 1,
-        justifyContent: 'center',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-    },
-    toolbarButtonActive: {
-        backgroundColor: '#EFF4F8',
-        borderColor: '#0A66C2',
-    },
-    toolbarButtonContent: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    toolbarButtonText: {
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    toolbarMenu: {
-        backgroundColor: '#FFFFFF',
-        borderColor: '#C7CCD1',
-        borderRadius: 8,
-        borderWidth: 1,
-        elevation: 3,
-        gap: 6,
-        left: 0,
-        minWidth: 64,
-        padding: 6,
-        position: 'absolute',
-        top: 38,
-        zIndex: 1,
-    },
-    toolbarMenuButton: {
-        alignItems: 'center',
-        borderRadius: 6,
-        justifyContent: 'center',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-    },
-    toolbarMenuContainer: {
-        position: 'relative',
-    },
-});
 
 MarkdownTextInput.displayName = 'MarkdownTextInput';
 

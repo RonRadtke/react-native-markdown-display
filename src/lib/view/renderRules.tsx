@@ -123,6 +123,11 @@ const renderRules = (Text: TextComponent): RenderRules => ({
             {children}
         </Text>
     ),
+    ins: (node, children, _parent, styles) => (
+        <Text key={node.key} style={styles.ins}>
+            {children}
+        </Text>
+    ),
     s: (node, children, _parent, styles) => (
         <Text key={node.key} style={styles.s}>
             {children}

@@ -84,5 +84,7 @@ export default function App(): React.JSX.Element {
 
 The viewer and input components are documented separately:
 
-- Use [VIEWER.md](VIEWER.md) for rendering, styling, rules, `MarkdownIt`, and preprocessing.
+- Use [VIEWER.md](VIEWER.md) for rendering, styling, rules, `MarkdownIt`, `createMarkdownIt`, and preprocessing.
 - Use [INPUT.md](INPUT.md) for `MarkdownTextInput`, `MarkdownComposer`, toolbars, prompts, shortcuts, and custom inputs.
+
+Underline is shipped as an opt-in built-in plugin. See [VIEWER.md](VIEWER.md) and [INPUT.md](INPUT.md) for activation with `createMarkdownIt({underline: true})`.

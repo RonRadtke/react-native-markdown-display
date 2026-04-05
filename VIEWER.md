@@ -1,6 +1,6 @@
 # Viewer Guide
 
-This guide covers the rendering side of the library: `<Markdown>`, custom rules, custom styles, `MarkdownIt`, and AST preprocessing.
+This guide covers the rendering side of the library: `<Markdown>`, custom rules, custom styles, `MarkdownIt`, `createMarkdownIt`, and AST preprocessing.
 
 ## Overview
 
@@ -58,7 +58,7 @@ Less common props:
 | Prop | Default | Description |
 | --- | --- | --- |
 | `renderer` | internal `AstRenderer` | Supply your own renderer instance |
-| `markdownit` | `MarkdownIt({ typographer: true })` | Custom `markdown-it` instance |
+| `markdownit` | `createMarkdownIt()` | Custom `markdown-it` instance |
 | `textcomponent` | `Text` | Replace the base text component |
 | `maxTopLevelChildren` | `null` | Cap the number of top-level rendered nodes |
 | `topLevelMaxExceededItem` | `<Text key="dotdotdot">...</Text>` | Rendered when `maxTopLevelChildren` is exceeded |
@@ -67,7 +67,7 @@ Less common props:
 
 ## Supported Markdown
 
-Out of the box, the renderer supports the markdown produced by the current `markdown-it` configuration used in this package, including:
+Out of the box, the renderer supports the markdown produced by the default `createMarkdownIt()` configuration used in this package, including:
 
 - headings
 - horizontal rules
@@ -81,6 +81,8 @@ Out of the box, the renderer supports the markdown produced by the current `mark
 - typographer replacements from `markdown-it`
 
 The exact surface can also be extended with `markdown-it` plugins.
+
+Underline is shipped as an opt-in built-in plugin, not enabled by default.
 
 ## Styling
 
@@ -183,9 +185,9 @@ You can supply your own `MarkdownIt` instance to:
 
 ```tsx
 import React from 'react';
-import Markdown, {MarkdownIt} from '@ronradtke/react-native-markdown-display';
+import Markdown, {createMarkdownIt} from '@ronradtke/react-native-markdown-display';
 
-const markdownit = MarkdownIt({typographer: true}).disable(['link', 'image']);
+const markdownit = createMarkdownIt().disable(['link', 'image']);
 
 export default function Example(): React.JSX.Element {
     return (
@@ -199,6 +201,28 @@ export default function Example(): React.JSX.Element {
 ## Adding `markdown-it` Plugins
 
 Viewer plugin support is already available through the `markdownit` prop.
+
+## Built-In Underline Plugin
+
+Underline support is bundled with this package as a plugin export.
+
+You can activate it either by:
+
+- using `createMarkdownIt({underline: true})`
+- or calling `.use(underlinePlugin)` on your own parser instance
+
+Example:
+
+```tsx
+import React from 'react';
+import Markdown, {createMarkdownIt} from '@ronradtke/react-native-markdown-display';
+
+const markdownit = createMarkdownIt({underline: true});
+
+export default function Example(): React.JSX.Element {
+    return <Markdown markdownit={markdownit}>{'++underlined++'}</Markdown>;
+}
+```
 
 Example with an emoji plugin:
 
@@ -219,9 +243,9 @@ yarn add markdown-it-emoji
 ```tsx
 import React from 'react';
 import markdownItEmoji from 'markdown-it-emoji';
-import Markdown, {MarkdownIt} from '@ronradtke/react-native-markdown-display';
+import Markdown, {createMarkdownIt} from '@ronradtke/react-native-markdown-display';
 
-const markdownit = MarkdownIt({typographer: true}).use(markdownItEmoji);
+const markdownit = createMarkdownIt().use(markdownItEmoji);
 
 export default function Example(): React.JSX.Element {
     return (
@@ -235,7 +259,7 @@ export default function Example(): React.JSX.Element {
 ### 3. Native linking
 
 No React Native linking step is needed for normal `markdown-it` plugins.
-They are JavaScript parser extensions and are activated entirely through `MarkdownIt(...).use(plugin)`.
+They are JavaScript parser extensions and are activated entirely through `createMarkdownIt().use(plugin)` or `MarkdownIt(...).use(plugin)`.
 
 ### 4. If the plugin adds new node types
 
@@ -253,12 +277,12 @@ If you need to tokenize markdown outside the component, you can pass an AST dire
 ```tsx
 import React from 'react';
 import Markdown, {
-    MarkdownIt,
+    createMarkdownIt,
     stringToTokens,
     tokensToAST,
 } from '@ronradtke/react-native-markdown-display';
 
-const markdownit = MarkdownIt({typographer: true});
+const markdownit = createMarkdownIt();
 const source = '# Hello\n\nThis is **bold**.';
 const ast = tokensToAST(stringToTokens(source, markdownit));
 
@@ -273,7 +297,7 @@ Any `markdown-it` compatible plugin can be used as long as you also provide matc
 
 A practical workflow is:
 
-1. Create a custom `MarkdownIt` instance with your plugin.
+1. Create a custom parser instance with your plugin.
 2. Render once with `debugPrintTree`.
 3. Check the node types in the logged AST.
 4. Add matching `rules` and optional `style` entries for those node types.
@@ -284,6 +308,8 @@ Viewer-related exports from the package root:
 
 - `Markdown` (default export)
 - `MarkdownIt`
+- `createMarkdownIt`
+- `underlinePlugin`
 - `parser`
 - `renderRules`
 - `styles`

@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, View,} from 'react-native';
 import markdownItContainer from 'markdown-it-container';
 
-import Markdown, {MarkdownComposer, MarkdownIt, type MarkdownStyleMap, type MarkdownToolbarItem, type RenderRules} from '../src';
+import Markdown, {createMarkdownIt, MarkdownComposer, type MarkdownStyleMap, type MarkdownToolbarItem, type RenderRules} from '../src';
 
 interface ChatMessage {
     author: 'demo' | 'you';
@@ -24,7 +24,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
         author: 'demo',
         id: 'message-2',
         markdown:
-            'Try `**bold**`, `_italic_`, lists, tables, links, warning blocks, or expand the input for preview.\n\n- Native input\n- Expandable composer\n- Markdown render on send',
+            'Try `**bold**`, `_italic_`, `++underline++`, lists, tables, links, warning blocks, or expand the input for preview.\n\n- Native input\n- Expandable composer\n- Markdown render on send',
     },
     {
         author: 'demo',
@@ -34,7 +34,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
     },
 ];
 const isTestEnvironment = typeof jest !== 'undefined';
-const warningMarkdownIt = MarkdownIt({typographer: true}).use(
+const warningMarkdownIt = createMarkdownIt({underline: true}).use(
     markdownItContainer,
     'warning',
 );
@@ -187,6 +187,7 @@ function App(): React.JSX.Element {
         () => [
             {command: 'bold' as const, label: 'B'},
             {command: 'italic' as const, label: 'I'},
+            {command: 'underline' as const, label: 'U'},
             {command: 'strikethrough' as const, label: 'S'},
             {
                 accessibilityLabel: 'Insert heading',

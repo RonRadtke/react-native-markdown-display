@@ -420,6 +420,34 @@ describe('MarkdownComposer', () => {
         expect(onChangeText).toHaveBeenCalledWith('~~docs~~');
     });
 
+    test('applies underline from a custom expanded toolbar item', async () => {
+        const onChangeText = jest.fn();
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    expandedToolbarItems={[{command: 'underline', label: 'U'}]}
+                    initialMode="expanded"
+                    onChangeText={onChangeText}
+                    selection={{start: 0, end: 4}}
+                    value="docs"
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownComposer underline');
+        }
+
+        await renderer.act(async () => {
+            findPressableByLabel(tree, 'U').props.onPress();
+            await Promise.resolve();
+        });
+
+        expect(onChangeText).toHaveBeenCalledWith('++docs++');
+    });
+
     test('applies ordered lists from the expanded toolbar', async () => {
         const onChangeText = jest.fn();
         let tree: renderer.ReactTestRenderer | undefined;

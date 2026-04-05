@@ -1,12 +1,12 @@
 import React from 'react';
 import renderer, {type ReactTestRenderer} from 'react-test-renderer';
 
-import Markdown, {MarkdownComposer, MarkdownTextInput} from '../src';
+import Markdown, {createMarkdownIt, MarkdownComposer, MarkdownTextInput} from '../src';
 
 const COMPLEX_MARKDOWN_VALUE = [
     '# Accessible title',
     '',
-    'Paragraph with **bold**, _italic_, ~~strikethrough~~, `inline code`, and [Docs](https://example.com/docs).',
+    'Paragraph with **bold**, _italic_, ++underline++, ~~strikethrough~~, `inline code`, and [Docs](https://example.com/docs).',
     '',
     '> Quoted text with a [reference](https://example.com/reference).',
     '',
@@ -100,7 +100,9 @@ const findPressableByText = (
 describe('accessibility', () => {
     test('renders complex markdown accessibly', () => {
         const tree = renderTree(
-            <Markdown>{COMPLEX_MARKDOWN_VALUE}</Markdown>,
+            <Markdown markdownit={createMarkdownIt({underline: true})}>
+                {COMPLEX_MARKDOWN_VALUE}
+            </Markdown>,
         );
 
         expect(tree.root).toBeAccessible();
@@ -124,6 +126,7 @@ describe('accessibility', () => {
                 initialMode="expanded"
                 onChangeText={() => {}}
                 previewEnabled
+                previewProps={{markdownit: createMarkdownIt({underline: true})}}
                 value={COMPLEX_MARKDOWN_VALUE}
             />,
         );

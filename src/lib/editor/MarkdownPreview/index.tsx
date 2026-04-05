@@ -1,11 +1,12 @@
-import MarkdownIt from 'markdown-it';
 import React, {useMemo} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {Text, View} from 'react-native';
 
-import {getRenderer} from '../view/createRenderer';
-import parser from '../view/parser';
+import {createMarkdownIt} from '../../view/createMarkdownIt';
+import {getRenderer} from '../../view/createRenderer';
+import parser from '../../view/parser';
+import styles from './style';
 
-import type {MarkdownPreviewProps} from './types';
+import type {MarkdownPreviewProps} from '../types';
 
 const MarkdownPreview = React.memo(function MarkdownPreview({
                                                                 allowedImageHandlers = [
@@ -19,9 +20,7 @@ const MarkdownPreview = React.memo(function MarkdownPreview({
                                                                 defaultImageHandler = 'https://',
                                                                 emptyState = 'Nothing to preview yet.',
                                                                 label = 'Preview',
-                                                                markdownit = MarkdownIt({
-                                                                    typographer: true,
-                                                                }),
+                                                                markdownit = createMarkdownIt(),
                                                                 maxTopLevelChildren = null,
                                                                 mergeStyle = true,
                                                                 onLinkPress,
@@ -76,25 +75,6 @@ const MarkdownPreview = React.memo(function MarkdownPreview({
             )}
         </View>
     );
-});
-
-const styles = StyleSheet.create({
-    container: {
-        borderColor: '#E2E7EC',
-        borderRadius: 8,
-        borderWidth: 1,
-        marginTop: 12,
-        padding: 12,
-    },
-    emptyState: {
-        color: '#68707A',
-    },
-    label: {
-        fontSize: 13,
-        fontWeight: '700',
-        marginBottom: 8,
-        textTransform: 'uppercase',
-    },
 });
 
 MarkdownPreview.displayName = 'MarkdownPreview';

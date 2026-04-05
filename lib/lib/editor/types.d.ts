@@ -17,7 +17,7 @@ export interface MarkdownManagedTextInputProps extends Omit<TextInputProps, 'onC
     value: string;
 }
 export type MarkdownInputComponent = ForwardRefExoticComponent<MarkdownManagedTextInputProps & RefAttributes<TextInput>>;
-export type MarkdownInlineFormat = 'bold' | 'italic' | 'strikethrough' | 'inline-code';
+export type MarkdownInlineFormat = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'inline-code';
 export type MarkdownBlockFormat = 'heading-one' | 'heading-two' | 'heading-three' | 'blockquote' | 'bullet-list' | 'ordered-list' | 'code-block';
 export type MarkdownCommand = MarkdownInlineFormat | MarkdownBlockFormat | 'link' | 'table';
 export interface MarkdownLinkPayload {

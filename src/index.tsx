@@ -5,7 +5,9 @@ import {Text} from 'react-native';
 import FitImage from 'react-native-fit-image';
 
 import AstRenderer from './lib/view/AstRenderer';
+import {createMarkdownIt} from './lib/view/createMarkdownIt';
 import {getRenderer} from './lib/view/createRenderer';
+import {underlinePlugin} from './lib/view/plugins/underline';
 import parser from './lib/view/parser';
 import renderRules from './lib/view/renderRules';
 import {styles as defaultStyles} from './lib/view/styles';
@@ -17,6 +19,8 @@ import removeTextStyleProps from './lib/view/util/removeTextStyleProps';
 import {stringToTokens} from './lib/view/util/stringToTokens';
 import tokensToAST from './lib/view/util/tokensToAST';
 
+import type {CreateMarkdownItOptions} from './lib/view/createMarkdownIt';
+import type {MarkdownItPlugin} from './lib/view/plugins/underline';
 import type {ASTNode, MarkdownParser, MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRules, TextComponent,} from './lib/view/types';
 
 export * from './lib/editor';
@@ -24,6 +28,7 @@ export * from './lib/editor';
 export {
     AstRenderer,
     FitImage,
+    createMarkdownIt,
     getUniqueID,
     hasParents,
     MarkdownIt,
@@ -35,11 +40,14 @@ export {
     defaultStyles as styles,
     textStyleProps,
     tokensToAST,
+    underlinePlugin,
 };
 
 export type {
     ASTNode,
+    CreateMarkdownItOptions,
     MarkdownParser,
+    MarkdownItPlugin,
     MarkdownStyleMap,
     MarkdownStyleObject,
     OnLinkPress,
@@ -69,9 +77,7 @@ const MarkdownComponent = React.memo(function MarkdownMemo({
                                                                rules = null,
                                                                style = null,
                                                                mergeStyle = true,
-                                                               markdownit = MarkdownIt({
-                                                                   typographer: true,
-                                                               }),
+                                                               markdownit = createMarkdownIt(),
                                                                onLinkPress,
                                                                maxTopLevelChildren = null,
                                                                topLevelMaxExceededItem =

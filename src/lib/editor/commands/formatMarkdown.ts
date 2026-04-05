@@ -4,6 +4,7 @@ import {normalizeSelection} from '../utils/selection';
 const INLINE_MARKERS: Record<MarkdownInlineFormat, string> = {
     bold: '**',
     italic: '_',
+    underline: '++',
     strikethrough: '~~',
     'inline-code': '`',
 };

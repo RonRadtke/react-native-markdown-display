@@ -32,6 +32,7 @@ export type MarkdownInputComponent = ForwardRefExoticComponent<
 export type MarkdownInlineFormat =
     | 'bold'
     | 'italic'
+    | 'underline'
     | 'strikethrough'
     | 'inline-code';
 
