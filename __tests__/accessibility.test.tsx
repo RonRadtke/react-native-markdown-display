@@ -97,6 +97,25 @@ const findPressableByText = (
     return button;
 };
 
+const findPressableByAccessibilityLabel = (
+    tree: ReactTestRenderer,
+    label: string,
+): renderer.ReactTestInstance => {
+    const button = tree.root.findAll(
+        (node) =>
+            typeof node.props.onPress === 'function' &&
+            node.props.accessibilityLabel === label,
+    )[0];
+
+    if (!button) {
+        throw new Error(
+            `Failed to find pressable with accessibility label: ${label}`,
+        );
+    }
+
+    return button;
+};
+
 describe('accessibility', () => {
     test('renders complex markdown accessibly', () => {
         const tree = renderTree(
@@ -148,7 +167,7 @@ describe('accessibility', () => {
         );
 
         await renderer.act(async () => {
-            findPressableByText(tree, 'Link').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Insert link').props.onPress();
             await Promise.resolve();
         });
 

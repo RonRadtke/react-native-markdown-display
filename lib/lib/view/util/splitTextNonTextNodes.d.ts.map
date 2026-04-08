@@ -1,1 +1,0 @@
-{"version":3,"file":"splitTextNonTextNodes.d.ts","sourceRoot":"","sources":["../../../../src/lib/view/util/splitTextNonTextNodes.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAC,YAAY,EAAE,SAAS,EAAC,MAAM,OAAO,CAAC;AAGnD,UAAU,oBAAoB;IAC1B,YAAY,EAAE,YAAY,EAAE,CAAC;IAC7B,SAAS,EAAE,YAAY,EAAE,CAAC;CAC7B;AAED,MAAM,CAAC,OAAO,UAAU,qBAAqB,CACzC,QAAQ,EAAE,SAAS,EAAE,GACtB,oBAAoB,CAsBtB"}

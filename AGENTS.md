@@ -12,9 +12,9 @@ The library:
 - renders that AST with native React Native components, not a WebView
 
 The source of truth is TypeScript in `src/`.
-Build output is generated into `lib/`.
+Build output is generated into `dist/`.
 
-Do not hand-edit generated files in `lib/` unless the user explicitly asks for generated output changes only. Make source changes in `src/` and rebuild.
+Do not hand-edit generated files in `dist/` unless the user explicitly asks for generated output changes only. Make source changes in `src/` and rebuild.
 
 ## Important Paths
 
@@ -26,7 +26,7 @@ Do not hand-edit generated files in `lib/` unless the user explicitly asks for g
 - `src/lib/types.ts`: shared public/internal TypeScript types
 - `src/lib/util/*`: token, AST, style, and helper utilities
 - `__tests__/`: Jest test suite
-- `lib/`: generated JS and declaration output
+- `dist/`: generated JS and declaration output
 
 ## Working Rules
 
@@ -72,6 +72,6 @@ If public exports or package output changed, also run:
 
 ## Generated Output
 
-- `package.json` points `main` and `types` at `lib/index.js` and `lib/index.d.ts`.
-- After source changes, regenerate `lib/` with `npm run build`.
-- If `src/` changes and `lib/` is committed in the repo, keep them in sync.
+- `package.json` points `main` and `types` at `dist/index.js` and `dist/index.d.ts`.
+- After source changes, regenerate `dist/` with `npm run build`.
+- If `src/` changes and `dist/` is committed in the repo, keep them in sync.

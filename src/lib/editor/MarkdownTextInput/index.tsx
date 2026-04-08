@@ -2,17 +2,12 @@ import React, {useMemo, useRef, useState} from 'react';
 import {type NativeSyntheticEvent, Pressable, Text, TextInput, type TextInputContentSizeChangeEventData, type TextInputSelectionChangeEventData, View,} from 'react-native';
 
 import {applyBlockFormat, applyInlineFormat, applyLinkFormat, applyTableFormat, applyToolbarAction,} from '../commands/formatMarkdown';
+import {DEFAULT_TEXT_INPUT_TOOLBAR_ITEMS} from '../defaultToolbarItems';
 import styles from './style';
 import {applyMarkdownShortcut} from '../utils/shortcuts';
 import {normalizeSelection} from '../utils/selection';
 
 import type {MarkdownCommand, MarkdownCommandResult, MarkdownManagedTextInputProps, MarkdownTextInputCommandPayload, MarkdownTextInputProps, MarkdownToolbarButtonItem, MarkdownToolbarCommandItem, MarkdownToolbarItem, MarkdownToolbarMenuItem,} from '../types';
-
-const DEFAULT_TOOLBAR_ITEMS: readonly MarkdownToolbarCommandItem[] = [
-    {accessibilityLabel: 'Bold', command: 'bold', label: 'B'},
-    {accessibilityLabel: 'Italic', command: 'italic', label: 'I'},
-    {accessibilityLabel: 'Inline code', command: 'inline-code', label: '</>'},
-];
 
 const DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS: Record<
     MarkdownCommand,
@@ -125,7 +120,7 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             inputComponent: InputComponent,
             selection,
             style,
-            toolbarItems = DEFAULT_TOOLBAR_ITEMS,
+            toolbarItems = DEFAULT_TEXT_INPUT_TOOLBAR_ITEMS,
             compactMaxHeight,
             enableShortcuts = true,
             multiline = true,

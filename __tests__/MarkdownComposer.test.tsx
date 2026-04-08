@@ -24,6 +24,23 @@ const findPressableByLabel = (
     return match;
 };
 
+const findPressableByAccessibilityLabel = (
+    tree: renderer.ReactTestRenderer,
+    label: string,
+): renderer.ReactTestInstance => {
+    const match = tree.root.findAll(
+        (node) =>
+            typeof node.props.onPress === 'function' &&
+            node.props.accessibilityLabel === label,
+    )[0];
+
+    if (!match) {
+        throw new Error(`Failed to find button with accessibility label: ${label}`);
+    }
+
+    return match;
+};
+
 describe('MarkdownComposer', () => {
     test('toggles between compact and expanded mode', () => {
         const onModeChange = jest.fn();
@@ -162,8 +179,12 @@ describe('MarkdownComposer', () => {
             tree.root.findAllByType(Text).some((node) => node.props.children === '</>'),
         ).toBe(true);
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'B'),
-        ).toBe(false);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Bold',
+            ),
+        ).toHaveLength(0);
     });
 
     test('renders JSX labels for minimized and expanded toolbar items', () => {
@@ -236,11 +257,19 @@ describe('MarkdownComposer', () => {
             tree.root.findAll((node) => typeof node.props.onPress === 'function'),
         ).toHaveLength(1);
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'B'),
-        ).toBe(false);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Bold',
+            ),
+        ).toHaveLength(0);
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'I'),
-        ).toBe(false);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Italic',
+            ),
+        ).toHaveLength(0);
     });
 
     test('uses a single-row multiline input in compact mode and a taller input when expanded', () => {
@@ -297,7 +326,7 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, 'Link').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Insert link').props.onPress();
             await Promise.resolve();
         });
 
@@ -335,7 +364,7 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, 'Link').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Insert link').props.onPress();
             await Promise.resolve();
         });
 
@@ -372,7 +401,7 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, 'Table').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Insert table').props.onPress();
             await Promise.resolve();
         });
 
@@ -413,7 +442,7 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, 'S').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Strikethrough').props.onPress();
             await Promise.resolve();
         });
 
@@ -468,7 +497,7 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, '1.').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Numbered list').props.onPress();
             await Promise.resolve();
         });
 
@@ -493,25 +522,45 @@ describe('MarkdownComposer', () => {
         }
 
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'H'),
-        ).toBe(true);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Insert heading',
+            ),
+        ).toHaveLength(1);
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'H3'),
-        ).toBe(false);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Heading three',
+            ),
+        ).toHaveLength(0);
 
         renderer.act(() => {
-            findPressableByLabel(tree, 'H').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Insert heading').props.onPress();
         });
 
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'H1'),
-        ).toBe(true);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Heading one',
+            ),
+        ).toHaveLength(1);
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'H2'),
-        ).toBe(true);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Heading two',
+            ),
+        ).toHaveLength(1);
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'H3'),
-        ).toBe(true);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Heading three',
+            ),
+        ).toHaveLength(1);
     });
 
     test('applies heading one from the expanded toolbar submenu', async () => {
@@ -534,18 +583,22 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, 'H').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Insert heading').props.onPress();
         });
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, 'H1').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Heading one').props.onPress();
             await Promise.resolve();
         });
 
         expect(onChangeText).toHaveBeenCalledWith('# Title');
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'H1'),
-        ).toBe(false);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Heading one',
+            ),
+        ).toHaveLength(0);
     });
 
     test('applies block quotes from the expanded toolbar', async () => {
@@ -568,7 +621,7 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, 'Quote').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Quote').props.onPress();
             await Promise.resolve();
         });
 
@@ -595,7 +648,7 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, '</>').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Inline code').props.onPress();
             await Promise.resolve();
         });
 
@@ -621,7 +674,7 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, 'Link').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Insert link').props.onPress();
             await Promise.resolve();
         });
 
@@ -699,7 +752,7 @@ describe('MarkdownComposer', () => {
         }
 
         await renderer.act(async () => {
-            findPressableByLabel(tree, 'Link').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Insert link').props.onPress();
             await Promise.resolve();
         });
 

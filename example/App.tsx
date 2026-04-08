@@ -1,5 +1,6 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, View,} from 'react-native';
+import {MaterialIcons} from '@react-native-vector-icons/material-icons';
 import markdownItContainer from 'markdown-it-container';
 
 import Markdown, {createMarkdownIt, MarkdownComposer, type MarkdownStyleMap, type MarkdownToolbarItem, type RenderRules} from '../src';
@@ -46,6 +47,17 @@ const warningRules: RenderRules = {
         </View>
     ),
 };
+
+type ToolbarIconName = React.ComponentProps<typeof MaterialIcons>['name'];
+
+const createToolbarIcon = (name: ToolbarIconName): React.ReactElement => (
+    <MaterialIcons
+        accessible={false}
+        color="#2B3137"
+        name={name}
+        size={18}
+    />
+);
 
 const createMessageId = (value: number): string => `message-${value}`;
 
@@ -185,21 +197,39 @@ function App(): React.JSX.Element {
 
     const composerToolbarItems = useMemo<readonly MarkdownToolbarItem[]>(
         () => [
-            {command: 'bold' as const, label: 'B'},
-            {command: 'italic' as const, label: 'I'},
-            {command: 'underline' as const, label: 'U'},
-            {command: 'strikethrough' as const, label: 'S'},
+            {command: 'bold' as const, label: createToolbarIcon('format-bold')},
+            {command: 'italic' as const, label: createToolbarIcon('format-italic')},
+            {
+                command: 'underline' as const,
+                label: createToolbarIcon('format-underlined'),
+            },
+            {
+                command: 'strikethrough' as const,
+                label: createToolbarIcon('format-strikethrough'),
+            },
             {
                 accessibilityLabel: 'Insert heading',
                 items: [
-                    {command: 'heading-one' as const, label: 'H1'},
-                    {command: 'heading-two' as const, label: 'H2'},
-                    {command: 'heading-three' as const, label: 'H3'},
+                    {
+                        command: 'heading-one' as const,
+                        label: createToolbarIcon('looks-one'),
+                    },
+                    {
+                        command: 'heading-two' as const,
+                        label: createToolbarIcon('looks-two'),
+                    },
+                    {
+                        command: 'heading-three' as const,
+                        label: createToolbarIcon('looks-3'),
+                    },
                 ],
-                label: 'H',
+                label: createToolbarIcon('title'),
             },
-            {command: 'link' as const, label: 'Link'},
-            {command: 'blockquote' as const, label: 'Quote'},
+            {command: 'link' as const, label: createToolbarIcon('add-link')},
+            {
+                command: 'blockquote' as const,
+                label: createToolbarIcon('format-quote'),
+            },
             {
                 accessibilityLabel: 'Insert warning block',
                 action: {
@@ -208,12 +238,21 @@ function App(): React.JSX.Element {
                     suffix: '\n:::',
                     type: 'wrap',
                 },
-                label: 'Warn',
+                label: createToolbarIcon('warning'),
             },
-            {command: 'inline-code' as const, label: '</>'},
-            {command: 'bullet-list' as const, label: 'List'},
-            {command: 'ordered-list' as const, label: '1.'},
-            {command: 'table' as const, label: 'Table'},
+            {
+                command: 'inline-code' as const,
+                label: createToolbarIcon('code'),
+            },
+            {
+                command: 'bullet-list' as const,
+                label: createToolbarIcon('format-list-bulleted'),
+            },
+            {
+                command: 'ordered-list' as const,
+                label: createToolbarIcon('format-list-numbered'),
+            },
+            {command: 'table' as const, label: createToolbarIcon('table-chart')},
         ],
         [],
     );

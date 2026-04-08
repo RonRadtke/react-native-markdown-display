@@ -98,6 +98,8 @@ The default `MarkdownTextInput` toolbar contains:
 - italic
 - inline code
 
+These built-in buttons use Google Material Icons from `@react-native-vector-icons/material-icons` by default, not visible text labels.
+
 Underline is available as a shipped opt-in plugin and command, but it is not shown in the default toolbar.
 
 ## Basic `MarkdownComposer`
@@ -129,6 +131,7 @@ Important composer behavior:
 - if `previewEnabled` is `true`, the preview toggle is shown in expanded mode
 - preview is hidden by default until the user taps `Show preview`
 - underline uses `++text++` syntax when you activate the shipped underline plugin
+- the built-in minimized and expanded toolbar presets use Material Design icons by default
 
 ## Toolbar Items
 

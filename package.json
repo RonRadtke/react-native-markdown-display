@@ -2,16 +2,16 @@
     "name": "@ronradtke/react-native-markdown-display",
     "version": "8.1.0",
     "description": "Markdown renderer for react-native, with CommonMark spec support + adds syntax extensions & sugar (URL autolinking, typographer), originally created by Mient-jan Stelling as react-native-markdown-renderer",
-    "main": "lib/index.js",
-    "types": "lib/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "files": [
-        "lib",
+        "dist",
         "src",
         "README.md",
         "LICENSE"
     ],
     "scripts": {
-        "build": "node -e \"require('fs').rmSync('lib', {recursive: true, force: true})\" && tsc -p tsconfig.json",
+        "build": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true}); require('fs').rmSync('lib', {recursive: true, force: true})\" && tsc -p tsconfig.json",
         "format": "prettier -w src",
         "format-check": "prettier --check src",
         "lint": "ESLINT_USE_FLAT_CONFIG=false eslint --cache ./src",
@@ -40,6 +40,7 @@
     },
     "homepage": "https://github.com/RonRadtke/react-native-markdown-display",
     "dependencies": {
+        "@react-native-vector-icons/material-icons": "^13.0.0",
         "css-to-react-native": "^3.2.0",
         "markdown-it": "^14.1.1",
         "markdown-it-ins": "^4.0.0",

@@ -10,6 +10,7 @@
         "test": "jest"
     },
     "dependencies": {
+        "@react-native-vector-icons/material-icons": "^13.0.0",
         "markdown-it-container": "^4.0.0",
         "react": "19.2.3",
         "react-native": "0.84.1"
