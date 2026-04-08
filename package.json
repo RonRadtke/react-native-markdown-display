@@ -29,9 +29,11 @@
         "native",
         "markdown",
         "commonmark",
-        "markdown-it"
+        "markdown-it",
+        "input",
+        "markdown input"
     ],
-    "author": "Michael Lohmann, Daniel Maslowski, Ron Radtke and maintainers of the original library",
+    "author": "Ron Radtke and maintainers of the original library",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/RonRadtke/react-native-markdown-display/issues"
