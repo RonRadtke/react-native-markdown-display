@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, View,} from 'react-native';
-import {MaterialIcons} from '@react-native-vector-icons/material-icons';
+import {MaterialDesignIcons} from '@react-native-vector-icons/material-design-icons';
 import markdownItContainer from 'markdown-it-container';
 
 import Markdown, {createMarkdownIt, MarkdownComposer, type MarkdownStyleMap, type MarkdownToolbarItem, type RenderRules} from '../src';
@@ -48,10 +48,10 @@ const warningRules: RenderRules = {
     ),
 };
 
-type ToolbarIconName = React.ComponentProps<typeof MaterialIcons>['name'];
+type ToolbarIconName = React.ComponentProps<typeof MaterialDesignIcons>['name'];
 
 const createToolbarIcon = (name: ToolbarIconName): React.ReactElement => (
-    <MaterialIcons
+    <MaterialDesignIcons
         accessible={false}
         color="#2B3137"
         name={name}
@@ -201,34 +201,34 @@ function App(): React.JSX.Element {
             {command: 'italic' as const, label: createToolbarIcon('format-italic')},
             {
                 command: 'underline' as const,
-                label: createToolbarIcon('format-underlined'),
+                label: createToolbarIcon('format-underline'),
             },
             {
                 command: 'strikethrough' as const,
-                label: createToolbarIcon('format-strikethrough'),
+                label: createToolbarIcon('format-strikethrough-variant'),
             },
             {
                 accessibilityLabel: 'Insert heading',
                 items: [
                     {
                         command: 'heading-one' as const,
-                        label: createToolbarIcon('looks-one'),
+                        label: createToolbarIcon('format-header-1'),
                     },
                     {
                         command: 'heading-two' as const,
-                        label: createToolbarIcon('looks-two'),
+                        label: createToolbarIcon('format-header-2'),
                     },
                     {
                         command: 'heading-three' as const,
-                        label: createToolbarIcon('looks-3'),
+                        label: createToolbarIcon('format-header-3'),
                     },
                 ],
-                label: createToolbarIcon('title'),
+                label: createToolbarIcon('format-header-pound'),
             },
-            {command: 'link' as const, label: createToolbarIcon('add-link')},
+            {command: 'link' as const, label: createToolbarIcon('link-variant')},
             {
                 command: 'blockquote' as const,
-                label: createToolbarIcon('format-quote'),
+                label: createToolbarIcon('format-quote-close'),
             },
             {
                 accessibilityLabel: 'Insert warning block',
@@ -238,11 +238,11 @@ function App(): React.JSX.Element {
                     suffix: '\n:::',
                     type: 'wrap',
                 },
-                label: createToolbarIcon('warning'),
+                label: createToolbarIcon('alert-outline'),
             },
             {
                 command: 'inline-code' as const,
-                label: createToolbarIcon('code'),
+                label: createToolbarIcon('code-tags'),
             },
             {
                 command: 'bullet-list' as const,
@@ -252,7 +252,7 @@ function App(): React.JSX.Element {
                 command: 'ordered-list' as const,
                 label: createToolbarIcon('format-list-numbered'),
             },
-            {command: 'table' as const, label: createToolbarIcon('table-chart')},
+            {command: 'table' as const, label: createToolbarIcon('table-large')},
         ],
         [],
     );

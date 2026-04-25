@@ -27,14 +27,14 @@ jest.mock('react-native-fit-image', () => {
     return FitImage;
 });
 
-jest.mock('@react-native-vector-icons/material-icons', () => {
+jest.mock('@react-native-vector-icons/material-design-icons', () => {
     const React = require('react');
 
-    function MaterialIcons(props) {
-        return React.createElement('MaterialIcons', props, props.children);
+    function MaterialDesignIcons(props) {
+        return React.createElement('MaterialDesignIcons', props, props.children);
     }
 
-    return {MaterialIcons};
+    return {MaterialDesignIcons};
 });
 
 if (typeof global.window === 'undefined') {

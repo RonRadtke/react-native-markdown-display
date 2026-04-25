@@ -98,7 +98,7 @@ The default `MarkdownTextInput` toolbar contains:
 - italic
 - inline code
 
-These built-in buttons use Google Material Icons from `@react-native-vector-icons/material-icons` by default, not visible text labels.
+These built-in buttons use Material Design Icons from `@react-native-vector-icons/material-design-icons` by default, not visible text labels.
 
 Underline is available as a shipped opt-in plugin and command, but it is not shown in the default toolbar.
 

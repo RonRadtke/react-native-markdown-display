@@ -1,13 +1,13 @@
 import React from 'react';
-import {MaterialIcons} from '@react-native-vector-icons/material-icons';
+import {MaterialDesignIcons} from '@react-native-vector-icons/material-design-icons';
 
 import type {MarkdownToolbarCommandItem} from '../types';
 
 const DEFAULT_TOOLBAR_ICON_SIZE = 18;
-type ToolbarIconName = React.ComponentProps<typeof MaterialIcons>['name'];
+type ToolbarIconName = React.ComponentProps<typeof MaterialDesignIcons>['name'];
 
 const createToolbarIcon = (name: ToolbarIconName): React.ReactElement => (
-    <MaterialIcons
+    <MaterialDesignIcons
         accessible={false}
         name={name}
         size={DEFAULT_TOOLBAR_ICON_SIZE}
@@ -28,7 +28,7 @@ export const DEFAULT_TEXT_INPUT_TOOLBAR_ITEMS: readonly MarkdownToolbarCommandIt
     {
         accessibilityLabel: 'Inline code',
         command: 'inline-code',
-        label: createToolbarIcon('code'),
+        label: createToolbarIcon('code-tags'),
     },
 ];
 
@@ -37,7 +37,7 @@ export const DEFAULT_COMPACT_TOOLBAR_ITEMS: readonly MarkdownToolbarCommandItem[
     {
         accessibilityLabel: 'Insert link',
         command: 'link',
-        label: createToolbarIcon('add-link'),
+        label: createToolbarIcon('link-variant'),
     },
 ];
 
@@ -45,17 +45,17 @@ export const DEFAULT_HEADING_TOOLBAR_ITEMS: readonly MarkdownToolbarCommandItem[
     {
         accessibilityLabel: 'Heading one',
         command: 'heading-one',
-        label: createToolbarIcon('looks-one'),
+        label: createToolbarIcon('format-header-1'),
     },
     {
         accessibilityLabel: 'Heading two',
         command: 'heading-two',
-        label: createToolbarIcon('looks-two'),
+        label: createToolbarIcon('format-header-2'),
     },
     {
         accessibilityLabel: 'Heading three',
         command: 'heading-three',
-        label: createToolbarIcon('looks-3'),
+        label: createToolbarIcon('format-header-3'),
     },
 ];
 
@@ -64,17 +64,17 @@ export const DEFAULT_EXPANDED_TOOLBAR_ITEMS = [
     {
         accessibilityLabel: 'Strikethrough',
         command: 'strikethrough',
-        label: createToolbarIcon('format-strikethrough'),
+        label: createToolbarIcon('format-strikethrough-variant'),
     },
     {
         accessibilityLabel: 'Insert heading',
         items: DEFAULT_HEADING_TOOLBAR_ITEMS,
-        label: createToolbarIcon('title'),
+        label: createToolbarIcon('format-header-pound'),
     },
     {
         accessibilityLabel: 'Quote',
         command: 'blockquote',
-        label: createToolbarIcon('format-quote'),
+        label: createToolbarIcon('format-quote-close'),
     },
     {
         accessibilityLabel: 'Bullet list',
@@ -89,12 +89,12 @@ export const DEFAULT_EXPANDED_TOOLBAR_ITEMS = [
     {
         accessibilityLabel: 'Code block',
         command: 'code-block',
-        label: createToolbarIcon('data-object'),
+        label: createToolbarIcon('code-braces-box'),
     },
     {
         accessibilityLabel: 'Insert table',
         command: 'table',
-        label: createToolbarIcon('table-chart'),
+        label: createToolbarIcon('table-large'),
     },
 ] as const;
 

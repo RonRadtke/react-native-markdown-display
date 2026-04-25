@@ -40,7 +40,7 @@
     },
     "homepage": "https://github.com/RonRadtke/react-native-markdown-display",
     "dependencies": {
-        "@react-native-vector-icons/material-icons": "^13.0.0",
+        "@react-native-vector-icons/material-design-icons": "^13.0.0",
         "css-to-react-native": "^3.2.0",
         "markdown-it": "^14.1.1",
         "markdown-it-ins": "^4.0.0",
