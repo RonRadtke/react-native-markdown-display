@@ -177,6 +177,20 @@ export interface MarkdownComposerProps extends Omit<
     textInputStyle?: StyleProp<TextStyle>;
 }
 
+export interface MarkdownWysiwygEditorProps extends Omit<
+    TextInputProps,
+    'onChangeText' | 'onSelectionChange' | 'selection' | 'style' | 'value'
+> {
+    cursorBlinkEnabled?: boolean;
+    cursorStyle?: StyleProp<ViewStyle>;
+    editorStyle?: StyleProp<ViewStyle>;
+    onChangeText: (value: string) => void;
+    onSelectionChange?: (selection: MarkdownSelection) => void;
+    selection?: MarkdownSelection;
+    textStyle?: StyleProp<TextStyle>;
+    value: string;
+}
+
 export interface MarkdownPreviewProps extends MarkdownRenderOptions {
     emptyState?: string;
     label?: ReactNode;

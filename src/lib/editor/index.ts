@@ -11,8 +11,10 @@ export {
 export {default as MarkdownComposer} from './MarkdownComposer';
 export {default as MarkdownPreview} from './MarkdownPreview';
 export {default as MarkdownTextInput} from './MarkdownTextInput';
+export {default as MarkdownWysiwygEditor} from './MarkdownWysiwygEditor';
 export {applyMarkdownShortcut} from './utils/shortcuts';
 export {getSelectedText, normalizeSelection} from './utils/selection';
+export {insertTextAtSelection, removeTextBeforeSelection} from './utils/wysiwygEditing';
 
 export type {
     MarkdownBlockFormat,
@@ -39,4 +41,5 @@ export type {
     MarkdownTextInputProps,
     MarkdownToolbarItem,
     MarkdownToolbarWrapAction,
+    MarkdownWysiwygEditorProps,
 } from './types';
