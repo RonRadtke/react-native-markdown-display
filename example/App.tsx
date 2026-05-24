@@ -1,15 +1,56 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, View,} from 'react-native';
 import {MaterialDesignIcons} from '@react-native-vector-icons/material-design-icons';
 import markdownItContainer from 'markdown-it-container';
 
-import Markdown, {createMarkdownIt, MarkdownComposer, type MarkdownStyleMap, type MarkdownToolbarItem, type RenderRules} from '../src';
+import Markdown, {createMarkdownIt, MarkdownComposer, MarkdownStream, type MarkdownStyleMap, type MarkdownToolbarItem, type RenderRules} from '../src';
 
 interface ChatMessage {
     author: 'demo' | 'you';
     id: string;
     markdown: string;
+    streaming?: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// Streaming demo
+// ---------------------------------------------------------------------------
+
+const STREAM_DEMO_ID = 'stream-demo';
+const STREAM_TICK_MS = 80;
+const STREAM_CHUNK_SIZE = 6;
+const STREAM_START_DELAY_MS = 900;
+
+const STREAM_DEMO_CONTENT =
+    '## Streaming demo\n\n' +
+    'This response arrives **token by token**, just like a real AI reply. ' +
+    'The renderer stays stable at every stage — even mid-sentence and mid-fence.\n\n' +
+    '### Inline formats\n\n' +
+    'Combine *italic*, **bold**, ~~strikethrough~~, and `inline code` freely in the same paragraph.\n\n' +
+    '### Code block\n\n' +
+    '```typescript\n' +
+    'function greet(name: string): string {\n' +
+    '    return `Hello, ${name}!`;\n' +
+    '}\n\n' +
+    'console.log(greet("Claude"));\n' +
+    '```\n\n' +
+    'The closing fence is sealed automatically while streaming, so the block never collapses mid-stream.\n\n' +
+    '### Lists\n\n' +
+    '1. Source string arrives incrementally\n' +
+    '2. Open fences are sealed before parsing\n' +
+    '3. Parser produces a stable AST on each tick\n' +
+    '4. Renderer outputs native components\n\n' +
+    '- No WebView\n' +
+    '- No HTML bridge\n' +
+    '- Pure native `Text` and `View`\n\n' +
+    '### Table\n\n' +
+    '| Element | Streaming-safe |\n' +
+    '| --- | --- |\n' +
+    '| Heading | ✓ |\n' +
+    '| Code fence | ✓ |\n' +
+    '| Blockquote | ✓ |\n' +
+    '| Table | ✓ |\n\n' +
+    '> All powered by `sealIncompleteMarkdown` — a pure function that closes open fences before every parse pass.';
 
 const STRUCTURED_MARKDOWN_LINE_PATTERN =
     /^(?:[-*+]\s+.+|\d+\.\s+.+|\|.*\|)$/;
@@ -177,9 +218,58 @@ const getMarkdownStyles = (isOwnMessage: boolean): MarkdownStyleMap => ({
 function App(): React.JSX.Element {
     const listRef = useRef<FlatList<ChatMessage>>(null);
     const messageCountRef = useRef(INITIAL_MESSAGES.length + 1);
+    const streamPositionRef = useRef(0);
+    const streamIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [draft, setDraft] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
     const composerPreviewStyle = useMemo(() => getMarkdownStyles(false), []);
+
+    const startStreamingDemo = useCallback((): void => {
+        if (streamIntervalRef.current) {
+            clearInterval(streamIntervalRef.current);
+            streamIntervalRef.current = null;
+        }
+        streamPositionRef.current = 0;
+
+        setMessages((prev) => {
+            const exists = prev.some((m) => m.id === STREAM_DEMO_ID);
+            const demoMessage: ChatMessage = {
+                author: 'demo',
+                id: STREAM_DEMO_ID,
+                markdown: '',
+                streaming: true,
+            };
+            return exists
+                ? prev.map((m) => (m.id === STREAM_DEMO_ID ? demoMessage : m))
+                : [...prev, demoMessage];
+        });
+
+        streamIntervalRef.current = setInterval(() => {
+            streamPositionRef.current = Math.min(
+                streamPositionRef.current + STREAM_CHUNK_SIZE,
+                STREAM_DEMO_CONTENT.length,
+            );
+            const pos = streamPositionRef.current;
+            const done = pos >= STREAM_DEMO_CONTENT.length;
+
+            setMessages((prev) =>
+                prev.map((m) =>
+                    m.id === STREAM_DEMO_ID
+                        ? {
+                            ...m,
+                            markdown: STREAM_DEMO_CONTENT.slice(0, pos),
+                            streaming: !done,
+                        }
+                        : m,
+                ),
+            );
+
+            if (done) {
+                clearInterval(streamIntervalRef.current!);
+                streamIntervalRef.current = null;
+            }
+        }, STREAM_TICK_MS);
+    }, []);
 
     useEffect(() => {
         if (isTestEnvironment) {
@@ -192,6 +282,21 @@ function App(): React.JSX.Element {
 
         return () => clearTimeout(timeoutId);
     }, [messages]);
+
+    useEffect(() => {
+        if (isTestEnvironment) {
+            return;
+        }
+
+        const timeoutId = setTimeout(startStreamingDemo, STREAM_START_DELAY_MS);
+
+        return () => {
+            clearTimeout(timeoutId);
+            if (streamIntervalRef.current) {
+                clearInterval(streamIntervalRef.current);
+            }
+        };
+    }, [startStreamingDemo]);
 
     const canSend = draft.trim().length > 0;
 
@@ -277,7 +382,10 @@ function App(): React.JSX.Element {
 
     const renderMessage = ({item}: ListRenderItemInfo<ChatMessage>) => {
         const isOwnMessage = item.author === 'you';
-        const usesWideBubble = usesStructuredBubbleLayout(item.markdown);
+        const usesWideBubble =
+            item.streaming !== undefined || usesStructuredBubbleLayout(item.markdown);
+        const markdownStyles = getMarkdownStyles(isOwnMessage);
+        const cursorColor = isOwnMessage ? '#FFFFFF' : '#10212E';
 
         return (
             <View
@@ -296,13 +404,25 @@ function App(): React.JSX.Element {
                     <Text style={styles.messageAuthor}>
                         {isOwnMessage ? 'You' : 'Demo'}
                     </Text>
-                    <Markdown
-                        markdownit={warningMarkdownIt}
-                        rules={warningRules}
-                        style={getMarkdownStyles(isOwnMessage)}
-                    >
-                        {item.markdown}
-                    </Markdown>
+                    {item.streaming !== undefined ? (
+                        <MarkdownStream
+                            cursorColor={cursorColor}
+                            markdownit={warningMarkdownIt}
+                            rules={warningRules}
+                            streaming={item.streaming}
+                            style={markdownStyles}
+                        >
+                            {item.markdown}
+                        </MarkdownStream>
+                    ) : (
+                        <Markdown
+                            markdownit={warningMarkdownIt}
+                            rules={warningRules}
+                            style={markdownStyles}
+                        >
+                            {item.markdown}
+                        </Markdown>
+                    )}
                 </View>
             </View>
         );
@@ -318,12 +438,25 @@ function App(): React.JSX.Element {
             >
                 <View style={styles.screen}>
                     <View style={styles.header}>
-                        <Text style={styles.eyebrow}>Example App</Text>
+                        <Text style={styles.eyebrow}>Example App 2</Text>
                         <Text style={styles.title}>Markdown Chat</Text>
                         <Text style={styles.subtitle}>
                             Send messages with the composer below and render them as markdown
                             bubbles in the conversation.
                         </Text>
+                        <Pressable
+                            accessibilityLabel="Replay streaming demo"
+                            accessibilityRole="button"
+                            onPress={startStreamingDemo}
+                            style={styles.replayButton}
+                        >
+                            <MaterialDesignIcons
+                                color="#0A66C2"
+                                name="refresh"
+                                size={14}
+                            />
+                            <Text style={styles.replayButtonText}>Replay streaming demo</Text>
+                        </Pressable>
                     </View>
 
                     <FlatList
@@ -403,6 +536,23 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         letterSpacing: 1,
         textTransform: 'uppercase',
+    },
+    replayButton: {
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        backgroundColor: '#EBF3FF',
+        borderColor: '#BFDBFE',
+        borderRadius: 20,
+        borderWidth: 1,
+        flexDirection: 'row',
+        gap: 5,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    replayButtonText: {
+        color: '#0A66C2',
+        fontSize: 13,
+        fontWeight: '600',
     },
     flex: {
         flex: 1,

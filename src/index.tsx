@@ -16,12 +16,15 @@ import getUniqueID from './lib/view/util/getUniqueID';
 import hasParents from './lib/view/util/hasParents';
 import openUrl from './lib/view/util/openUrl';
 import removeTextStyleProps from './lib/view/util/removeTextStyleProps';
+import {sealIncompleteMarkdown} from './lib/view/util/sealIncompleteMarkdown';
 import {stringToTokens} from './lib/view/util/stringToTokens';
 import tokensToAST from './lib/view/util/tokensToAST';
+import MarkdownStream from './lib/view/StreamingMarkdown';
 
 import type {CreateMarkdownItOptions} from './lib/view/createMarkdownIt';
 import type {MarkdownItPlugin} from './lib/view/plugins/underline';
 import type {ASTNode, MarkdownParser, MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRules, TextComponent,} from './lib/view/types';
+import type {MarkdownStreamProps} from './lib/view/StreamingMarkdown';
 
 export * from './lib/editor';
 
@@ -32,10 +35,12 @@ export {
     getUniqueID,
     hasParents,
     MarkdownIt,
+    MarkdownStream,
     openUrl,
     parser,
     renderRules,
     removeTextStyleProps,
+    sealIncompleteMarkdown,
     stringToTokens,
     defaultStyles as styles,
     textStyleProps,
@@ -48,6 +53,7 @@ export type {
     CreateMarkdownItOptions,
     MarkdownParser,
     MarkdownItPlugin,
+    MarkdownStreamProps,
     MarkdownStyleMap,
     MarkdownStyleObject,
     OnLinkPress,
