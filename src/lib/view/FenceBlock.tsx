@@ -9,6 +9,7 @@ const COPY_FEEDBACK_MS = 2000;
 
 interface FenceBlockProps {
     code: string;
+    colorScheme?: 'light' | 'dark';
     language: string;
     styles: MarkdownStyleMap;
     onCopyCode?: OnCopyCode | undefined;
@@ -16,6 +17,7 @@ interface FenceBlockProps {
 
 const FenceBlock = React.memo(function FenceBlock({
     code,
+    colorScheme = 'light',
     language,
     styles,
     onCopyCode,
@@ -29,6 +31,8 @@ const FenceBlock = React.memo(function FenceBlock({
     };
 
     const showHeader = language.length > 0 || onCopyCode !== undefined;
+    const prismTheme = colorScheme === 'dark' ? themes.oneDark : themes.oneLight;
+    const iconColor = colorScheme === 'dark' ? '#8b949e' : '#666666';
 
     return (
         <View style={styles._VIEW_SAFE_fence}>
@@ -46,7 +50,7 @@ const FenceBlock = React.memo(function FenceBlock({
                                 <Text style={styles.fence_copy_text}>Copied!</Text>
                             ) : (
                                 <MaterialDesignIcons
-                                    color={ICON_COLOR}
+                                    color={iconColor}
                                     name="content-copy"
                                     size={15}
                                 />
@@ -56,7 +60,7 @@ const FenceBlock = React.memo(function FenceBlock({
                 </View>
             )}
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <Highlight theme={themes.oneLight} code={code} language={language || 'text'}>
+                <Highlight theme={prismTheme} code={code} language={language || 'text'}>
                     {({tokens, getTokenProps}) => (
                         <View style={styles._VIEW_SAFE_fence_code}>
                             {tokens.map((line, lineIndex) => (
@@ -95,8 +99,6 @@ const FenceBlock = React.memo(function FenceBlock({
         </View>
     );
 });
-
-const ICON_COLOR = '#666666';
 
 const localStyles = StyleSheet.create({
     codeLine: {

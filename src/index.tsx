@@ -10,7 +10,7 @@ import {getRenderer} from './lib/view/createRenderer';
 import {underlinePlugin} from './lib/view/plugins/underline';
 import parser from './lib/view/parser';
 import renderRules from './lib/view/renderRules';
-import {styles as defaultStyles} from './lib/view/styles';
+import {darkStyles, styles as defaultStyles} from './lib/view/styles';
 import textStyleProps from './lib/view/data/textStyleProps';
 import getUniqueID from './lib/view/util/getUniqueID';
 import hasParents from './lib/view/util/hasParents';
@@ -30,6 +30,7 @@ export * from './lib/editor';
 
 export {
     AstRenderer,
+    darkStyles,
     FitImage,
     createMarkdownIt,
     getUniqueID,
@@ -64,6 +65,7 @@ export type {
 export interface MarkdownProps {
     allowedImageHandlers?: string[];
     children: string | ASTNode[];
+    colorScheme?: 'light' | 'dark';
     debugPrintTree?: boolean;
     defaultImageHandler?: string | null;
     markdownit?: MarkdownParser;
@@ -86,6 +88,7 @@ const MarkdownComponent = React.memo(function MarkdownMemo({
                                                                style = null,
                                                                mergeStyle = true,
                                                                markdownit = createMarkdownIt(),
+                                                               colorScheme,
                                                                onCopyCode,
                                                                onLinkPress,
                                                                maxTopLevelChildren = null,
@@ -116,9 +119,11 @@ const MarkdownComponent = React.memo(function MarkdownMemo({
                     defaultImageHandler,
                     debugPrintTree,
                     onCopyCode,
+                    colorScheme,
                 ),
             [
                 allowedImageHandlers,
+                colorScheme,
                 debugPrintTree,
                 defaultImageHandler,
                 maxTopLevelChildren,

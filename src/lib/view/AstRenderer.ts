@@ -18,6 +18,8 @@ export default class AstRenderer {
 
     private readonly _maxTopLevelChildren: number | null;
 
+    private readonly _colorScheme: 'light' | 'dark' | undefined;
+
     private readonly _onCopyCode: OnCopyCode | undefined;
 
     private readonly _onLinkPress: OnLinkPress | undefined;
@@ -38,6 +40,7 @@ export default class AstRenderer {
         defaultImageHandler: string | null = null,
         debugPrintTree = false,
         onCopyCode?: OnCopyCode,
+        colorScheme?: 'light' | 'dark',
     ) {
         this._renderRules = renderRules;
         this._style = style;
@@ -48,6 +51,7 @@ export default class AstRenderer {
         this._defaultImageHandler = defaultImageHandler;
         this._debugPrintTree = debugPrintTree;
         this._onCopyCode = onCopyCode;
+        this._colorScheme = colorScheme;
     }
 
     public getRenderFunction(type: string): RenderRule {
@@ -112,6 +116,7 @@ export default class AstRenderer {
                 [...parentNodes],
                 this._style,
                 this._onCopyCode,
+                this._colorScheme,
             );
         }
 

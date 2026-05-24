@@ -240,6 +240,7 @@ const renderRules = (Text: TextComponent): RenderRules => ({
         _parent,
         styles,
         onCopyCode?: RenderRuleExtra,
+        colorScheme?: RenderRuleExtra,
     ) => {
         const language = typeof node.sourceInfo === 'string'
             ? node.sourceInfo.trim().split(/\s+/)[0] ?? ''
@@ -248,6 +249,7 @@ const renderRules = (Text: TextComponent): RenderRules => ({
             <FenceBlock
                 key={node.key}
                 code={trimTrailingNewLine(node.content)}
+                colorScheme={colorScheme === 'dark' ? 'dark' : 'light'}
                 language={language}
                 styles={styles}
                 onCopyCode={typeof onCopyCode === 'function' ? onCopyCode as OnCopyCode : undefined}

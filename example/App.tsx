@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {Alert, FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, View,} from 'react-native';
+import {Alert, FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, useColorScheme, View,} from 'react-native';
 import {MaterialDesignIcons} from '@react-native-vector-icons/material-design-icons';
 import markdownItContainer from 'markdown-it-container';
 
@@ -116,7 +116,45 @@ export const usesStructuredBubbleLayout = (markdown: string): boolean => {
     );
 };
 
-const getMarkdownStyles = (isOwnMessage: boolean): MarkdownStyleMap => ({
+const LIGHT_CHROME = {
+    background: '#EAF0F5',
+    headerBg: '#F5F8FB',
+    headerBorder: '#D7E0E8',
+    composerBg: '#F5F8FB',
+    composerBorder: '#D7E0E8',
+    demoBubbleBg: '#FFFFFF',
+    demoBubbleBorder: '#D9E2EB',
+    eyebrow: '#0A66C2',
+    title: '#13202B',
+    subtitle: '#526171',
+    replayBg: '#EBF3FF',
+    replayBorder: '#BFDBFE',
+    replayIcon: '#0A66C2',
+    replayText: '#0A66C2',
+    sendEnabled: '#111E2B',
+    sendDisabled: '#B9C3CC',
+};
+
+const DARK_CHROME = {
+    background: '#0d1117',
+    headerBg: '#161b22',
+    headerBorder: '#30363d',
+    composerBg: '#161b22',
+    composerBorder: '#30363d',
+    demoBubbleBg: '#1c2128',
+    demoBubbleBorder: '#30363d',
+    eyebrow: '#58a6ff',
+    title: '#e6edf3',
+    subtitle: '#8b949e',
+    replayBg: '#0d2146',
+    replayBorder: '#1f6feb',
+    replayIcon: '#58a6ff',
+    replayText: '#58a6ff',
+    sendEnabled: '#e6edf3',
+    sendDisabled: '#30363d',
+};
+
+const getMarkdownStyles = (isOwnMessage: boolean, dark = false): MarkdownStyleMap => ({
     body: {
         width: '100%',
     },
@@ -127,17 +165,17 @@ const getMarkdownStyles = (isOwnMessage: boolean): MarkdownStyleMap => ({
         flex: 1,
     },
     code_block: {
-        backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.16)' : '#EFF4F8',
-        borderColor: isOwnMessage ? 'rgba(255,255,255,0.22)' : '#CCD6E0',
-        color: isOwnMessage ? '#F8FBFF' : '#16202A',
+        backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.16)' : (dark ? '#161b22' : '#EFF4F8'),
+        borderColor: isOwnMessage ? 'rgba(255,255,255,0.22)' : (dark ? '#30363d' : '#CCD6E0'),
+        color: isOwnMessage ? '#F8FBFF' : (dark ? '#e6edf3' : '#16202A'),
     },
     code_inline: {
-        backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.16)' : '#EFF4F8',
-        borderColor: isOwnMessage ? 'rgba(255,255,255,0.22)' : '#CCD6E0',
-        color: isOwnMessage ? '#F8FBFF' : '#16202A',
+        backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.16)' : (dark ? '#161b22' : '#EFF4F8'),
+        borderColor: isOwnMessage ? 'rgba(255,255,255,0.22)' : (dark ? '#30363d' : '#CCD6E0'),
+        color: isOwnMessage ? '#F8FBFF' : (dark ? '#e6edf3' : '#16202A'),
     },
     container_warning: {
-        backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.12)' : '#FFF4E5',
+        backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.12)' : (dark ? 'rgba(245,180,65,0.10)' : '#FFF4E5'),
         borderColor: isOwnMessage ? 'rgba(255,255,255,0.34)' : '#F5B041',
         borderLeftWidth: 4,
         borderRadius: 12,
@@ -147,83 +185,60 @@ const getMarkdownStyles = (isOwnMessage: boolean): MarkdownStyleMap => ({
         paddingVertical: 10,
         width: '100%',
     },
-    container_warning_content: {
-        width: '100%',
-    },
+    container_warning_content: {width: '100%'},
     container_warning_title: {
-        color: isOwnMessage ? '#FFFFFF' : '#8A3B12',
+        color: isOwnMessage ? '#FFFFFF' : (dark ? '#F5B041' : '#8A3B12'),
         fontSize: 12,
         fontWeight: '800',
         letterSpacing: 0.6,
         marginBottom: 6,
         textTransform: 'uppercase',
     },
-    fence: {
-        backgroundColor: isOwnMessage ? 'rgba(255,255,255,0.16)' : '#EFF4F8',
-        borderColor: isOwnMessage ? 'rgba(255,255,255,0.22)' : '#CCD6E0',
-        color: isOwnMessage ? '#F8FBFF' : '#16202A',
-    },
-    heading1: {
-        color: isOwnMessage ? '#F8FBFF' : '#14212B',
-        fontSize: 28,
-    },
-    heading2: {
-        color: isOwnMessage ? '#F8FBFF' : '#14212B',
-        fontSize: 22,
-    },
-    heading3: {
-        color: isOwnMessage ? '#F8FBFF' : '#14212B',
-        fontSize: 18,
-    },
+    ...(isOwnMessage ? {
+        fence: {borderColor: 'rgba(255,255,255,0.22)'},
+    } : {}),
+    heading1: {color: isOwnMessage ? '#F8FBFF' : (dark ? '#e6edf3' : '#14212B'), fontSize: 28},
+    heading2: {color: isOwnMessage ? '#F8FBFF' : (dark ? '#e6edf3' : '#14212B'), fontSize: 22},
+    heading3: {color: isOwnMessage ? '#F8FBFF' : (dark ? '#e6edf3' : '#14212B'), fontSize: 18},
     link: {
-        color: isOwnMessage ? '#FFFFFF' : '#0A66C2',
+        color: isOwnMessage ? '#FFFFFF' : (dark ? '#58a6ff' : '#0A66C2'),
         textDecorationLine: 'underline',
     },
-    list_item: {
-        width: '100%',
-    },
-    ordered_list: {
-        width: '100%',
-    },
-    ordered_list_content: {
-        flex: 1,
-    },
-    paragraph: {
-        marginBottom: 8,
-        marginTop: 0,
-    },
+    list_item: {width: '100%'},
+    ordered_list: {width: '100%'},
+    ordered_list_content: {flex: 1},
+    paragraph: {marginBottom: 8, marginTop: 0},
     strong: {
-        color: isOwnMessage ? '#FFFFFF' : '#10212E',
+        color: isOwnMessage ? '#FFFFFF' : (dark ? '#ffffff' : '#10212E'),
         fontWeight: '700',
     },
     table: {
         width: '100%',
-        borderColor: isOwnMessage ? 'rgba(255,255,255,0.28)' : '#CCD6E0',
+        borderColor: isOwnMessage ? 'rgba(255,255,255,0.28)' : (dark ? '#30363d' : '#CCD6E0'),
     },
-    tbody: {
-        width: '100%',
-    },
+    tbody: {width: '100%'},
     text: {
-        color: isOwnMessage ? '#F8FBFF' : '#10212E',
+        color: isOwnMessage ? '#F8FBFF' : (dark ? '#e6edf3' : '#10212E'),
         fontSize: 15,
         lineHeight: 22,
     },
-    thead: {
-        width: '100%',
-    },
-    tr: {
-        width: '100%',
-    },
+    thead: {width: '100%'},
+    tr: {width: '100%'},
 });
 
 function App(): React.JSX.Element {
+    const systemColorScheme = useColorScheme();
+    const isDark = systemColorScheme === 'dark';
+    const colorScheme = isDark ? 'dark' : 'light';
+    const chrome = isDark ? DARK_CHROME : LIGHT_CHROME;
+
     const listRef = useRef<FlatList<ChatMessage>>(null);
     const messageCountRef = useRef(INITIAL_MESSAGES.length + 1);
     const streamPositionRef = useRef(0);
     const streamIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [draft, setDraft] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
-    const composerPreviewStyle = useMemo(() => getMarkdownStyles(false), []);
+    const composerPreviewStyle = useMemo(() => getMarkdownStyles(false, isDark), [isDark]);
 
     const startStreamingDemo = useCallback((): void => {
         if (streamIntervalRef.current) {
@@ -389,8 +404,9 @@ function App(): React.JSX.Element {
         const isOwnMessage = item.author === 'you';
         const usesWideBubble =
             item.streaming !== undefined || usesStructuredBubbleLayout(item.markdown);
-        const markdownStyles = getMarkdownStyles(isOwnMessage);
-        const cursorColor = isOwnMessage ? '#FFFFFF' : '#10212E';
+        const markdownStyles = getMarkdownStyles(isOwnMessage, isDark);
+        const messageColorScheme = isOwnMessage ? 'light' : colorScheme;
+        const cursorColor = isOwnMessage ? '#FFFFFF' : (isDark ? '#e6edf3' : '#10212E');
 
         return (
             <View
@@ -403,7 +419,9 @@ function App(): React.JSX.Element {
                     style={[
                         styles.messageBubble,
                         usesWideBubble ? styles.structuredMessageBubble : null,
-                        isOwnMessage ? styles.ownMessageBubble : styles.demoMessageBubble,
+                        isOwnMessage
+                        ? styles.ownMessageBubble
+                        : [styles.demoMessageBubble, {backgroundColor: chrome.demoBubbleBg, borderColor: chrome.demoBubbleBorder}],
                     ]}
                 >
                     <Text style={styles.messageAuthor}>
@@ -411,6 +429,7 @@ function App(): React.JSX.Element {
                     </Text>
                     {item.streaming !== undefined ? (
                         <MarkdownStream
+                            colorScheme={messageColorScheme}
                             cursorColor={cursorColor}
                             markdownit={warningMarkdownIt}
                             onCopyCode={handleCopyCode}
@@ -422,6 +441,7 @@ function App(): React.JSX.Element {
                         </MarkdownStream>
                     ) : (
                         <Markdown
+                            colorScheme={messageColorScheme}
                             markdownit={warningMarkdownIt}
                             onCopyCode={handleCopyCode}
                             rules={warningRules}
@@ -436,18 +456,18 @@ function App(): React.JSX.Element {
     };
 
     return (
-        <View style={styles.safeArea}>
-            <StatusBar barStyle="dark-content"/>
+        <View style={[styles.safeArea, {backgroundColor: chrome.background}]}>
+            <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'}/>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
                 style={styles.flex}
             >
-                <View style={styles.screen}>
-                    <View style={styles.header}>
-                        <Text style={styles.eyebrow}>Example App 2</Text>
-                        <Text style={styles.title}>Markdown Chat</Text>
-                        <Text style={styles.subtitle}>
+                <View style={[styles.screen, {backgroundColor: chrome.background}]}>
+                    <View style={[styles.header, {backgroundColor: chrome.headerBg, borderBottomColor: chrome.headerBorder}]}>
+                        <Text style={[styles.eyebrow, {color: chrome.eyebrow}]}>Example App 2</Text>
+                        <Text style={[styles.title, {color: chrome.title}]}>Markdown Chat</Text>
+                        <Text style={[styles.subtitle, {color: chrome.subtitle}]}>
                             Send messages with the composer below and render them as markdown
                             bubbles in the conversation.
                         </Text>
@@ -455,27 +475,28 @@ function App(): React.JSX.Element {
                             accessibilityLabel="Replay streaming demo"
                             accessibilityRole="button"
                             onPress={startStreamingDemo}
-                            style={styles.replayButton}
+                            style={[styles.replayButton, {backgroundColor: chrome.replayBg, borderColor: chrome.replayBorder}]}
                         >
                             <MaterialDesignIcons
-                                color="#0A66C2"
+                                color={chrome.replayIcon}
                                 name="refresh"
                                 size={14}
                             />
-                            <Text style={styles.replayButtonText}>Replay streaming demo</Text>
+                            <Text style={[styles.replayButtonText, {color: chrome.replayText}]}>Replay streaming demo</Text>
                         </Pressable>
                     </View>
 
                     <FlatList
                         contentContainerStyle={styles.messageListContent}
                         data={messages}
+                        extraData={colorScheme}
                         keyExtractor={(item) => item.id}
                         ref={listRef}
                         renderItem={renderMessage}
                         style={styles.messageList}
                     />
 
-                    <View style={styles.composerShell}>
+                    <View style={[styles.composerShell, {backgroundColor: chrome.composerBg, borderTopColor: chrome.composerBorder}]}>
                         <View style={styles.composerCard}>
                             <MarkdownComposer
                                 expandedToolbarItems={composerToolbarItems}
@@ -503,10 +524,10 @@ function App(): React.JSX.Element {
                             onPress={handleSend}
                             style={[
                                 styles.sendButton,
-                                canSend ? styles.sendButtonEnabled : styles.sendButtonDisabled,
+                                {backgroundColor: canSend ? chrome.sendEnabled : chrome.sendDisabled},
                             ]}
                         >
-                            <Text style={styles.sendButtonText}>Send</Text>
+                            <Text style={[styles.sendButtonText, {color: isDark ? '#0d1117' : '#FFFFFF'}]}>Send</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -521,8 +542,6 @@ const styles = StyleSheet.create({
     },
     composerShell: {
         alignItems: 'flex-end',
-        backgroundColor: '#F5F8FB',
-        borderTopColor: '#D7E0E8',
         borderTopWidth: 1,
         flexDirection: 'row',
         gap: 12,
@@ -530,15 +549,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 14,
     },
-    demoMessageBubble: {
-        backgroundColor: '#FFFFFF',
-        borderColor: '#D9E2EB',
-    },
+    demoMessageBubble: {},
     demoMessageRow: {
         justifyContent: 'flex-start',
     },
     eyebrow: {
-        color: '#0A66C2',
         fontSize: 12,
         fontWeight: '700',
         letterSpacing: 1,
@@ -547,8 +562,6 @@ const styles = StyleSheet.create({
     replayButton: {
         alignItems: 'center',
         alignSelf: 'flex-start',
-        backgroundColor: '#EBF3FF',
-        borderColor: '#BFDBFE',
         borderRadius: 20,
         borderWidth: 1,
         flexDirection: 'row',
@@ -557,7 +570,6 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
     },
     replayButtonText: {
-        color: '#0A66C2',
         fontSize: 13,
         fontWeight: '600',
     },
@@ -565,8 +577,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
-        backgroundColor: '#F5F8FB',
-        borderBottomColor: '#D7E0E8',
         borderBottomWidth: 1,
         gap: 6,
         paddingHorizontal: 20,
@@ -606,11 +616,9 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     safeArea: {
-        backgroundColor: '#EAF0F5',
         flex: 1,
     },
     screen: {
-        backgroundColor: '#EAF0F5',
         flex: 1,
     },
     structuredMessageBubble: {
@@ -624,25 +632,16 @@ const styles = StyleSheet.create({
         minWidth: 84,
         paddingHorizontal: 18,
     },
-    sendButtonDisabled: {
-        backgroundColor: '#B9C3CC',
-    },
-    sendButtonEnabled: {
-        backgroundColor: '#111E2B',
-    },
     sendButtonText: {
-        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '700',
     },
     subtitle: {
-        color: '#526171',
         fontSize: 14,
         lineHeight: 20,
         maxWidth: 520,
     },
     title: {
-        color: '#13202B',
         fontSize: 28,
         fontWeight: '800',
     },

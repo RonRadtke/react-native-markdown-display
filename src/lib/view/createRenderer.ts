@@ -2,7 +2,7 @@ import {StyleSheet, Text} from 'react-native';
 
 import AstRenderer from './AstRenderer';
 import renderRules from './renderRules';
-import {styles as defaultStyles} from './styles';
+import {darkStyles, styles as defaultStyles} from './styles';
 import removeTextStyleProps from './util/removeTextStyleProps';
 
 import type {MarkdownStyleMap, MarkdownStyleObject, OnCopyCode, OnLinkPress, RenderRules, TextComponent,} from './types';
@@ -11,7 +11,9 @@ import type {ReactNode} from 'react';
 export const getStyle = (
     mergeStyle: boolean,
     style: MarkdownStyleMap | null,
+    colorScheme?: 'light' | 'dark',
 ): MarkdownStyleMap => {
+    const baseStyles = colorScheme === 'dark' ? darkStyles : defaultStyles;
     const useStyles: Record<string, MarkdownStyleObject> = {};
 
     if (mergeStyle && style !== null) {
@@ -21,15 +23,15 @@ export const getStyle = (
             };
         });
 
-        Object.keys(defaultStyles).forEach((styleName) => {
+        Object.keys(baseStyles).forEach((styleName) => {
             useStyles[styleName] = {
-                ...defaultStyles[styleName],
+                ...baseStyles[styleName],
                 ...(StyleSheet.flatten(style[styleName]) ?? {}),
             };
         });
     }
     else {
-        Object.assign(useStyles, defaultStyles);
+        Object.assign(useStyles, baseStyles);
 
         if (style !== null) {
             Object.keys(style).forEach((styleName) => {
@@ -62,6 +64,7 @@ export const getRenderer = (
     defaultImageHandler: string | null,
     debugPrintTree: boolean,
     onCopyCode?: OnCopyCode,
+    colorScheme?: 'light' | 'dark',
 ): AstRenderer => {
     if (renderer && rules) {
         console.warn(
@@ -79,7 +82,7 @@ export const getRenderer = (
         return renderer;
     }
 
-    const useStyles = getStyle(mergeStyle, style);
+    const useStyles = getStyle(mergeStyle, style, colorScheme);
 
     return new AstRenderer(
         {
@@ -94,5 +97,6 @@ export const getRenderer = (
         defaultImageHandler,
         debugPrintTree,
         onCopyCode,
+        colorScheme,
     );
 };

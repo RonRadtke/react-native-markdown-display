@@ -69,6 +69,7 @@ export interface MarkdownStreamProps {
     debugPrintTree?: boolean;
     defaultImageHandler?: string | null;
     markdownit?: MarkdownParser;
+    colorScheme?: 'light' | 'dark';
     maxTopLevelChildren?: number | null;
     mergeStyle?: boolean;
     onCopyCode?: OnCopyCode;
@@ -101,6 +102,7 @@ const MarkdownStream = React.memo(function MarkdownStream({
     defaultImageHandler = 'https://',
     markdownit = createMarkdownIt(),
     maxTopLevelChildren = null,
+    colorScheme,
     mergeStyle = true,
     onCopyCode,
     onLinkPress,
@@ -126,9 +128,11 @@ const MarkdownStream = React.memo(function MarkdownStream({
                 defaultImageHandler,
                 debugPrintTree,
                 onCopyCode,
+                colorScheme,
             ),
         [
             allowedImageHandlers,
+            colorScheme,
             debugPrintTree,
             defaultImageHandler,
             maxTopLevelChildren,

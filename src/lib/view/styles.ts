@@ -2,6 +2,12 @@ import {Platform} from 'react-native';
 
 import type {MarkdownStyleSheet} from './types';
 
+const monoFont = Platform.select({
+    ios: {fontFamily: 'Courier New'},
+    android: {fontFamily: 'monospace'},
+    default: {},
+});
+
 export const styles: MarkdownStyleSheet = {
     body: {},
     heading1: {
@@ -77,15 +83,7 @@ export const styles: MarkdownStyleSheet = {
         backgroundColor: '#f5f5f5',
         padding: 10,
         borderRadius: 4,
-        ...Platform.select({
-            ios: {
-                fontFamily: 'Courier New',
-            },
-            android: {
-                fontFamily: 'monospace',
-            },
-            default: {},
-        }),
+        ...monoFont,
     },
     code_block: {
         borderWidth: 1,
@@ -93,15 +91,7 @@ export const styles: MarkdownStyleSheet = {
         backgroundColor: '#f5f5f5',
         padding: 10,
         borderRadius: 4,
-        ...Platform.select({
-            ios: {
-                fontFamily: 'Courier New',
-            },
-            android: {
-                fontFamily: 'monospace',
-            },
-            default: {},
-        }),
+        ...monoFont,
     },
     fence: {
         borderWidth: 1,
@@ -122,11 +112,7 @@ export const styles: MarkdownStyleSheet = {
     fence_language_label: {
         fontSize: 11,
         color: '#666666',
-        ...Platform.select({
-            ios: {fontFamily: 'Courier New'},
-            android: {fontFamily: 'monospace'},
-            default: {},
-        }),
+        ...monoFont,
     },
     fence_copy_button: {
         paddingHorizontal: 6,
@@ -143,11 +129,7 @@ export const styles: MarkdownStyleSheet = {
     fence_token: {
         fontSize: 13,
         lineHeight: 19,
-        ...Platform.select({
-            ios: {fontFamily: 'Courier New'},
-            android: {fontFamily: 'monospace'},
-            default: {},
-        }),
+        ...monoFont,
     },
     table: {
         borderWidth: 1,
@@ -196,6 +178,103 @@ export const styles: MarkdownStyleSheet = {
         width: '100%',
         height: 1,
     },
+    softbreak: {},
+    pre: {},
+    inline: {},
+    span: {},
+};
+
+export const darkStyles: MarkdownStyleSheet = {
+    body: {},
+    heading1: {flexDirection: 'row', fontSize: 32},
+    heading2: {flexDirection: 'row', fontSize: 24},
+    heading3: {flexDirection: 'row', fontSize: 18},
+    heading4: {flexDirection: 'row', fontSize: 16},
+    heading5: {flexDirection: 'row', fontSize: 13},
+    heading6: {flexDirection: 'row', fontSize: 11},
+    hr: {backgroundColor: '#30363d', height: 1},
+    strong: {fontWeight: 'bold'},
+    em: {fontStyle: 'italic'},
+    ins: {textDecorationLine: 'underline'},
+    s: {textDecorationLine: 'line-through'},
+    blockquote: {
+        backgroundColor: '#161b22',
+        borderColor: '#3b434b',
+        borderLeftWidth: 4,
+        marginLeft: 5,
+        paddingHorizontal: 5,
+    },
+    bullet_list: {},
+    ordered_list: {},
+    list_item: {flexDirection: 'row', justifyContent: 'flex-start'},
+    bullet_list_icon: {marginLeft: 10, marginRight: 10},
+    bullet_list_content: {flex: 1},
+    ordered_list_icon: {marginLeft: 10, marginRight: 10},
+    ordered_list_content: {flex: 1},
+    code_inline: {
+        borderWidth: 1,
+        borderColor: '#30363d',
+        backgroundColor: '#161b22',
+        color: '#e6edf3',
+        padding: 10,
+        borderRadius: 4,
+        ...monoFont,
+    },
+    code_block: {
+        borderWidth: 1,
+        borderColor: '#30363d',
+        backgroundColor: '#161b22',
+        color: '#e6edf3',
+        padding: 10,
+        borderRadius: 4,
+        ...monoFont,
+    },
+    fence: {
+        borderWidth: 1,
+        borderColor: '#30363d',
+        borderRadius: 4,
+        overflow: 'hidden',
+    },
+    fence_header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        backgroundColor: '#010409',
+        borderBottomWidth: 1,
+        borderBottomColor: '#30363d',
+    },
+    fence_language_label: {
+        fontSize: 11,
+        color: '#8b949e',
+        ...monoFont,
+    },
+    fence_copy_button: {paddingHorizontal: 6, paddingVertical: 2},
+    fence_copy_text: {fontSize: 11, color: '#8b949e'},
+    fence_code: {backgroundColor: '#0d1117', padding: 10},
+    fence_token: {fontSize: 13, lineHeight: 19, ...monoFont},
+    table: {borderWidth: 1, borderColor: '#30363d', borderRadius: 3},
+    thead: {},
+    tbody: {},
+    th: {flex: 1, padding: 5},
+    tr: {borderBottomWidth: 1, borderColor: '#30363d', flexDirection: 'row'},
+    td: {flex: 1, padding: 5},
+    link: {textDecorationLine: 'underline', marginBottom: -4},
+    blocklink: {flex: 1, borderColor: '#30363d', borderBottomWidth: 1},
+    image: {flex: 1},
+    text: {},
+    textgroup: {},
+    paragraph: {
+        marginTop: 10,
+        marginBottom: 10,
+        flexWrap: 'wrap',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+        width: '100%',
+    },
+    hardbreak: {width: '100%', height: 1},
     softbreak: {},
     pre: {},
     inline: {},
