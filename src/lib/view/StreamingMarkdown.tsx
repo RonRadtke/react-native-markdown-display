@@ -9,7 +9,7 @@ import {sealIncompleteMarkdown} from './util/sealIncompleteMarkdown';
 
 import type {ReactNode} from 'react';
 import type {StyleProp, ViewStyle} from 'react-native';
-import type {MarkdownParser, MarkdownStyleMap, OnLinkPress, RenderRules, TextComponent} from './types';
+import type {MarkdownParser, MarkdownStyleMap, OnCopyCode, OnLinkPress, RenderRules, TextComponent} from './types';
 
 const CURSOR_BLINK_ON_MS = 600;
 const CURSOR_BLINK_OFF_MS = 600;
@@ -71,6 +71,7 @@ export interface MarkdownStreamProps {
     markdownit?: MarkdownParser;
     maxTopLevelChildren?: number | null;
     mergeStyle?: boolean;
+    onCopyCode?: OnCopyCode;
     onLinkPress?: OnLinkPress;
     renderer?: AstRenderer | null;
     rules?: RenderRules | null;
@@ -101,6 +102,7 @@ const MarkdownStream = React.memo(function MarkdownStream({
     markdownit = createMarkdownIt(),
     maxTopLevelChildren = null,
     mergeStyle = true,
+    onCopyCode,
     onLinkPress,
     renderer = null,
     rules = null,
@@ -123,6 +125,7 @@ const MarkdownStream = React.memo(function MarkdownStream({
                 allowedImageHandlers,
                 defaultImageHandler,
                 debugPrintTree,
+                onCopyCode,
             ),
         [
             allowedImageHandlers,
@@ -130,6 +133,7 @@ const MarkdownStream = React.memo(function MarkdownStream({
             defaultImageHandler,
             maxTopLevelChildren,
             mergeStyle,
+            onCopyCode,
             onLinkPress,
             renderer,
             rules,

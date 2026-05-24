@@ -7,7 +7,9 @@ import textStyleProps from './data/textStyleProps';
 import hasParents from './util/hasParents';
 import openUrl from './util/openUrl';
 
-import type {ASTNode, MarkdownStyleObject, OnLinkPress, RenderRuleExtra, RenderRules, TextComponent,} from './types';
+import FenceBlock from './FenceBlock';
+
+import type {ASTNode, MarkdownStyleObject, OnCopyCode, OnLinkPress, RenderRuleExtra, RenderRules, TextComponent,} from './types';
 
 type StylePropertyValue = MarkdownStyleObject[keyof MarkdownStyleObject];
 
@@ -28,7 +30,7 @@ const getStyleObject = (value?: RenderRuleExtra): MarkdownStyleObject => {
 };
 
 const getOnLinkPress = (value?: RenderRuleExtra): OnLinkPress | undefined =>
-    typeof value === 'function' ? value : undefined;
+    typeof value === 'function' ? value as OnLinkPress : undefined;
 
 const getAllowedImageHandlers = (value?: RenderRuleExtra): string[] =>
     Array.isArray(value)
@@ -237,15 +239,21 @@ const renderRules = (Text: TextComponent): RenderRules => ({
         _children,
         _parent,
         styles,
-        inheritedStyles?: RenderRuleExtra,
-    ) => (
-        <Text
-            key={node.key}
-            style={[getStyleObject(inheritedStyles), styles.fence]}
-        >
-            {trimTrailingNewLine(node.content)}
-        </Text>
-    ),
+        onCopyCode?: RenderRuleExtra,
+    ) => {
+        const language = typeof node.sourceInfo === 'string'
+            ? node.sourceInfo.trim().split(/\s+/)[0] ?? ''
+            : '';
+        return (
+            <FenceBlock
+                key={node.key}
+                code={trimTrailingNewLine(node.content)}
+                language={language}
+                styles={styles}
+                onCopyCode={typeof onCopyCode === 'function' ? onCopyCode as OnCopyCode : undefined}
+            />
+        );
+    },
     table: (node, children, _parent, styles) => (
         <View key={node.key} style={styles._VIEW_SAFE_table}>
             {children}

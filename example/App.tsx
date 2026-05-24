@@ -1,9 +1,9 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, View,} from 'react-native';
+import {Alert, FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform, Pressable, StatusBar, StyleSheet, Text, View,} from 'react-native';
 import {MaterialDesignIcons} from '@react-native-vector-icons/material-design-icons';
 import markdownItContainer from 'markdown-it-container';
 
-import Markdown, {createMarkdownIt, MarkdownComposer, MarkdownStream, type MarkdownStyleMap, type MarkdownToolbarItem, type RenderRules} from '../src';
+import Markdown, {createMarkdownIt, MarkdownComposer, MarkdownStream, type MarkdownStyleMap, type MarkdownToolbarItem, type OnCopyCode, type RenderRules} from '../src';
 
 interface ChatMessage {
     author: 'demo' | 'you';
@@ -28,11 +28,12 @@ const STREAM_DEMO_CONTENT =
     '### Inline formats\n\n' +
     'Combine *italic*, **bold**, ~~strikethrough~~, and `inline code` freely in the same paragraph.\n\n' +
     '### Code block\n\n' +
-    '```typescript\n' +
-    'function greet(name: string): string {\n' +
+    '```javascript\n' +
+    'function greet(name) {\n' +
     '    return `Hello, ${name}!`;\n' +
     '}\n\n' +
-    'console.log(greet("Claude"));\n' +
+    'const result = greet("Hawk Intelligent Technologies");\n' +
+    'console.log(result);\n' +
     '```\n\n' +
     'The closing fence is sealed automatically while streaming, so the block never collapses mid-stream.\n\n' +
     '### Lists\n\n' +
@@ -300,6 +301,10 @@ function App(): React.JSX.Element {
 
     const canSend = draft.trim().length > 0;
 
+    const handleCopyCode: OnCopyCode = useCallback((_code, language) => {
+        Alert.alert('Copied!', language ? `${language} code copied to clipboard.` : 'Code copied to clipboard.');
+    }, []);
+
     const composerToolbarItems = useMemo<readonly MarkdownToolbarItem[]>(
         () => [
             {command: 'bold' as const, label: createToolbarIcon('format-bold')},
@@ -408,6 +413,7 @@ function App(): React.JSX.Element {
                         <MarkdownStream
                             cursorColor={cursorColor}
                             markdownit={warningMarkdownIt}
+                            onCopyCode={handleCopyCode}
                             rules={warningRules}
                             streaming={item.streaming}
                             style={markdownStyles}
@@ -417,6 +423,7 @@ function App(): React.JSX.Element {
                     ) : (
                         <Markdown
                             markdownit={warningMarkdownIt}
+                            onCopyCode={handleCopyCode}
                             rules={warningRules}
                             style={markdownStyles}
                         >

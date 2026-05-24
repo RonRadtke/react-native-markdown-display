@@ -23,7 +23,7 @@ import MarkdownStream from './lib/view/StreamingMarkdown';
 
 import type {CreateMarkdownItOptions} from './lib/view/createMarkdownIt';
 import type {MarkdownItPlugin} from './lib/view/plugins/underline';
-import type {ASTNode, MarkdownParser, MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRules, TextComponent,} from './lib/view/types';
+import type {ASTNode, MarkdownParser, MarkdownStyleMap, MarkdownStyleObject, OnCopyCode, OnLinkPress, RenderRules, TextComponent,} from './lib/view/types';
 import type {MarkdownStreamProps} from './lib/view/StreamingMarkdown';
 
 export * from './lib/editor';
@@ -56,6 +56,7 @@ export type {
     MarkdownStreamProps,
     MarkdownStyleMap,
     MarkdownStyleObject,
+    OnCopyCode,
     OnLinkPress,
     RenderRules,
 };
@@ -68,6 +69,7 @@ export interface MarkdownProps {
     markdownit?: MarkdownParser;
     maxTopLevelChildren?: number | null;
     mergeStyle?: boolean;
+    onCopyCode?: OnCopyCode;
     onLinkPress?: OnLinkPress;
     renderer?: AstRenderer | null;
     rules?: RenderRules | null;
@@ -84,6 +86,7 @@ const MarkdownComponent = React.memo(function MarkdownMemo({
                                                                style = null,
                                                                mergeStyle = true,
                                                                markdownit = createMarkdownIt(),
+                                                               onCopyCode,
                                                                onLinkPress,
                                                                maxTopLevelChildren = null,
                                                                topLevelMaxExceededItem =
@@ -112,6 +115,7 @@ const MarkdownComponent = React.memo(function MarkdownMemo({
                     allowedImageHandlers,
                     defaultImageHandler,
                     debugPrintTree,
+                    onCopyCode,
                 ),
             [
                 allowedImageHandlers,
@@ -119,6 +123,7 @@ const MarkdownComponent = React.memo(function MarkdownMemo({
                 defaultImageHandler,
                 maxTopLevelChildren,
                 mergeStyle,
+                onCopyCode,
                 onLinkPress,
                 renderer,
                 rules,

@@ -106,16 +106,46 @@ export const styles: MarkdownStyleSheet = {
     fence: {
         borderWidth: 1,
         borderColor: '#CCCCCC',
+        borderRadius: 4,
+        overflow: 'hidden',
+    },
+    fence_header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        backgroundColor: '#e8e8e8',
+        borderBottomWidth: 1,
+        borderBottomColor: '#CCCCCC',
+    },
+    fence_language_label: {
+        fontSize: 11,
+        color: '#666666',
+        ...Platform.select({
+            ios: {fontFamily: 'Courier New'},
+            android: {fontFamily: 'monospace'},
+            default: {},
+        }),
+    },
+    fence_copy_button: {
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+    },
+    fence_copy_text: {
+        fontSize: 11,
+        color: '#666666',
+    },
+    fence_code: {
         backgroundColor: '#f5f5f5',
         padding: 10,
-        borderRadius: 4,
+    },
+    fence_token: {
+        fontSize: 13,
+        lineHeight: 19,
         ...Platform.select({
-            ios: {
-                fontFamily: 'Courier New',
-            },
-            android: {
-                fontFamily: 'monospace',
-            },
+            ios: {fontFamily: 'Courier New'},
+            android: {fontFamily: 'monospace'},
             default: {},
         }),
     },

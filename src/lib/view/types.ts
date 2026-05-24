@@ -17,6 +17,7 @@ export type MarkdownData =
 export type RenderRuleExtra =
     | MarkdownStyleObject
     | OnLinkPress
+    | OnCopyCode
     | string[]
     | string
     | null
@@ -53,6 +54,7 @@ export interface ASTNode {
 }
 
 export type OnLinkPress = (url: string) => boolean;
+export type OnCopyCode = (code: string, language: string) => void;
 
 export type RenderRule = (
     node: ASTNode,

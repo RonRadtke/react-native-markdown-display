@@ -4,7 +4,7 @@ import textStyleProps from './data/textStyleProps';
 import convertAdditionalStyles from './util/convertAdditionalStyles';
 import getUniqueID from './util/getUniqueID';
 
-import type {ASTNode, MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRule, RenderRuleExtra, RenderRules,} from './types';
+import type {ASTNode, MarkdownStyleMap, MarkdownStyleObject, OnCopyCode, OnLinkPress, RenderRule, RenderRuleExtra, RenderRules,} from './types';
 import type {ReactNode} from 'react';
 
 type StylePropertyValue = MarkdownStyleObject[keyof MarkdownStyleObject];
@@ -17,6 +17,8 @@ export default class AstRenderer {
     private readonly _defaultImageHandler: string | null;
 
     private readonly _maxTopLevelChildren: number | null;
+
+    private readonly _onCopyCode: OnCopyCode | undefined;
 
     private readonly _onLinkPress: OnLinkPress | undefined;
 
@@ -35,6 +37,7 @@ export default class AstRenderer {
         allowedImageHandlers: string[] = [],
         defaultImageHandler: string | null = null,
         debugPrintTree = false,
+        onCopyCode?: OnCopyCode,
     ) {
         this._renderRules = renderRules;
         this._style = style;
@@ -44,6 +47,7 @@ export default class AstRenderer {
         this._allowedImageHandlers = allowedImageHandlers;
         this._defaultImageHandler = defaultImageHandler;
         this._debugPrintTree = debugPrintTree;
+        this._onCopyCode = onCopyCode;
     }
 
     public getRenderFunction(type: string): RenderRule {
@@ -98,6 +102,16 @@ export default class AstRenderer {
                 this._style,
                 this._allowedImageHandlers,
                 this._defaultImageHandler,
+            );
+        }
+
+        if (node.type === 'fence') {
+            return renderFunction(
+                node,
+                children,
+                [...parentNodes],
+                this._style,
+                this._onCopyCode,
             );
         }
 

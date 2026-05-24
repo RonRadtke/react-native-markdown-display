@@ -5,7 +5,7 @@ import renderRules from './renderRules';
 import {styles as defaultStyles} from './styles';
 import removeTextStyleProps from './util/removeTextStyleProps';
 
-import type {MarkdownStyleMap, MarkdownStyleObject, OnLinkPress, RenderRules, TextComponent,} from './types';
+import type {MarkdownStyleMap, MarkdownStyleObject, OnCopyCode, OnLinkPress, RenderRules, TextComponent,} from './types';
 import type {ReactNode} from 'react';
 
 export const getStyle = (
@@ -61,6 +61,7 @@ export const getRenderer = (
     allowedImageHandlers: string[],
     defaultImageHandler: string | null,
     debugPrintTree: boolean,
+    onCopyCode?: OnCopyCode,
 ): AstRenderer => {
     if (renderer && rules) {
         console.warn(
@@ -92,5 +93,6 @@ export const getRenderer = (
         allowedImageHandlers,
         defaultImageHandler,
         debugPrintTree,
+        onCopyCode,
     );
 };
