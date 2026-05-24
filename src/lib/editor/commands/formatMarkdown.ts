@@ -140,6 +140,25 @@ export const applyBlockFormat = (
     const normalizedSelection = normalizeSelection(value, selection);
 
     if (format === 'code-block') {
+        const fencePrefix = '```\n';
+        const fenceSuffix = '\n```';
+
+        if (
+            normalizedSelection.start >= fencePrefix.length &&
+            value.slice(normalizedSelection.start - fencePrefix.length, normalizedSelection.start) === fencePrefix &&
+            value.slice(normalizedSelection.end, normalizedSelection.end + fenceSuffix.length) === fenceSuffix
+        ) {
+            const nextValue =
+                value.slice(0, normalizedSelection.start - fencePrefix.length) +
+                value.slice(normalizedSelection.start, normalizedSelection.end) +
+                value.slice(normalizedSelection.end + fenceSuffix.length);
+
+            return createResult(nextValue, {
+                start: normalizedSelection.start - fencePrefix.length,
+                end: normalizedSelection.end - fencePrefix.length,
+            });
+        }
+
         const selectedText = value.slice(
             normalizedSelection.start,
             normalizedSelection.end,

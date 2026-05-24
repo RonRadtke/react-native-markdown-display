@@ -292,6 +292,93 @@ describe('MarkdownTextInput', () => {
         );
     });
 
+    test('fires onCommand with the payload and the resulting value', async () => {
+        const onChangeText = jest.fn();
+        const onCommand = jest.fn();
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownTextInput
+                    onChangeText={onChangeText}
+                    onCommand={onCommand}
+                    selection={{start: 0, end: 5}}
+                    toolbarItems={[{command: 'bold', label: 'B'}]}
+                    value="hello"
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownTextInput');
+        }
+
+        const button = tree.root.find(
+            (node) => typeof node.props.onPress === 'function',
+        );
+
+        await renderer.act(async () => {
+            button.props.onPress();
+            await Promise.resolve();
+        });
+
+        expect(onChangeText).toHaveBeenCalledWith('**hello**');
+        expect(onCommand).toHaveBeenCalledWith(
+            {command: 'bold'},
+            {value: '**hello**', selection: {start: 2, end: 7}},
+        );
+    });
+
+    test('does not apply shortcuts when enableShortcuts is false', () => {
+        const onChangeText = jest.fn();
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownTextInput
+                    enableShortcuts={false}
+                    multiline
+                    onChangeText={onChangeText}
+                    value="- item"
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownTextInput');
+        }
+
+        const input = tree.root.findByType(TextInput);
+
+        renderer.act(() => {
+            input.props.onChangeText('- item\n');
+        });
+
+        expect(onChangeText).toHaveBeenCalledWith('- item\n');
+    });
+
+    test('renders no toolbar row when toolbarItems is empty', () => {
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownTextInput
+                    onChangeText={() => {}}
+                    toolbarItems={[]}
+                    value=""
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render MarkdownTextInput');
+        }
+
+        expect(
+            tree.root.findAll((node) => typeof node.props.onPress === 'function'),
+        ).toHaveLength(0);
+    });
+
     test('keeps the caret after an auto-continued ordered list when value updates are delayed', () => {
         jest.useFakeTimers();
 
