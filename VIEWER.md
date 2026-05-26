@@ -57,6 +57,8 @@ Less common props:
 
 | Prop | Default | Description |
 | --- | --- | --- |
+| `colorScheme` | `undefined` (light) | `'light'` or `'dark'` — selects the built-in dark style set for block elements |
+| `onCopyCode` | `undefined` | Callback fired when the user presses the copy button on a fenced code block. Signature: `(code: string, language: string) => void`. The copy button is only shown when this prop is provided. |
 | `renderer` | internal `AstRenderer` | Supply your own renderer instance |
 | `markdownit` | `createMarkdownIt()` | Custom `markdown-it` instance |
 | `textcomponent` | `Text` | Replace the base text component |
@@ -302,14 +304,196 @@ A practical workflow is:
 3. Check the node types in the logged AST.
 4. Add matching `rules` and optional `style` entries for those node types.
 
+## Dark Mode
+
+Pass `colorScheme="dark"` to activate the built-in dark style set for block and container elements (code blocks, fences, blockquotes, table borders, horizontal rules).
+
+```tsx
+import React from 'react';
+import {useColorScheme} from 'react-native';
+import Markdown from '@ronradtke/react-native-markdown-display';
+
+export default function Example(): React.JSX.Element {
+    const scheme = useColorScheme(); // 'light' | 'dark' | null
+
+    return (
+        <Markdown colorScheme={scheme === 'dark' ? 'dark' : 'light'}>
+            {'# Hello\n\n```js\nconst x = 1;\n```'}
+        </Markdown>
+    );
+}
+```
+
+### What `darkStyles` covers
+
+The built-in `darkStyles` (GitHub Dark palette) sets background and border colors for:
+
+- `code_inline`, `code_block` — inline and indented code
+- `fence`, `fence_header`, `fence_code` — fenced code blocks
+- `blockquote` — blockquote containers
+- `table`, `tr`, `hr`, `blocklink` — table and rule borders
+
+**Text, headings, and links are intentionally left unstyled** — the library does not know what foreground colors your app uses. Set them through the `style` prop or your own theme.
+
+### Overriding individual dark-mode colors
+
+With `mergeStyle={true}` (the default), anything in your `style` prop is merged on top of the base styles. You can override a single key without touching the rest:
+
+```tsx
+import React from 'react';
+import Markdown from '@ronradtke/react-native-markdown-display';
+
+export default function Example(): React.JSX.Element {
+    return (
+        <Markdown
+            colorScheme="dark"
+            style={{
+                body: {color: '#e6edf3'},
+                heading1: {color: '#ffffff'},
+                link: {color: '#58a6ff'},
+                // override just the fence background
+                fence: {borderColor: '#444c56'},
+            }}
+        >
+            {'# Hello\n\nSome **markdown**.'}
+        </Markdown>
+    );
+}
+```
+
+### Using `darkStyles` directly
+
+If you prefer to build your own merged style map outside the component, the base dark style object is exported:
+
+```tsx
+import Markdown, {darkStyles} from '@ronradtke/react-native-markdown-display';
+
+const myDarkStyle = {
+    ...darkStyles,
+    body: {color: '#e6edf3'},
+    heading1: {color: '#ffffff'},
+};
+
+<Markdown style={myDarkStyle} mergeStyle={false}>...</Markdown>
+```
+
+### Integration with theming libraries
+
+If you use React Native Paper, styled-components, or another library that manages your color scheme separately from `useColorScheme()`, source `colorScheme` from your own theme context so it stays in sync with manual theme toggles:
+
+```tsx
+// React Native Paper example
+import {useTheme} from 'react-native-paper';
+import Markdown from '@ronradtke/react-native-markdown-display';
+
+function MessageBubble({content}: {content: string}) {
+    const theme = useTheme();
+    const colorScheme = theme.dark ? 'dark' : 'light';
+
+    return <Markdown colorScheme={colorScheme}>{content}</Markdown>;
+}
+```
+
+Do not call `useColorScheme()` inside a library-agnostic component that also uses `useTheme()` — they can return different values if the user has toggled the theme manually.
+
+## Code Blocks
+
+### Syntax highlighting
+
+Fenced code blocks are automatically syntax-highlighted using `prism-react-renderer`. The language is read from the opening fence info string (e.g. ` ```typescript `). Unknown languages fall back to plain text.
+
+Long lines are horizontally scrollable — they never wrap inside a code block.
+
+The highlight theme follows `colorScheme`: `oneLight` for light, `oneDark` for dark.
+
+Style keys you can override for code blocks:
+
+| Key | Applies to |
+| --- | --- |
+| `fence` | Outer container `View` (border, borderRadius) |
+| `fence_header` | Header bar `View` (language label row) |
+| `fence_language_label` | Language label `Text` |
+| `fence_copy_button` | Copy button `Pressable` |
+| `fence_copy_text` | "Copied!" feedback `Text` |
+| `fence_code` | Code area `View` (background, padding) |
+| `fence_token` | Each syntax token `Text` (fontFamily, fontSize) |
+
+### Copy button
+
+The copy button is only rendered when you pass an `onCopyCode` callback. Your callback receives the raw code string and the language name; you handle the actual clipboard write:
+
+```tsx
+import React from 'react';
+import Clipboard from '@react-native-clipboard/clipboard';
+import Markdown from '@ronradtke/react-native-markdown-display';
+
+export default function Example(): React.JSX.Element {
+    return (
+        <Markdown
+            onCopyCode={(code, language) => {
+                Clipboard.setString(code);
+                console.log('Copied', language, 'snippet');
+            }}
+        >
+            {'```js\nconsole.log("hello");\n```'}
+        </Markdown>
+    );
+}
+```
+
+The button displays a clipboard icon while idle and switches to a "Copied!" label for 2 seconds after being pressed.
+
+## Streaming
+
+`MarkdownStream` is a streaming-safe wrapper around the same rendering pipeline. It accepts the same props as `Markdown` plus a few extras:
+
+| Prop | Default | Description |
+| --- | --- | --- |
+| `children` | required | Markdown string (AST not accepted) |
+| `streaming` | `false` | When `true`, seals open fences before parsing and shows a blinking cursor |
+| `cursorColor` | `'#000000'` | Color of the blinking cursor |
+| `cursorStyle` | `undefined` | Override the cursor `View` style |
+
+```tsx
+import React, {useEffect, useState} from 'react';
+import {MarkdownStream} from '@ronradtke/react-native-markdown-display';
+
+export default function StreamingMessage(): React.JSX.Element {
+    const [text, setText] = useState('');
+    const [streaming, setStreaming] = useState(true);
+
+    useEffect(() => {
+        // simulate token arrivals
+        const tokens = '# Hello\n\nThis is a **streamed** response.'.split(' ');
+        let i = 0;
+        const id = setInterval(() => {
+            setText(prev => prev + (i > 0 ? ' ' : '') + tokens[i]);
+            if (++i >= tokens.length) {
+                clearInterval(id);
+                setStreaming(false);
+            }
+        }, 80);
+        return () => clearInterval(id);
+    }, []);
+
+    return (
+        <MarkdownStream streaming={streaming} cursorColor="#333333">
+            {text}
+        </MarkdownStream>
+    );
+}
+```
+
 ## Useful Exports
 
 Viewer-related exports from the package root:
 
 - `Markdown` (default export)
+- `MarkdownStream`
 - `MarkdownIt`
 - `createMarkdownIt`
 - `underlinePlugin`
+- `darkStyles`
 - `parser`
 - `renderRules`
 - `styles`
@@ -318,6 +502,17 @@ Viewer-related exports from the package root:
 - `AstRenderer`
 - `openUrl`
 - `removeTextStyleProps`
+
+Types:
+
+- `MarkdownProps`
+- `MarkdownStreamProps`
+- `MarkdownStyleMap`
+- `MarkdownStyleObject`
+- `OnCopyCode`
+- `OnLinkPress`
+- `RenderRules`
+- `ASTNode`
 
 ## Notes
 

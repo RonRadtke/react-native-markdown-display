@@ -120,7 +120,7 @@ The `disabled` prop should prevent sending while the AI is still streaming.
 
 | Item | Notes |
 |---|---|
-| Dark mode support in example | All hardcoded colors; replace with a theme context |
+| Dark mode support in example | Done — `useColorScheme()` drives `LIGHT_CHROME`/`DARK_CHROME` palettes + `colorScheme` prop on `Markdown`/`MarkdownStream`. Note: `colorScheme` is a plain prop so consumers using Paper/styled-components should source it from their own theme context, not `useColorScheme()` directly, to stay in sync with manual toggles. |
 | Keyboard-avoiding in example chat | `KeyboardAvoidingView` so the composer stays above the soft keyboard |
 | Accessibility labels on toolbar | Each toolbar `Pressable` needs an `accessibilityLabel` |
 | `streaming` auto-scroll | `FlatList.scrollToEnd` triggered on each new token |
