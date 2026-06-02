@@ -76,27 +76,6 @@ const renderTree = (element: React.ReactElement): ReactTestRenderer => {
     return tree;
 };
 
-const findPressableByText = (
-    tree: ReactTestRenderer,
-    label: string,
-): renderer.ReactTestInstance => {
-    const button = tree.root.findAll((node) => {
-        if (typeof node.props.onPress !== 'function') {
-            return false;
-        }
-
-        return (
-            node.findAll((childNode) => childNode.props.children === label).length > 0
-        );
-    })[0];
-
-    if (!button) {
-        throw new Error(`Failed to find pressable with label: ${label}`);
-    }
-
-    return button;
-};
-
 const findPressableByAccessibilityLabel = (
     tree: ReactTestRenderer,
     label: string,
@@ -151,7 +130,7 @@ describe('accessibility', () => {
         );
 
         renderer.act(() => {
-            findPressableByText(tree, 'Show preview').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Show preview').props.onPress();
         });
 
         expect(tree.root).toBeAccessible();

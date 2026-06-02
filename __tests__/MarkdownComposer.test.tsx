@@ -75,8 +75,12 @@ describe('MarkdownComposer', () => {
 
         expect(onModeChange).toHaveBeenCalledWith('expanded');
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'Collapse'),
-        ).toBe(true);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Collapse composer',
+            ),
+        ).toHaveLength(1);
     });
 
     test('keeps preview hidden by default in expanded mode', () => {
@@ -101,11 +105,56 @@ describe('MarkdownComposer', () => {
             tree.root.findAllByType(Text).some((node) => node.props.children === 'Preview'),
         ).toBe(false);
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'Show preview'),
-        ).toBe(true);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Show preview',
+            ),
+        ).toHaveLength(1);
         expect(
             tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
         ).toBe(false);
+    });
+
+    test('shows and toggles preview from compact mode', () => {
+        let tree: renderer.ReactTestRenderer | undefined;
+
+        renderer.act(() => {
+            tree = renderer.create(
+                <MarkdownComposer
+                    onChangeText={() => {}}
+                    previewEnabled
+                    value="# Compact title"
+                />,
+            );
+        });
+
+        if (!tree) {
+            throw new Error('Failed to render compact MarkdownComposer preview');
+        }
+
+        expect(
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Show preview',
+            ),
+        ).toHaveLength(1);
+        expect(
+            tree.root.findAllByType(Text).some(
+                (node) => node.props.children === 'Compact title',
+            ),
+        ).toBe(false);
+
+        renderer.act(() => {
+            findPressableByAccessibilityLabel(tree, 'Show preview').props.onPress();
+        });
+
+        expect(
+            tree.root.findAllByType(Text).some(
+                (node) => node.props.children === 'Compact title',
+            ),
+        ).toBe(true);
     });
 
     test('uses previewProps markdownit for expanded preview rendering', () => {
@@ -148,7 +197,7 @@ describe('MarkdownComposer', () => {
         }
 
         renderer.act(() => {
-            findPressableByLabel(tree, 'Show preview').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Show preview').props.onPress();
         });
 
         expect(
@@ -715,19 +764,27 @@ describe('MarkdownComposer', () => {
         }
 
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'Show preview'),
-        ).toBe(true);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Show preview',
+            ),
+        ).toHaveLength(1);
         expect(
             tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
         ).toBe(false);
 
         renderer.act(() => {
-            findPressableByLabel(tree, 'Show preview').props.onPress();
+            findPressableByAccessibilityLabel(tree, 'Show preview').props.onPress();
         });
 
         expect(
-            tree.root.findAllByType(Text).some((node) => node.props.children === 'Hide preview'),
-        ).toBe(true);
+            tree.root.findAll(
+                (node) =>
+                    typeof node.props.onPress === 'function' &&
+                    node.props.accessibilityLabel === 'Hide preview',
+            ),
+        ).toHaveLength(1);
         expect(
             tree.root.findAllByType(Text).some((node) => node.props.children === 'Title'),
         ).toBe(true);

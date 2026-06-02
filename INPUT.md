@@ -128,8 +128,8 @@ Important composer behavior:
 
 - compact mode is the default
 - expanded mode uses a taller input
-- if `previewEnabled` is `true`, the preview toggle is shown in expanded mode
-- preview is hidden by default until the user taps `Show preview`
+- if `previewEnabled` is `true`, the preview toggle is shown in every composer mode
+- preview is hidden by default until the user taps the preview icon
 - underline uses `++text++` syntax when you activate the shipped underline plugin
 - the built-in minimized and expanded toolbar presets use Material Design icons by default
 
@@ -524,8 +524,8 @@ Composer-specific props:
 | `previewProps` | `undefined` | Additional preview configuration such as `markdownit`, `rules`, `style`, and other viewer render options |
 | `previewLabel` | `'Preview'` | Label rendered above preview content |
 | `previewEmptyState` | `'Nothing to preview yet.'` | Empty preview copy |
-| `previewToggleLabels` | `{ show: 'Show preview', hide: 'Hide preview' }` | Toggle labels |
-| `renderExpandButtonLabel` | built-in `Expand` / `Collapse` labels | Custom expand/collapse control content |
+| `previewToggleLabels` | built-in show/hide preview icons | Toggle content |
+| `renderExpandButtonLabel` | built-in expand/collapse icons | Custom expand/collapse control content |
 
 ## `MarkdownPreview` Props
 

@@ -510,10 +510,6 @@ function App(): React.JSX.Element {
                                     rules: warningRules,
                                     style: composerPreviewStyle,
                                 }}
-                                previewToggleLabels={{
-                                    hide: 'Hide message preview',
-                                    show: 'Show message preview',
-                                }}
                                 value={draft}
                             />
                         </View>
@@ -541,7 +537,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     composerShell: {
-        alignItems: 'flex-end',
+        alignItems: 'stretch',
         borderTopWidth: 1,
         flexDirection: 'row',
         gap: 12,
@@ -626,11 +622,12 @@ const styles = StyleSheet.create({
     },
     sendButton: {
         alignItems: 'center',
-        borderRadius: 14,
+        alignSelf: 'flex-end',
+        borderRadius: 8,
         justifyContent: 'center',
-        minHeight: 52,
-        minWidth: 84,
-        paddingHorizontal: 18,
+        minHeight: 44,
+        minWidth: 76,
+        paddingHorizontal: 16,
     },
     sendButtonText: {
         fontSize: 16,

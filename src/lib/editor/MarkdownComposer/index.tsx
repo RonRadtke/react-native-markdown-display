@@ -1,5 +1,6 @@
 import React, {useMemo, useRef, useState} from 'react';
-import {Pressable, Text, TextInput, View} from 'react-native';
+import {MaterialDesignIcons} from '@react-native-vector-icons/material-design-icons';
+import {Pressable, type StyleProp, Text, TextInput, type TextStyle, View} from 'react-native';
 
 import {DEFAULT_COMPACT_TOOLBAR_ITEMS, DEFAULT_EXPANDED_TOOLBAR_ITEMS} from '../defaultToolbarItems';
 import MarkdownPreview from '../MarkdownPreview';
@@ -12,9 +13,28 @@ const DEFAULT_COMPACT_MAX_HEIGHT = 110;
 const DEFAULT_LINK_URL = 'https://';
 const MAX_TABLE_COLUMNS = 10;
 const MAX_TABLE_ROWS = 20;
+const DEFAULT_CONTROL_ICON_SIZE = 18;
+type ComposerIconName = React.ComponentProps<typeof MaterialDesignIcons>['name'];
+
+const createComposerControlIcon = (
+    name: ComposerIconName,
+    color: string,
+): React.ReactElement => (
+    <MaterialDesignIcons
+        accessible={false}
+        color={color}
+        name={name}
+        size={DEFAULT_CONTROL_ICON_SIZE}
+    />
+);
+
 const DEFAULT_PREVIEW_TOGGLE_LABELS = {
-    hide: 'Hide preview',
-    show: 'Show preview',
+    hide: createComposerControlIcon('eye-off', '#2F5E8D'),
+    show: createComposerControlIcon('eye', '#2F5E8D'),
+} as const;
+const DEFAULT_EXPAND_BUTTON_LABELS = {
+    compact: createComposerControlIcon('arrow-expand', '#FFFFFF'),
+    expanded: createComposerControlIcon('arrow-collapse', '#FFFFFF'),
 } as const;
 
 interface LinkPromptState {
@@ -58,6 +78,16 @@ const parsePositiveInteger = (value: string): number | null => {
 
 const clamp = (value: number, min: number, max: number): number =>
     Math.min(Math.max(value, min), max);
+
+const renderControlLabel = (
+    label: React.ReactNode,
+    textStyle: StyleProp<TextStyle>,
+): React.ReactNode =>
+    typeof label === 'string' || typeof label === 'number' ? (
+        <Text style={textStyle}>{label}</Text>
+    ) : (
+        <View style={styles.controlContent}>{label}</View>
+    );
 
 const getDefaultCommandPayload = (
     command: MarkdownTextInputCommandPayload['command'],
@@ -365,8 +395,11 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
                     </View>
                 ) : null}
                 <View style={styles.footer}>
-                    {previewEnabled && mode === 'expanded' ? (
+                    {previewEnabled ? (
                         <Pressable
+                            accessibilityLabel={
+                                isPreviewVisible ? 'Hide preview' : 'Show preview'
+                            }
                             accessibilityRole="button"
                             accessibilityState={{expanded: isPreviewVisible}}
                             onPress={() =>
@@ -374,30 +407,41 @@ const MarkdownComposer = React.forwardRef<TextInput, MarkdownComposerProps>(
                             }
                             style={styles.previewToggle}
                         >
-                            <Text style={styles.previewToggleText}>
-                                {isPreviewVisible
+                            {renderControlLabel(
+                                isPreviewVisible
                                     ? previewToggleLabels.hide
-                                    : previewToggleLabels.show}
-                            </Text>
+                                    : previewToggleLabels.show,
+                                styles.previewToggleText,
+                            )}
                         </Pressable>
                     ) : null}
                     <Pressable
+                        accessibilityLabel={
+                            mode === 'compact'
+                                ? 'Expand composer'
+                                : 'Collapse composer'
+                        }
                         accessibilityRole="button"
                         accessibilityState={{expanded: mode === 'expanded'}}
                         onPress={toggleMode}
                         style={styles.expandButton}
                     >
-                        <Text style={styles.expandButtonText}>
-                            {renderExpandButtonLabel?.(mode) ??
-                                (mode === 'compact' ? 'Expand' : 'Collapse')}
-                        </Text>
+                        {renderControlLabel(
+                            renderExpandButtonLabel?.(mode) ??
+                                DEFAULT_EXPAND_BUTTON_LABELS[mode],
+                            styles.expandButtonText,
+                        )}
                     </Pressable>
                 </View>
-                {previewEnabled && mode === 'expanded' && isPreviewVisible ? (
+                {previewEnabled && isPreviewVisible ? (
                     <MarkdownPreview
                         {...previewProps}
                         {...(previewEmptyState ? {emptyState: previewEmptyState} : {})}
                         {...(previewLabel ? {label: previewLabel} : {})}
+                        previewContainerStyle={[
+                            styles.preview,
+                            previewProps?.previewContainerStyle,
+                        ]}
                         value={value}
                     />
                 ) : null}

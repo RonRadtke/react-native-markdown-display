@@ -5,7 +5,8 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     input: {
-        borderColor: '#C7CCD1',
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D8E0E8',
         borderRadius: 8,
         borderWidth: 1,
         minHeight: 44,
@@ -15,20 +16,23 @@ const styles = StyleSheet.create({
     toolbar: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 8,
-        marginBottom: 8,
+        gap: 6,
+        marginBottom: 10,
     },
     toolbarButton: {
         alignItems: 'center',
-        borderColor: '#C7CCD1',
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D8E0E8',
         borderRadius: 6,
         borderWidth: 1,
+        height: 34,
         justifyContent: 'center',
-        paddingHorizontal: 10,
+        minWidth: 34,
+        paddingHorizontal: 8,
         paddingVertical: 6,
     },
     toolbarButtonActive: {
-        backgroundColor: '#EFF4F8',
+        backgroundColor: '#EAF3FC',
         borderColor: '#0A66C2',
     },
     toolbarButtonContent: {
@@ -36,12 +40,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     toolbarButtonText: {
+        color: '#2B3137',
         fontSize: 14,
         fontWeight: '600',
     },
     toolbarMenu: {
         backgroundColor: '#FFFFFF',
-        borderColor: '#C7CCD1',
+        borderColor: '#D8E0E8',
         borderRadius: 8,
         borderWidth: 1,
         elevation: 3,
