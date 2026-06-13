@@ -1,0 +1,73 @@
+import {StyleSheet} from 'react-native';
+
+const styles = StyleSheet.create({
+    container: {
+        width: '100%',
+    },
+    input: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D8E0E8',
+        borderRadius: 8,
+        borderWidth: 1,
+        minHeight: 44,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+    },
+    toolbar: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+        marginBottom: 10,
+    },
+    toolbarButton: {
+        alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D8E0E8',
+        borderRadius: 6,
+        borderWidth: 1,
+        height: 34,
+        justifyContent: 'center',
+        minWidth: 34,
+        paddingHorizontal: 8,
+        paddingVertical: 6,
+    },
+    toolbarButtonActive: {
+        backgroundColor: '#EAF3FC',
+        borderColor: '#0A66C2',
+    },
+    toolbarButtonContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    toolbarButtonText: {
+        color: '#2B3137',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    toolbarMenu: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D8E0E8',
+        borderRadius: 8,
+        borderWidth: 1,
+        elevation: 3,
+        gap: 6,
+        left: 0,
+        minWidth: 64,
+        padding: 6,
+        position: 'absolute',
+        top: 38,
+        zIndex: 1,
+    },
+    toolbarMenuButton: {
+        alignItems: 'center',
+        borderRadius: 6,
+        justifyContent: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+    },
+    toolbarMenuContainer: {
+        position: 'relative',
+    },
+});
+
+export default styles;

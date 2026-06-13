@@ -1,63 +1,84 @@
 {
-  "name": "@ronradtke/react-native-markdown-display",
-  "version": "8.1.0",
-  "description": "Markdown renderer for react-native, with CommonMark spec support + adds syntax extensions & sugar (URL autolinking, typographer), originally created by Mient-jan Stelling as react-native-markdown-renderer",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
-  "scripts": {
-    "format": "prettier -w src",
-    "format-check": "prettier --check src",
-    "lint": "eslint --cache ./src",
-    "lint-fix": "eslint --fix --cache ./src"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/RonRadtke/react-native-markdown-display.git"
-  },
-  "keywords": [
-    "react",
-    "react-native",
-    "native",
-    "markdown",
-    "commonmark",
-    "markdown-it"
-  ],
-  "author": "Michael Lohmann, Daniel Maslowski, Ron Radtke and maintainers of the original library",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/RonRadtke/react-native-markdown-display/issues"
-  },
-  "homepage": "https://github.com/RonRadtke/react-native-markdown-display",
-  "dependencies": {
-    "css-to-react-native": "^3.2.0",
-    "markdown-it": "^13.0.1",
-    "prop-types": "^15.7.2",
-    "react-native-fit-image": "^1.5.5"
-  },
-  "peerDependencies": {
-    "react": ">=16.2.0",
-    "react-native": ">=0.50.4"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.21.0",
-    "@babel/runtime": "^7.21.0",
-    "@react-native-community/eslint-config": "^3.2.0",
-    "@types/markdown-it": "^12.2.3",
-    "@types/react-native": ">=0.50.0",
-    "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "@typescript-eslint/parser": "^5.53.0",
-    "eslint": "^8.26.0",
-    "eslint-config-defaults": "^9.0.0",
-    "eslint-config-prettier": "^8.7.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-native": "^4.0.0",
-    "metro-react-native-babel-preset": "^0.76.0",
-    "prettier": "^2.8.4",
-    "typescript": "^4.9.5"
-  },
-  "directories": {
-    "doc": "doc"
-  }
+    "name": "@ronradtke/react-native-markdown-display",
+    "version": "8.1.0",
+    "description": "Markdown renderer for react-native, with CommonMark spec support + adds syntax extensions & sugar (URL autolinking, typographer), originally created by Mient-jan Stelling as react-native-markdown-renderer",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "src",
+        "README.md",
+        "LICENSE"
+    ],
+    "scripts": {
+        "build": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true}); require('fs').rmSync('lib', {recursive: true, force: true})\" && tsc -p tsconfig.json",
+        "format": "prettier -w src",
+        "format-check": "prettier --check src",
+        "lint": "ESLINT_USE_FLAT_CONFIG=false eslint --cache ./src",
+        "lint-fix": "ESLINT_USE_FLAT_CONFIG=false eslint --fix --cache ./src",
+        "test": "jest",
+        "typecheck": "tsc -p tsconfig.json --noEmit"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/RonRadtke/react-native-markdown-display.git"
+    },
+    "keywords": [
+        "react",
+        "react-native",
+        "native",
+        "markdown",
+        "commonmark",
+        "markdown-it",
+        "input",
+        "markdown input"
+    ],
+    "author": "Ron Radtke and maintainers of the original library",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/RonRadtke/react-native-markdown-display/issues"
+    },
+    "homepage": "https://github.com/RonRadtke/react-native-markdown-display",
+    "dependencies": {
+        "@react-native-vector-icons/material-design-icons": "^13.0.0",
+        "css-to-react-native": "^3.2.0",
+        "markdown-it": "^14.1.1",
+        "markdown-it-ins": "^4.0.0",
+        "prism-react-renderer": "^2.4.1",
+        "react-native-fit-image": "^1.5.5"
+    },
+    "peerDependencies": {
+        "react": ">=16.2.0",
+        "react-native": ">=0.50.4"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.29.0",
+        "@babel/runtime": "^7.29.2",
+        "@react-native/babel-preset": "^0.84.1",
+        "@react-native/eslint-config": "^0.84.1",
+        "@types/jest": "^30.0.0",
+        "@types/markdown-it": "^14.1.2",
+        "@types/react": "^19.2.14",
+        "@typescript-eslint/eslint-plugin": "^8.58.0",
+        "@typescript-eslint/parser": "^8.58.0",
+        "babel-jest": "^30.3.0",
+        "eslint": "^8.57.1",
+        "eslint-config-defaults": "^9.0.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-import": "^2.32.0",
+        "eslint-plugin-jest": "^29.15.1",
+        "eslint-plugin-react": "^7.37.5",
+        "eslint-plugin-react-hooks": "^7.0.1",
+        "eslint-plugin-react-native": "^5.0.0",
+        "jest": "^30.3.0",
+        "prettier": "^3.8.1",
+        "react": "^19.2.4",
+        "react-native": "^0.84.1",
+        "react-native-accessibility-engine": "^3.2.0",
+        "react-test-renderer": "^19.2.4",
+        "typescript": "^6.0.2"
+    },
+    "directories": {
+        "doc": "doc"
+    }
 }

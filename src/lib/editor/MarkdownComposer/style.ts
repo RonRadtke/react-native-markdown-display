@@ -1,0 +1,121 @@
+import {StyleSheet} from 'react-native';
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D8E0E8',
+        borderRadius: 8,
+        borderWidth: 1,
+        overflow: 'visible',
+        padding: 10,
+        width: '100%',
+    },
+    controlContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    expandButton: {
+        alignItems: 'center',
+        backgroundColor: '#0A66C2',
+        borderRadius: 6,
+        justifyContent: 'center',
+        minHeight: 34,
+        paddingHorizontal: 14,
+        paddingVertical: 7,
+    },
+    expandButtonText: {
+        color: '#FFFFFF',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    footer: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        gap: 8,
+        justifyContent: 'space-between',
+        marginTop: 10,
+        width: '100%',
+    },
+    preview: {
+        backgroundColor: '#F8FAFC',
+        borderColor: '#E2E7EC',
+        marginTop: 10,
+    },
+    previewToggle: {
+        alignItems: 'center',
+        backgroundColor: '#EFF4F8',
+        borderColor: '#D8E0E8',
+        borderRadius: 6,
+        borderWidth: 1,
+        justifyContent: 'center',
+        minHeight: 34,
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+    },
+    previewToggleText: {
+        color: '#2F5E8D',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    promptError: {
+        color: '#B42318',
+        marginTop: 8,
+    },
+    promptActions: {
+        flexDirection: 'row',
+        gap: 8,
+        justifyContent: 'flex-end',
+        marginTop: 12,
+    },
+    promptButton: {
+        borderRadius: 6,
+        borderWidth: 1,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+    },
+    promptButtonPrimary: {
+        backgroundColor: '#0A66C2',
+        borderColor: '#0A66C2',
+    },
+    promptButtonPrimaryText: {
+        color: '#FFFFFF',
+        fontWeight: '600',
+    },
+    promptButtonSecondary: {
+        borderColor: '#C7CCD1',
+    },
+    promptButtonSecondaryText: {
+        color: '#2B3137',
+        fontWeight: '600',
+    },
+    promptCard: {
+        backgroundColor: '#F8FAFC',
+        borderColor: '#D8E0E8',
+        borderRadius: 8,
+        borderWidth: 1,
+        marginTop: 12,
+        padding: 12,
+    },
+    promptInput: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#C7CCD1',
+        borderRadius: 6,
+        borderWidth: 1,
+        marginTop: 8,
+        minHeight: 40,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+    },
+    promptTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    textInput: {
+        backgroundColor: '#F8FAFC',
+        borderColor: '#E2E7EC',
+        minHeight: 48,
+        width: '100%',
+    },
+});
+
+export default styles;
