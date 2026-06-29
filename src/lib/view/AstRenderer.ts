@@ -4,7 +4,7 @@ import textStyleProps from './data/textStyleProps';
 import convertAdditionalStyles from './util/convertAdditionalStyles';
 import getUniqueID from './util/getUniqueID';
 
-import type {ASTNode, MarkdownStyleMap, MarkdownStyleObject, OnCopyCode, OnLinkPress, RenderRule, RenderRuleExtra, RenderRules,} from './types';
+import type {ASTNode, MarkdownStyleMap, MarkdownStyleObject, OnCopyCode, OnLinkPress, RenderRule, RenderRuleExtra, RenderRules} from './types';
 import type {ReactNode} from 'react';
 
 type StylePropertyValue = MarkdownStyleObject[keyof MarkdownStyleObject];
@@ -30,18 +30,7 @@ export default class AstRenderer {
 
     private readonly _topLevelMaxExceededItem: ReactNode;
 
-    public constructor(
-        renderRules: RenderRules,
-        style: MarkdownStyleMap,
-        onLinkPress?: OnLinkPress,
-        maxTopLevelChildren: number | null = null,
-        topLevelMaxExceededItem: ReactNode = null,
-        allowedImageHandlers: string[] = [],
-        defaultImageHandler: string | null = null,
-        debugPrintTree = false,
-        onCopyCode?: OnCopyCode,
-        colorScheme?: 'light' | 'dark',
-    ) {
+    public constructor(renderRules: RenderRules, style: MarkdownStyleMap, onLinkPress?: OnLinkPress, maxTopLevelChildren: number | null = null, topLevelMaxExceededItem: ReactNode = null, allowedImageHandlers: string[] = [], defaultImageHandler: string | null = null, debugPrintTree = false, onCopyCode?: OnCopyCode, colorScheme?: 'light' | 'dark') {
         this._renderRules = renderRules;
         this._style = style;
         this._onLinkPress = onLinkPress;
@@ -62,19 +51,13 @@ export default class AstRenderer {
         }
 
         if (!this._renderRules[type]) {
-            console.warn(
-                `Warning, unknown render rule encountered: ${type}. 'unknown' render rule used (by default, returns null - nothing rendered)`,
-            );
+            console.warn(`Warning, unknown render rule encountered: ${type}. 'unknown' render rule used (by default, returns null - nothing rendered)`);
         }
 
         return renderFunction;
     }
 
-    public renderNode = (
-        node: ASTNode,
-        parentNodes: ReadonlyArray<ASTNode>,
-        isRoot = false,
-    ): ReactNode => {
+    public renderNode = (node: ASTNode, parentNodes: ReadonlyArray<ASTNode>, isRoot = false): ReactNode => {
         const renderFunction = this.getRenderFunction(node.type);
         const parents = [...parentNodes];
 
@@ -84,40 +67,18 @@ export default class AstRenderer {
 
         parents.unshift(node);
 
-        let children = node.children.map((childNode) =>
-            this.renderNode(childNode, parents),
-        );
+        let children = node.children.map(childNode => this.renderNode(childNode, parents));
 
         if (node.type === 'link' || node.type === 'blocklink') {
-            return renderFunction(
-                node,
-                children,
-                [...parentNodes],
-                this._style,
-                this._onLinkPress,
-            );
+            return renderFunction(node, children, [...parentNodes], this._style, this._onLinkPress);
         }
 
         if (node.type === 'image') {
-            return renderFunction(
-                node,
-                children,
-                [...parentNodes],
-                this._style,
-                this._allowedImageHandlers,
-                this._defaultImageHandler,
-            );
+            return renderFunction(node, children, [...parentNodes], this._style, this._allowedImageHandlers, this._defaultImageHandler);
         }
 
         if (node.type === 'fence') {
-            return renderFunction(
-                node,
-                children,
-                [...parentNodes],
-                this._style,
-                this._onCopyCode,
-                this._colorScheme,
-            );
+            return renderFunction(node, children, [...parentNodes], this._style, this._onCopyCode, this._colorScheme);
         }
 
         if (children.length === 0 || node.type === 'list_item') {
@@ -134,75 +95,36 @@ export default class AstRenderer {
                 const parentStyle = this._style[parentNode.type];
 
                 if (parentStyle) {
-                    refStyle = {
-                        ...refStyle,
-                        ...(StyleSheet.flatten(parentStyle) ?? {}),
-                    };
+                    refStyle = {...refStyle, ...(StyleSheet.flatten(parentStyle) ?? {})};
 
                     if (parentNode.type === 'list_item') {
                         const nextParentNode = parentNodes[index + 1];
 
-                        const contentStyle =
-                            nextParentNode?.type === 'bullet_list'
-                                ? this._style.bullet_list_content
-                                : nextParentNode?.type === 'ordered_list'
-                                    ? this._style.ordered_list_content
-                                    : undefined;
+                        const contentStyle = nextParentNode?.type === 'bullet_list' ? this._style.bullet_list_content : nextParentNode?.type === 'ordered_list' ? this._style.ordered_list_content : undefined;
 
-                        refStyle = {
-                            ...refStyle,
-                            ...(StyleSheet.flatten(contentStyle) ?? {}),
-                        };
+                        refStyle = {...refStyle, ...(StyleSheet.flatten(contentStyle) ?? {})};
                     }
                 }
 
                 for (const propertyName of Object.keys(refStyle)) {
                     if (textStyleProps.includes(propertyName)) {
-                        (styleObj as Record<string, StylePropertyValue>)[propertyName] = (
-                            refStyle as Record<string, StylePropertyValue>
-                        )[propertyName];
+                        (styleObj as Record<string, StylePropertyValue>)[propertyName] = (refStyle as Record<string, StylePropertyValue>)[propertyName];
                     }
                 }
             }
 
-            return renderFunction(
-                node,
-                children,
-                [...parentNodes],
-                this._style,
-                styleObj as RenderRuleExtra,
-            );
+            return renderFunction(node, children, [...parentNodes], this._style, styleObj as RenderRuleExtra);
         }
 
-        if (
-            isRoot &&
-            this._maxTopLevelChildren !== null &&
-            children.length > this._maxTopLevelChildren
-        ) {
-            children = [
-                ...children.slice(0, this._maxTopLevelChildren),
-                this._topLevelMaxExceededItem,
-            ];
+        if (isRoot && this._maxTopLevelChildren !== null && children.length > this._maxTopLevelChildren) {
+            children = [...children.slice(0, this._maxTopLevelChildren), this._topLevelMaxExceededItem];
         }
 
         return renderFunction(node, children, [...parentNodes], this._style);
     };
 
     public render = (nodes: ReadonlyArray<ASTNode>): ReactNode => {
-        const root: ASTNode = {
-            type: 'body',
-            sourceType: 'body',
-            sourceInfo: null,
-            sourceMeta: null,
-            block: true,
-            key: getUniqueID(),
-            content: '',
-            markup: '',
-            tokenIndex: -1,
-            index: 0,
-            attributes: {},
-            children: [...nodes],
-        };
+        const root: ASTNode = {type: 'body', sourceType: 'body', sourceInfo: null, sourceMeta: null, block: true, key: getUniqueID(), content: '', markup: '', tokenIndex: -1, index: 0, attributes: {}, children: [...nodes]};
 
         return this.renderNode(root, [], true);
     };

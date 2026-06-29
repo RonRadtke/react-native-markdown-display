@@ -23,28 +23,12 @@ function StreamingCursor({color, style}: StreamingCursorProps): React.JSX.Elemen
     const [opacity] = useState(() => new Animated.Value(1));
 
     useEffect(() => {
-        const animation = Animated.loop(
-            Animated.sequence([
-                Animated.timing(opacity, {duration: 0, toValue: 1, useNativeDriver: false}),
-                Animated.delay(CURSOR_BLINK_ON_MS),
-                Animated.timing(opacity, {duration: 0, toValue: 0, useNativeDriver: false}),
-                Animated.delay(CURSOR_BLINK_OFF_MS),
-            ]),
-        );
+        const animation = Animated.loop(Animated.sequence([Animated.timing(opacity, {duration: 0, toValue: 1, useNativeDriver: false}), Animated.delay(CURSOR_BLINK_ON_MS), Animated.timing(opacity, {duration: 0, toValue: 0, useNativeDriver: false}), Animated.delay(CURSOR_BLINK_OFF_MS)]));
         animation.start();
         return () => animation.stop();
     }, [opacity]);
 
-    return (
-        <Animated.View
-            style={[
-                styles.cursor,
-                {backgroundColor: color},
-                style,
-                {opacity},
-            ]}
-        />
-    );
+    return <Animated.View style={[styles.cursor, {backgroundColor: color}, style, {opacity}]} />;
 }
 
 export interface MarkdownStreamProps {
@@ -83,91 +67,23 @@ export interface MarkdownStreamProps {
     topLevelMaxExceededItem?: ReactNode;
 }
 
-const MarkdownStream = React.memo(function MarkdownStream({
-    allowedImageHandlers = [
-        'data:image/png;base64',
-        'data:image/gif;base64',
-        'data:image/jpeg;base64',
-        'https://',
-        'http://',
-    ],
-    children,
-    cursorColor = '#000000',
-    cursorStyle,
-    debugPrintTree = false,
-    defaultImageHandler = 'https://',
-    markdownit = createMarkdownIt(),
-    maxTopLevelChildren = null,
-    colorScheme,
-    mergeStyle = true,
-    onCopyCode,
-    onLinkPress,
-    renderer = null,
-    rules = null,
-    streaming = false,
-    style = null,
-    textcomponent = Text,
-    topLevelMaxExceededItem = <Text key="dotdotdot">...</Text>,
-}: MarkdownStreamProps) {
-    const memoizedRenderer = useMemo(
-        () =>
-            getRenderer(
-                textcomponent,
-                renderer,
-                rules,
-                style,
-                mergeStyle,
-                onLinkPress,
-                maxTopLevelChildren,
-                topLevelMaxExceededItem,
-                allowedImageHandlers,
-                defaultImageHandler,
-                debugPrintTree,
-                onCopyCode,
-                colorScheme,
-            ),
-        [
-            allowedImageHandlers,
-            colorScheme,
-            debugPrintTree,
-            defaultImageHandler,
-            maxTopLevelChildren,
-            mergeStyle,
-            onCopyCode,
-            onLinkPress,
-            renderer,
-            rules,
-            style,
-            textcomponent,
-            topLevelMaxExceededItem,
-        ],
-    );
+const MarkdownStream = React.memo(function MarkdownStream({allowedImageHandlers = ['data:image/png;base64', 'data:image/gif;base64', 'data:image/jpeg;base64', 'https://', 'http://'], children, cursorColor = '#000000', cursorStyle, debugPrintTree = false, defaultImageHandler = 'https://', markdownit = createMarkdownIt(), maxTopLevelChildren = null, colorScheme, mergeStyle = true, onCopyCode, onLinkPress, renderer = null, rules = null, streaming = false, style = null, textcomponent = Text, topLevelMaxExceededItem = <Text key="dotdotdot">...</Text>}: MarkdownStreamProps) {
+    const memoizedRenderer = useMemo(() => getRenderer(textcomponent, renderer, rules, style, mergeStyle, onLinkPress, maxTopLevelChildren, topLevelMaxExceededItem, allowedImageHandlers, defaultImageHandler, debugPrintTree, onCopyCode, colorScheme), [allowedImageHandlers, colorScheme, debugPrintTree, defaultImageHandler, maxTopLevelChildren, mergeStyle, onCopyCode, onLinkPress, renderer, rules, style, textcomponent, topLevelMaxExceededItem]);
 
     const memoizedParser = useMemo(() => markdownit, [markdownit]);
 
-    const source = useMemo(
-        () => (streaming ? sealIncompleteMarkdown(children) : children),
-        [children, streaming],
-    );
+    const source = useMemo(() => (streaming ? sealIncompleteMarkdown(children) : children), [children, streaming]);
 
     return (
         <View>
             {parser(source, memoizedRenderer.render, memoizedParser)}
-            {streaming ? (
-                <StreamingCursor color={cursorColor} style={cursorStyle} />
-            ) : null}
+            {streaming ? <StreamingCursor color={cursorColor} style={cursorStyle} /> : null}
         </View>
     );
 });
 
 MarkdownStream.displayName = 'MarkdownStream';
 
-const styles = StyleSheet.create({
-    cursor: {
-        height: 16,
-        marginTop: 4,
-        width: 2,
-    },
-});
+const styles = StyleSheet.create({cursor: {height: 16, marginTop: 4, width: 2}});
 
 export default MarkdownStream;

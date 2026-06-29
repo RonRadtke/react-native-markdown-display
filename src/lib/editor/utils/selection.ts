@@ -1,12 +1,8 @@
 import type {MarkdownSelection} from '../types';
 
-const clamp = (value: number, min: number, max: number): number =>
-    Math.min(Math.max(value, min), max);
+const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
 
-export const normalizeSelection = (
-    value: string,
-    selection: MarkdownSelection | undefined,
-): MarkdownSelection => {
+export const normalizeSelection = (value: string, selection: MarkdownSelection | undefined): MarkdownSelection => {
     const max = value.length;
 
     if (!selection) {
@@ -19,10 +15,7 @@ export const normalizeSelection = (
     return start <= end ? {start, end} : {start: end, end: start};
 };
 
-export const getSelectedText = (
-    value: string,
-    selection: MarkdownSelection | undefined,
-): string => {
+export const getSelectedText = (value: string, selection: MarkdownSelection | undefined): string => {
     const normalizedSelection = normalizeSelection(value, selection);
 
     return value.slice(normalizedSelection.start, normalizedSelection.end);

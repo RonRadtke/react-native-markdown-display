@@ -6,8 +6,7 @@ export default function renderInlineAsText(tokens: TokenLike[]): string {
     for (const token of tokens) {
         if (token.type === 'text') {
             result += token.content;
-        }
-        else if (token.type === 'image') {
+        } else if (token.type === 'image') {
             result += renderInlineAsText(token.children ?? []);
         }
     }

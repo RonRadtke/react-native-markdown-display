@@ -6,23 +6,16 @@ interface SplitTextNodesResult {
     textNodes: ReactElement[];
 }
 
-export default function splitTextNonTextNodes(
-    children: ReactNode[],
-): SplitTextNodesResult {
+export default function splitTextNonTextNodes(children: ReactNode[]): SplitTextNodesResult {
     return children.reduce<SplitTextNodesResult>(
         (acc, childNode) => {
             if (!React.isValidElement(childNode)) {
                 return acc;
             }
 
-            if (
-                typeof childNode.type !== 'string' &&
-                'displayName' in childNode.type &&
-                childNode.type.displayName === 'Text'
-            ) {
+            if (typeof childNode.type !== 'string' && 'displayName' in childNode.type && childNode.type.displayName === 'Text') {
                 acc.textNodes.push(childNode);
-            }
-            else {
+            } else {
                 acc.nonTextNodes.push(childNode);
             }
 

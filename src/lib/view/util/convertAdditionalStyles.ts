@@ -2,12 +2,10 @@ import cssToReactNative from 'css-to-react-native';
 
 import type {MarkdownStyleObject} from '../types';
 
-export default function convertAdditionalStyles(
-    style: string,
-): MarkdownStyleObject {
+export default function convertAdditionalStyles(style: string): MarkdownStyleObject {
     const tuples = style
         .split(';')
-        .map((rule) => {
+        .map(rule => {
             const [rawKey, rawValue] = rule.split(':');
 
             if (!rawKey || !rawValue) {

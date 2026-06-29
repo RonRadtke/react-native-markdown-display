@@ -11,11 +11,7 @@ export default function omitListItemParagraph(tokens: TokenLike[]): TokenLike[] 
         if (token.type === 'list_item' && token.nesting === 1 && depth === null) {
             const nextToken = tokens[index + 1];
 
-            if (
-                nextToken &&
-                nextToken.type === 'paragraph' &&
-                nextToken.nesting === 1
-            ) {
+            if (nextToken && nextToken.type === 'paragraph' && nextToken.nesting === 1) {
                 depth = 0;
             }
 

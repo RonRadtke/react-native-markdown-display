@@ -1,7 +1,7 @@
 import type {ForwardRefExoticComponent, ReactNode, RefAttributes} from 'react';
-import type {NativeSyntheticEvent, StyleProp, TextInput, TextInputProps, TextInputSelectionChangeEventData, TextStyle, ViewStyle,} from 'react-native';
+import type {NativeSyntheticEvent, StyleProp, TextInput, TextInputProps, TextInputSelectionChangeEventData, TextStyle, ViewStyle} from 'react-native';
 import type AstRenderer from '../view/AstRenderer';
-import type {MarkdownParser, MarkdownStyleMap, OnLinkPress, RenderRules, TextComponent,} from '../view/types';
+import type {MarkdownParser, MarkdownStyleMap, OnLinkPress, RenderRules, TextComponent} from '../view/types';
 
 export interface MarkdownSelection {
     start: number;
@@ -13,43 +13,20 @@ export interface MarkdownCommandResult {
     value: string;
 }
 
-export interface MarkdownManagedTextInputProps extends Omit<
-    TextInputProps,
-    'onChangeText' | 'onSelectionChange' | 'selection' | 'value'
-> {
+export interface MarkdownManagedTextInputProps extends Omit<TextInputProps, 'onChangeText' | 'onSelectionChange' | 'selection' | 'value'> {
     onChangeText: (value: string) => void;
-    onSelectionChange?: (
-        event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
-    ) => void;
+    onSelectionChange?: (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => void;
     selection: MarkdownSelection;
     value: string;
 }
 
-export type MarkdownInputComponent = ForwardRefExoticComponent<
-    MarkdownManagedTextInputProps & RefAttributes<TextInput>
->;
+export type MarkdownInputComponent = ForwardRefExoticComponent<MarkdownManagedTextInputProps & RefAttributes<TextInput>>;
 
-export type MarkdownInlineFormat =
-    | 'bold'
-    | 'italic'
-    | 'underline'
-    | 'strikethrough'
-    | 'inline-code';
+export type MarkdownInlineFormat = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'inline-code';
 
-export type MarkdownBlockFormat =
-    | 'heading-one'
-    | 'heading-two'
-    | 'heading-three'
-    | 'blockquote'
-    | 'bullet-list'
-    | 'ordered-list'
-    | 'code-block';
+export type MarkdownBlockFormat = 'heading-one' | 'heading-two' | 'heading-three' | 'blockquote' | 'bullet-list' | 'ordered-list' | 'code-block';
 
-export type MarkdownCommand =
-    | MarkdownInlineFormat
-    | MarkdownBlockFormat
-    | 'link'
-    | 'table';
+export type MarkdownCommand = MarkdownInlineFormat | MarkdownBlockFormat | 'link' | 'table';
 
 export interface MarkdownLinkPayload {
     title?: string;
@@ -67,12 +44,7 @@ export interface MarkdownTextInputCommandPayload {
     table?: MarkdownTablePayload;
 }
 
-export type MarkdownCommandPayloadResolver = (
-    command: MarkdownCommand,
-) =>
-    | MarkdownTextInputCommandPayload
-    | Promise<MarkdownTextInputCommandPayload | null>
-    | null;
+export type MarkdownCommandPayloadResolver = (command: MarkdownCommand) => MarkdownTextInputCommandPayload | Promise<MarkdownTextInputCommandPayload | null> | null;
 
 interface MarkdownToolbarBaseItem {
     accessibilityLabel?: string;
@@ -97,25 +69,19 @@ export interface MarkdownToolbarWrapAction {
     type: 'wrap';
 }
 
-export type MarkdownToolbarAction =
-    | MarkdownToolbarInsertAction
-    | MarkdownToolbarWrapAction;
+export type MarkdownToolbarAction = MarkdownToolbarInsertAction | MarkdownToolbarWrapAction;
 
 export interface MarkdownToolbarActionItem extends MarkdownToolbarBaseItem {
     action: MarkdownToolbarAction;
 }
 
-export type MarkdownToolbarButtonItem =
-    | MarkdownToolbarActionItem
-    | MarkdownToolbarCommandItem;
+export type MarkdownToolbarButtonItem = MarkdownToolbarActionItem | MarkdownToolbarCommandItem;
 
 export interface MarkdownToolbarMenuItem extends MarkdownToolbarBaseItem {
     items: readonly MarkdownToolbarButtonItem[];
 }
 
-export type MarkdownToolbarItem =
-    | MarkdownToolbarButtonItem
-    | MarkdownToolbarMenuItem;
+export type MarkdownToolbarItem = MarkdownToolbarButtonItem | MarkdownToolbarMenuItem;
 
 export interface MarkdownRenderOptions {
     allowedImageHandlers?: string[];
@@ -132,21 +98,13 @@ export interface MarkdownRenderOptions {
     topLevelMaxExceededItem?: ReactNode;
 }
 
-export interface MarkdownTextInputProps extends Omit<
-    TextInputProps,
-    'onChangeText' | 'onSelectionChange' | 'value'
-> {
+export interface MarkdownTextInputProps extends Omit<TextInputProps, 'onChangeText' | 'onSelectionChange' | 'value'> {
     compactMaxHeight?: number;
     enableShortcuts?: boolean;
     inputComponent?: MarkdownInputComponent;
     onChangeText: (value: string) => void;
-    onCommand?: (
-        payload: MarkdownTextInputCommandPayload,
-        result: MarkdownCommandResult,
-    ) => void;
-    onSelectionChange?: (
-        event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
-    ) => void;
+    onCommand?: (payload: MarkdownTextInputCommandPayload, result: MarkdownCommandResult) => void;
+    onSelectionChange?: (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => void;
     resolveCommandPayload?: MarkdownCommandPayloadResolver;
     selection?: MarkdownSelection;
     toolbarItems?: readonly MarkdownToolbarItem[];
@@ -155,10 +113,7 @@ export interface MarkdownTextInputProps extends Omit<
 
 export type MarkdownComposerMode = 'compact' | 'expanded';
 
-export interface MarkdownComposerProps extends Omit<
-    MarkdownTextInputProps,
-    'multiline' | 'numberOfLines' | 'toolbarItems'
-> {
+export interface MarkdownComposerProps extends Omit<MarkdownTextInputProps, 'multiline' | 'numberOfLines' | 'toolbarItems'> {
     compactToolbarItems?: readonly MarkdownToolbarItem[];
     composerStyle?: StyleProp<ViewStyle>;
     expandedToolbarItems?: readonly MarkdownToolbarItem[];
@@ -169,10 +124,7 @@ export interface MarkdownComposerProps extends Omit<
     previewEmptyState?: string;
     previewLabel?: ReactNode;
     previewProps?: Omit<MarkdownPreviewProps, 'value'>;
-    previewToggleLabels?: {
-        hide: ReactNode;
-        show: ReactNode;
-    };
+    previewToggleLabels?: {hide: ReactNode; show: ReactNode};
     renderExpandButtonLabel?: (mode: MarkdownComposerMode) => ReactNode;
     textInputStyle?: StyleProp<TextStyle>;
 }

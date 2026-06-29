@@ -6,13 +6,7 @@ interface ShortcutContext {
     previousValue: string;
 }
 
-const createResult = (
-    value: string,
-    selection: MarkdownSelection,
-): MarkdownCommandResult => ({
-    selection,
-    value,
-});
+const createResult = (value: string, selection: MarkdownSelection): MarkdownCommandResult => ({selection, value});
 
 const getLineBeforeCursor = (value: string, cursor: number): string => {
     const lineStart = value.lastIndexOf('\n', Math.max(cursor - 1, 0));
@@ -20,23 +14,14 @@ const getLineBeforeCursor = (value: string, cursor: number): string => {
     return value.slice(lineStart === -1 ? 0 : lineStart + 1, cursor);
 };
 
-const isSingleNewlineInsertion = ({
-                                      nextValue,
-                                      previousSelection,
-                                      previousValue,
-                                  }: ShortcutContext): boolean => {
+const isSingleNewlineInsertion = ({nextValue, previousSelection, previousValue}: ShortcutContext): boolean => {
     if (previousSelection.start !== previousSelection.end) {
         return false;
     }
 
     const cursor = previousSelection.start;
 
-    return (
-        nextValue.length === previousValue.length + 1 &&
-        nextValue.slice(0, cursor) === previousValue.slice(0, cursor) &&
-        nextValue[cursor] === '\n' &&
-        nextValue.slice(cursor + 1) === previousValue.slice(cursor)
-    );
+    return nextValue.length === previousValue.length + 1 && nextValue.slice(0, cursor) === previousValue.slice(0, cursor) && nextValue[cursor] === '\n' && nextValue.slice(cursor + 1) === previousValue.slice(cursor);
 };
 
 const getContinuation = (line: string): string | null => {
@@ -59,12 +44,9 @@ const getContinuation = (line: string): string | null => {
     return null;
 };
 
-const isExitMarker = (line: string): boolean =>
-    /^>\s?$/.test(line) || /^([-+*])\s$/.test(line) || /^\d+\.\s$/.test(line);
+const isExitMarker = (line: string): boolean => /^>\s?$/.test(line) || /^([-+*])\s$/.test(line) || /^\d+\.\s$/.test(line);
 
-export const applyMarkdownShortcut = (
-    context: ShortcutContext,
-): MarkdownCommandResult | null => {
+export const applyMarkdownShortcut = (context: ShortcutContext): MarkdownCommandResult | null => {
     if (!isSingleNewlineInsertion(context)) {
         return null;
     }
@@ -74,13 +56,9 @@ export const applyMarkdownShortcut = (
 
     if (isExitMarker(line)) {
         const lineStart = cursor - line.length;
-        const value =
-            context.nextValue.slice(0, lineStart) + context.nextValue.slice(cursor);
+        const value = context.nextValue.slice(0, lineStart) + context.nextValue.slice(cursor);
 
-        return createResult(value, {
-            start: lineStart + 1,
-            end: lineStart + 1,
-        });
+        return createResult(value, {start: lineStart + 1, end: lineStart + 1});
     }
 
     const continuation = getContinuation(line);
@@ -89,14 +67,8 @@ export const applyMarkdownShortcut = (
         return null;
     }
 
-    const value =
-        context.nextValue.slice(0, cursor + 1) +
-        continuation +
-        context.nextValue.slice(cursor + 1);
+    const value = context.nextValue.slice(0, cursor + 1) + continuation + context.nextValue.slice(cursor + 1);
     const nextCursor = cursor + 1 + continuation.length;
 
-    return createResult(value, {
-        start: nextCursor,
-        end: nextCursor,
-    });
+    return createResult(value, {start: nextCursor, end: nextCursor});
 };

@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: npm install --ci
+        run: npm ci
 
       - name: Run ESLint
         run: npm run lint
