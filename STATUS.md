@@ -2,7 +2,7 @@
 
 ## Use Case
 
-This library serves a dual role in an AI chat interface (similar to Claude):
+This library serves a dual role in an AI chat interface (similar to Claude or ChatGPT):
 
 - **Input** — `MarkdownTextInput` / `MarkdownComposer` let the user compose messages with markdown
   formatting via a toolbar and typing shortcuts.
