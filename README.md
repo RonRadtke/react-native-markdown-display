@@ -9,17 +9,17 @@ Markdown rendering and editing primitives for React Native, running only in JS. 
 
 `@ronradtke/react-native-markdown-display` turns markdown into real React Native views, not a WebView. It pairs a typed markdown viewer with optional input and composer components, so the same package can power read-only content, message previews, documentation screens, and markdown authoring flows.
 
-## Why This Package
+## ✨ Why This Package
 
-- **Native rendering pipeline**: markdown is parsed with `markdown-it`, normalized into an AST, and rendered with React Native components.
-- **No WebView dependency**: content participates in your React Native layout, styling, theming, navigation, and event handling.
-- **Typed customization surface**: override styles, render rules, link handling, parser behavior, and image handling with TypeScript-friendly APIs.
-- **Viewer and editor pieces**: use `<Markdown>` for display, `MarkdownStream` for streaming text, or `MarkdownTextInput` / `MarkdownComposer` for authoring.
-- **Extensible markdown support**: bring your own `markdown-it` instance or opt into bundled plugins such as underline.
+- ⚡ **Native rendering pipeline**: markdown is parsed with `markdown-it`, normalized into an AST, and rendered with React Native components.
+- 🧱 **No WebView dependency**: content participates in your React Native layout, styling, theming, navigation, and event handling.
+- 🧩 **Typed customization surface**: override styles, render rules, link handling, parser behavior, and image handling with TypeScript-friendly APIs.
+- ✍️ **Viewer and editor pieces**: use `<Markdown>` for display, `MarkdownStream` for streaming text, or `MarkdownTextInput` / `MarkdownComposer` for authoring.
+- 🔌 **Extensible markdown support**: bring your own `markdown-it` instance or opt into bundled plugins such as underline.
 
 This package is intended as a modern replacement for `react-native-markdown-renderer`, with stricter typing and a maintained native rendering architecture.
 
-## Install
+## 📦 Install
 
 ### Yarn
 
@@ -33,9 +33,9 @@ yarn add @ronradtke/react-native-markdown-display
 npm install @ronradtke/react-native-markdown-display
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
-### Viewer
+### 👁️ Viewer
 
 ```tsx
 import React from 'react';
@@ -59,7 +59,7 @@ export default function App(): React.JSX.Element {
 }
 ```
 
-### Composer
+### ✍️ Composer
 
 ```tsx
 import React from 'react';
@@ -80,17 +80,17 @@ export default function App(): React.JSX.Element {
 }
 ```
 
-## What You Can Build
+## 🛠️ What You Can Build
 
 | Use case | Component |
 | --- | --- |
-| Render markdown content | `<Markdown>` |
-| Render actively streaming markdown text | `MarkdownStream` |
-| Add a markdown-aware text input | `MarkdownTextInput` |
-| Ship an opinionated markdown composer with toolbar and preview | `MarkdownComposer` |
-| Preview an editor value with the same renderer | `MarkdownPreview` |
+| 📖 Render markdown content | `<Markdown>` |
+| ⏱️ Render actively streaming markdown text | `MarkdownStream` |
+| ⌨️ Add a markdown-aware text input | `MarkdownTextInput` |
+| 🧰 Ship an opinionated markdown composer with toolbar and preview | `MarkdownComposer` |
+| 🔎 Preview an editor value with the same renderer | `MarkdownPreview` |
 
-## Supported Markdown
+## 📝 Supported Markdown
 
 The default parser supports common markdown content including:
 
@@ -104,24 +104,24 @@ The default parser supports common markdown content including:
 
 You can extend or restrict the syntax by passing a custom `markdown-it` instance through the `markdownit` prop. Underline support is included as an opt-in plugin via `createMarkdownIt({underline: true})` or `underlinePlugin`.
 
-## Customization
+## 🎛️ Customization
 
 The viewer is designed to be customized at the right layer:
 
-- use `style` for visual changes
-- use `rules` when a markdown node should render differently
-- use `onLinkPress` to control navigation
-- use `markdownit` to change parsing behavior
-- use `allowedImageHandlers` and `defaultImageHandler` to control image sources
-- use `debugPrintTree` to inspect the AST while integrating custom syntax
+- 🎨 use `style` for visual changes
+- 🧬 use `rules` when a markdown node should render differently
+- 🔗 use `onLinkPress` to control navigation
+- ⚙️ use `markdownit` to change parsing behavior
+- 🖼️ use `allowedImageHandlers` and `defaultImageHandler` to control image sources
+- 🧭 use `debugPrintTree` to inspect the AST while integrating custom syntax
 
-## Documentation
+## 📚 Documentation
 
 - [Viewer guide](VIEWER.md): rendering, styles, custom rules, `MarkdownIt`, preprocessing, and streaming
 - [Input guide](INPUT.md): `MarkdownTextInput`, `MarkdownComposer`, toolbars, prompts, shortcuts, and previews
 - [Editor architecture note](doc/markdown-editor-architecture.md): internal editor model and design notes
 - [Example app](example/README.md): local example project
 
-## License
+## 📄 License
 
 MIT
