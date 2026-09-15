@@ -1,13 +1,15 @@
 import React, {useMemo, useRef, useState} from 'react';
 import {type NativeSyntheticEvent, Pressable, Text, TextInput, type TextInputContentSizeChangeEventData, type TextInputSelectionChangeEventData, View,} from 'react-native';
 
-import {applyBlockFormat, applyInlineFormat, applyLinkFormat, applyTableFormat, applyToolbarAction,} from '../commands/formatMarkdown';
+import {applyToolbarAction} from '../commands/formatMarkdown';
+import {executeCommand} from '../commands/executeCommand';
 import {DEFAULT_TEXT_INPUT_TOOLBAR_ITEMS} from '../defaultToolbarItems';
 import styles from './style';
 import {applyMarkdownShortcut} from '../utils/shortcuts';
 import {normalizeSelection} from '../utils/selection';
+import {useCommittedValue} from '../utils/useCommittedValue';
 
-import type {MarkdownCommand, MarkdownCommandResult, MarkdownManagedTextInputProps, MarkdownTextInputCommandPayload, MarkdownTextInputProps, MarkdownToolbarButtonItem, MarkdownToolbarCommandItem, MarkdownToolbarItem, MarkdownToolbarMenuItem,} from '../types';
+import type {MarkdownCommand, MarkdownManagedTextInputProps, MarkdownTextInputProps, MarkdownToolbarButtonItem, MarkdownToolbarCommandItem, MarkdownToolbarItem, MarkdownToolbarMenuItem,} from '../types';
 
 const DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS: Record<
     MarkdownCommand,
@@ -78,39 +80,6 @@ const renderToolbarLabel = (label: MarkdownToolbarItem['label']): React.ReactNod
         <View style={styles.toolbarButtonContent}>{label}</View>
     );
 
-const executeCommand = (
-    value: string,
-    selection: MarkdownTextInputProps['selection'],
-    payload: MarkdownTextInputCommandPayload,
-): MarkdownCommandResult => {
-    switch (payload.command) {
-        case 'bold':
-        case 'italic':
-        case 'underline':
-        case 'strikethrough':
-        case 'inline-code':
-            return applyInlineFormat(value, selection, payload.command);
-        case 'heading-one':
-        case 'heading-two':
-        case 'heading-three':
-        case 'blockquote':
-        case 'bullet-list':
-        case 'ordered-list':
-        case 'code-block':
-            return applyBlockFormat(value, selection, payload.command);
-        case 'link':
-            return applyLinkFormat(value, selection, payload.link);
-        case 'table':
-            return applyTableFormat(value, selection, payload.table);
-        default: {
-            const exhaustiveCheck: never = payload.command;
-            throw new Error(
-                `Unsupported markdown command: ${String(exhaustiveCheck)}`,
-            );
-        }
-    }
-};
-
 const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
     function MarkdownTextInput(
         {
@@ -142,6 +111,16 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             () => normalizeSelection(value, selection ?? internalSelection),
             [internalSelection, selection, value],
         );
+        const disabled = textInputProps.editable === false || textInputProps.readOnly === true;
+        const latest = useCommittedValue({
+            disabled,
+            normalizedSelection,
+            onChangeText,
+            onCommand,
+            resolveCommandPayload,
+            selection,
+            value,
+        });
 
         const handleSelectionChange = (
             event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
@@ -167,30 +146,39 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
         const handleCommandPress = async (
             command: MarkdownCommand,
         ): Promise<void> => {
+            const initial = latest.current;
+            if (!initial || initial.disabled) {
+                return;
+            }
             setOpenMenuIndex(null);
 
-            const resolvedPayload = await resolveCommandPayload?.(command);
+            const resolvedPayload = await initial.resolveCommandPayload?.(command);
+            const current = latest.current;
 
-            if (resolvedPayload === null) {
+            if (resolvedPayload === null || !current || current.disabled) {
                 return;
             }
 
             const payload = resolvedPayload ?? {command};
 
-            const result = executeCommand(value, normalizedSelection, payload);
+            const result = executeCommand(current.value, current.normalizedSelection, payload);
 
-            if (!selection) {
+            if (!current.selection) {
                 pendingSelectionValueRef.current = result.value;
                 setInternalSelection(result.selection);
             }
 
-            onChangeText(result.value);
-            onCommand?.(payload, result);
+            current.onChangeText(result.value);
+            current.onCommand?.(payload, result);
         };
 
         const handleToolbarButtonPress = async (
             item: MarkdownToolbarButtonItem,
         ): Promise<void> => {
+            const current = latest.current;
+            if (!current || current.disabled) {
+                return;
+            }
             if (isToolbarCommandItem(item)) {
                 await handleCommandPress(item.command);
                 return;
@@ -199,17 +187,17 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
             setOpenMenuIndex(null);
 
             const result = applyToolbarAction(
-                value,
-                normalizedSelection,
+                current.value,
+                current.normalizedSelection,
                 item.action,
             );
 
-            if (!selection) {
+            if (!current.selection) {
                 pendingSelectionValueRef.current = result.value;
                 setInternalSelection(result.selection);
             }
 
-            onChangeText(result.value);
+            current.onChangeText(result.value);
         };
 
         const handleContentSizeChange = (
@@ -285,7 +273,8 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
                                                 item,
                                             )}
                                             accessibilityRole="button"
-                                            accessibilityState={{expanded: isMenuOpen}}
+                                            accessibilityState={{disabled, expanded: isMenuOpen}}
+                                            disabled={disabled}
                                             onPress={() =>
                                                 setOpenMenuIndex((currentIndex) =>
                                                     currentIndex === index
@@ -310,6 +299,8 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
                                                             menuItem,
                                                         )}
                                                         accessibilityRole="button"
+                                                        accessibilityState={{disabled}}
+                                                        disabled={disabled}
                                                         key={getToolbarButtonKey(
                                                             menuItem,
                                                             menuItemIndex,
@@ -334,6 +325,8 @@ const MarkdownTextInput = React.forwardRef<TextInput, MarkdownTextInputProps>(
                                         item,
                                     )}
                                     accessibilityRole="button"
+                                    accessibilityState={{disabled}}
+                                    disabled={disabled}
                                     key={getToolbarButtonKey(item, index)}
                                     onPress={() => {
                                         handleToolbarButtonPress(item);

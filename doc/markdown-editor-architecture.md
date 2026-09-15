@@ -56,9 +56,57 @@ Implemented:
 
 Still pending:
 
-- native inline attributed styling
 - richer keyboard shortcut handling
 - more advanced built-in dialogs and field-level UX polish
+
+## WYSIWYG Editing
+
+`MarkdownEditor` is the unified surface and supports two modes via a `mode`
+prop (`'plaintext' | 'wysiwyg'`) plus an optional built-in toggle:
+
+- `plaintext`: edits the raw markdown source through `MarkdownTextInput`.
+- `wysiwyg`: edits through `MarkdownWysiwygEditor`, a real multiline
+  `TextInput` whose inline markers are hidden and whose content is rendered as
+  styled `Text` spans (bold, italic, underline, strikethrough, inline code).
+
+Markdown is always the source of truth in both modes. The WYSIWYG surface keeps
+the markdown source authoritative while presenting marker-free display text:
+
+- `utils/wysiwygModel.ts` is a pure module that parses the source into a display
+  string plus a per-character source-offset map and grouped styled segments.
+- `applyDisplayEdit` uses the previous display selection to locate edits,
+  falling back to a common prefix/suffix diff for native replacements elsewhere.
+  It preserves paired delimiters around surviving content, removes spans emptied
+  by the edit, and joins matching spans when their separating text is deleted.
+  Line breaks close and reopen inline formatting, and joining blocks removes the
+  second block's prefix. Lines whose delimiter boundaries become invalid are
+  serialized again; untouched valid syntax and literal code remain unchanged.
+  Its optional third argument accepts the previous display selection, and the
+  native editor supplies it automatically.
+- `applyInlineFormatWysiwyg` toggles formats on selected display characters and
+  serializes the affected lines. It keeps block prefixes outside inline formats,
+  preserves nested styles, and treats code contents as literal text. Delimiter
+  choice, escaped punctuation, and character references keep the stored Markdown
+  valid at word boundaries without adding visible characters.
+- `displaySelectionToSource` / `sourceOffsetToDisplay` translate selections
+  between the two coordinate spaces. Selections are clamped after value changes
+  and translated for both toolbar and parent-controlled mode changes.
+- Async command resolvers apply their returned command to the latest committed
+  value and selection. Pending commands are discarded after unmounting or when
+  editing is disabled. Both toolbars honor `editable={false}` and `readOnly`.
+- The native surface uses styled children without a `TextInput.value`, since
+  React Native does not support combining both. Accepted edits retain the input
+  instance. If a parent rejects an edit, the surface replaces its native input
+  to restore the source text and selection, and restores focus when needed.
+
+Known limitations (next steps):
+
+- Headings hide their prefixes and lists show synthetic markers. Quotes, tables,
+  links, and fenced code blocks are still edited as literal visible text.
+- Native styling, selection, and IME behavior need validation on iOS and Android
+  devices. Replacing the input after a rejected edit can reset native undo and
+  composition state; tests cover the component recovery path using native mocks.
+- Intraword underscores are treated as italic markers when balanced.
 
 ## Design Principles
 

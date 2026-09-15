@@ -8,13 +8,34 @@ export {
     applyTableFormat,
     createMarkdownTable,
 } from './commands/formatMarkdown';
+export {executeCommand, isInlineCommand} from './commands/executeCommand';
+export {default as EditorToolbar} from './EditorToolbar';
 export {default as MarkdownComposer} from './MarkdownComposer';
+export {default as MarkdownEditor} from './MarkdownEditor';
 export {default as MarkdownPreview} from './MarkdownPreview';
 export {default as MarkdownTextInput} from './MarkdownTextInput';
 export {default as MarkdownWysiwygEditor} from './MarkdownWysiwygEditor';
 export {applyMarkdownShortcut} from './utils/shortcuts';
 export {getSelectedText, normalizeSelection} from './utils/selection';
 export {insertTextAtSelection, removeTextBeforeSelection} from './utils/wysiwygEditing';
+export {
+    applyDisplayEdit,
+    applyInlineFormatWysiwyg,
+    buildWysiwygModel,
+    cleanEmptyMarkers,
+    displaySelectionToSource,
+    getFormatsAtDisplayOffset,
+    sourceOffsetToDisplay,
+} from './utils/wysiwygModel';
+
+export type {
+    WysiwygBlock,
+    WysiwygEditResult,
+    WysiwygInlineFormat,
+    WysiwygModel,
+    WysiwygSegment,
+} from './utils/wysiwygModel';
+export type {EditorToolbarProps} from './EditorToolbar';
 
 export type {
     MarkdownBlockFormat,
@@ -23,6 +44,8 @@ export type {
     MarkdownCommandResult,
     MarkdownComposerMode,
     MarkdownComposerProps,
+    MarkdownEditorMode,
+    MarkdownEditorProps,
     MarkdownInputComponent,
     MarkdownInlineFormat,
     MarkdownLinkPayload,
@@ -42,4 +65,6 @@ export type {
     MarkdownToolbarItem,
     MarkdownToolbarWrapAction,
     MarkdownWysiwygEditorProps,
+    MarkdownWysiwygFormat,
+    MarkdownWysiwygFormatStyles,
 } from './types';

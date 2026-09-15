@@ -1,22 +1,28 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {
-    Animated,
     type NativeSyntheticEvent,
-    Pressable,
+    type StyleProp,
     Text,
     TextInput,
-    type TextInputKeyPressEventData,
-    View,
+    type TextInputSelectionChangeEventData,
+    type TextStyle,
 } from 'react-native';
 
 import styles from './style';
 import {normalizeSelection} from '../utils/selection';
 import {
-    insertTextAtSelection,
-    removeTextBeforeSelection,
-} from '../utils/wysiwygEditing';
+    applyDisplayEdit,
+    buildWysiwygModel,
+    type WysiwygBlock,
+    type WysiwygInlineFormat,
+    type WysiwygSegment,
+} from '../utils/wysiwygModel';
 
-import type {MarkdownSelection, MarkdownWysiwygEditorProps} from '../types';
+import type {
+    MarkdownSelection,
+    MarkdownWysiwygEditorProps,
+    MarkdownWysiwygFormatStyles,
+} from '../types';
 
 const setForwardedRef = (
     forwardedRef: React.ForwardedRef<TextInput>,
@@ -32,17 +38,67 @@ const setForwardedRef = (
     }
 };
 
+const getDefaultFormatStyle = (
+    format: WysiwygInlineFormat,
+    hasUnderline: boolean,
+    hasStrikethrough: boolean,
+): StyleProp<TextStyle> => {
+    switch (format) {
+        case 'bold':
+            return styles.bold;
+        case 'italic':
+            return styles.italic;
+        case 'inline-code':
+            return styles.code;
+        case 'underline':
+            return hasStrikethrough ? styles.underlineStrikethrough : styles.underline;
+        case 'strikethrough':
+            return hasUnderline ? null : styles.strikethrough;
+        default:
+            return null;
+    }
+};
+
+const getBlockStyle = (block: WysiwygBlock): StyleProp<TextStyle> => {
+    switch (block) {
+        case 'heading-one':
+            return styles.headingOne;
+        case 'heading-two':
+            return styles.headingTwo;
+        case 'heading-three':
+            return styles.headingThree;
+        case 'list-marker':
+            return styles.listMarker;
+        default:
+            return null;
+    }
+};
+
+const getSegmentStyle = (
+    segment: WysiwygSegment,
+    formatStyles: MarkdownWysiwygFormatStyles | undefined,
+): StyleProp<TextStyle>[] => {
+    const hasUnderline = segment.formats.includes('underline');
+    const hasStrikethrough = segment.formats.includes('strikethrough');
+
+    return [
+        getBlockStyle(segment.block),
+        ...segment.formats.flatMap((format) => [
+            getDefaultFormatStyle(format, hasUnderline, hasStrikethrough),
+            formatStyles?.[format] ?? null,
+        ]),
+    ];
+};
+
 const MarkdownWysiwygEditor = React.forwardRef<
     TextInput,
     MarkdownWysiwygEditorProps
 >(function MarkdownWysiwygEditor(
     {
-        cursorBlinkEnabled = true,
-        cursorStyle,
         editorStyle,
+        formatStyles,
         onChangeText,
         onSelectionChange,
-        placeholder,
         selection,
         textStyle,
         value,
@@ -50,44 +106,48 @@ const MarkdownWysiwygEditor = React.forwardRef<
     },
     ref,
 ) {
+    const model = useMemo(() => buildWysiwygModel(value), [value]);
     const inputRef = useRef<TextInput | null>(null);
-    const cursorOpacity = useMemo(() => new Animated.Value(1), []);
-    const [internalSelection, setInternalSelection] = useState(() =>
-        normalizeSelection(value, selection),
+    const [nativeState, setNativeState] = useState<{
+        generation: number;
+        restoreFocus: boolean;
+        pending: {display: string; previousDisplay: string; previousSelection: MarkdownSelection; focused: boolean} | null;
+    }>({generation: 0, restoreFocus: false, pending: null});
+    const [internalSelection, setInternalSelection] = useState<MarkdownSelection>(
+        () => normalizeSelection(model.display, selection),
     );
 
     const normalizedSelection = useMemo(
-        () => normalizeSelection(value, selection ?? internalSelection),
-        [internalSelection, selection, value],
+        () => normalizeSelection(model.display, selection ?? internalSelection),
+        [internalSelection, model.display, selection],
     );
 
-    useEffect(() => {
-        if (!cursorBlinkEnabled) {
-            cursorOpacity.setValue(1);
-            return undefined;
+    if (nativeState.pending) {
+        const pending = nativeState.pending;
+        const rejected = pending.display !== model.display && pending.previousDisplay === model.display;
+
+        // Unchanged attributed children cannot reset native text. Recreate only
+        // a rejected edit's native surface; normal accepted typing keeps its host.
+        setNativeState({
+            generation: nativeState.generation + (rejected ? 1 : 0),
+            restoreFocus: rejected ? pending.focused : nativeState.restoreFocus,
+            pending: null,
+        });
+        if (rejected && selection === undefined) {
+            setInternalSelection(pending.previousSelection);
         }
+    }
 
-        const animation = Animated.loop(
-            Animated.sequence([
-                Animated.timing(cursorOpacity, {
-                    duration: 500,
-                    toValue: 0,
-                    useNativeDriver: false,
-                }),
-                Animated.timing(cursorOpacity, {
-                    duration: 500,
-                    toValue: 1,
-                    useNativeDriver: false,
-                }),
-            ]),
-        );
+    const setInputRef = useCallback((input: TextInput | null): void => {
+        inputRef.current = input;
+        setForwardedRef(ref, input);
+    }, [ref]);
 
-        animation.start();
-
-        return () => {
-            animation.stop();
-        };
-    }, [cursorBlinkEnabled, cursorOpacity]);
+    useLayoutEffect(() => {
+        if (nativeState.restoreFocus) {
+            inputRef.current?.focus();
+        }
+    }, [nativeState.generation, nativeState.restoreFocus]);
 
     const updateSelection = (nextSelection: MarkdownSelection): void => {
         if (!selection) {
@@ -97,88 +157,47 @@ const MarkdownWysiwygEditor = React.forwardRef<
         onSelectionChange?.(nextSelection);
     };
 
-    const applyResult = (
-        result: ReturnType<typeof insertTextAtSelection>,
-    ): void => {
+    const handleChangeText = (nextDisplay: string): void => {
+        const result = applyDisplayEdit(value, nextDisplay, normalizedSelection);
+        const focused = inputRef.current?.isFocused() ?? false;
+
+        setNativeState((current) => ({
+            ...current,
+            pending: {display: nextDisplay, previousDisplay: model.display, previousSelection: normalizedSelection, focused},
+        }));
+
         updateSelection(result.selection);
         onChangeText(result.value);
     };
 
-    const focusInput = (): void => {
-        inputRef.current?.focus();
-    };
-
-    const moveCursorToEnd = (): void => {
-        updateSelection({
-            end: value.length,
-            start: value.length,
-        });
-        focusInput();
-    };
-
-    const handleHiddenInputChange = (typedText: string): void => {
-        if (typedText.length === 0) {
-            return;
-        }
-
-        applyResult(insertTextAtSelection(value, normalizedSelection, typedText));
-    };
-
-    const handleKeyPress = (
-        event: NativeSyntheticEvent<TextInputKeyPressEventData>,
+    const handleSelectionChange = (
+        event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
     ): void => {
-        textInputProps.onKeyPress?.(event);
-
-        if (event.nativeEvent.key === 'Backspace') {
-            applyResult(removeTextBeforeSelection(value, normalizedSelection));
-        }
+        updateSelection(event.nativeEvent.selection);
     };
-
-    const visibleBeforeCursor = value.slice(0, normalizedSelection.start);
-    const visibleAfterCursor = value.slice(normalizedSelection.end);
-    const showPlaceholder = value.length === 0 && placeholder;
 
     return (
-        <Pressable
-            accessibilityRole="text"
-            onPress={moveCursorToEnd}
-            style={[styles.container, editorStyle]}
+        <TextInput
+            {...textInputProps}
+            key={nativeState.generation}
+            multiline
+            onChangeText={handleChangeText}
+            onSelectionChange={handleSelectionChange}
+            ref={setInputRef}
+            selection={normalizedSelection}
+            style={[styles.input, textStyle, editorStyle]}
         >
-            {showPlaceholder ? (
-                <Text style={[styles.placeholder, textStyle]}>{placeholder}</Text>
-            ) : (
-                <View style={styles.cursorRow}>
-                    <Text style={[styles.text, textStyle]}>{visibleBeforeCursor}</Text>
-                    <Animated.View
-                        accessibilityElementsHidden
-                        importantForAccessibility="no-hide-descendants"
-                        style={[
-                            styles.cursor,
-                            cursorStyle,
-                            {
-                                opacity: cursorOpacity,
-                            },
-                        ]}
-                    />
-                    <Text style={[styles.text, textStyle]}>{visibleAfterCursor}</Text>
-                </View>
-            )}
-            <TextInput
-                {...textInputProps}
-                autoCorrect={textInputProps.autoCorrect ?? true}
-                caretHidden
-                multiline
-                onChangeText={handleHiddenInputChange}
-                onKeyPress={handleKeyPress}
-                ref={(input) => {
-                    inputRef.current = input;
-                    setForwardedRef(ref, input);
-                }}
-                selection={{end: 0, start: 0}}
-                style={styles.hiddenInput}
-                value=""
-            />
-        </Pressable>
+            {model.display.length > 0
+                ? model.segments.map((segment, index) => (
+                    <Text
+                        key={`segment-${index}`}
+                        style={getSegmentStyle(segment, formatStyles)}
+                    >
+                        {segment.text}
+                    </Text>
+                ))
+                : null}
+        </TextInput>
     );
 });
 

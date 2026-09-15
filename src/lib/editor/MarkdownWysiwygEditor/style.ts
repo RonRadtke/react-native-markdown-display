@@ -1,46 +1,56 @@
-import {StyleSheet} from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
-    container: {
-        borderColor: '#C7CCD1',
-        borderRadius: 8,
-        borderWidth: 1,
-        minHeight: 44,
-        overflow: 'hidden',
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        position: 'relative',
-        width: '100%',
+    bold: {
+        fontWeight: '700',
     },
-    cursor: {
-        backgroundColor: '#0A66C2',
-        height: 20,
-        marginHorizontal: 1,
-        width: 2,
+    code: {
+        backgroundColor: '#EFF4F8',
+        fontFamily: Platform.select({
+            android: 'monospace',
+            default: 'Menlo',
+            ios: 'Menlo',
+        }),
     },
-    cursorRow: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        minHeight: 24,
+    headingOne: {
+        fontSize: 26,
+        fontWeight: '700',
+        lineHeight: 32,
     },
-    hiddenInput: {
-        height: 1,
-        left: 0,
-        opacity: 0,
-        position: 'absolute',
-        top: 0,
-        width: 1,
+    headingThree: {
+        fontSize: 18,
+        fontWeight: '700',
+        lineHeight: 24,
     },
-    placeholder: {
-        color: '#7A8694',
-        fontSize: 16,
-        lineHeight: 22,
+    headingTwo: {
+        fontSize: 21,
+        fontWeight: '700',
+        lineHeight: 28,
     },
-    text: {
+    listMarker: {
+        color: '#56606B',
+    },
+    input: {
         color: '#1F2933',
         fontSize: 16,
         lineHeight: 22,
+        margin: 0,
+        minHeight: 44,
+        padding: 0,
+        textAlignVertical: 'top',
+        width: '100%',
+    },
+    italic: {
+        fontStyle: 'italic',
+    },
+    strikethrough: {
+        textDecorationLine: 'line-through',
+    },
+    underline: {
+        textDecorationLine: 'underline',
+    },
+    underlineStrikethrough: {
+        textDecorationLine: 'underline line-through',
     },
 });
 

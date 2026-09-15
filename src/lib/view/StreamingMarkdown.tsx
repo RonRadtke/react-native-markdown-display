@@ -1,5 +1,5 @@
-import React, {useEffect, useMemo, useRef} from 'react';
-import {Animated, Text, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Animated, StyleSheet, Text, View} from 'react-native';
 
 import AstRenderer from './AstRenderer';
 import {createMarkdownIt} from './createMarkdownIt';
@@ -13,6 +13,7 @@ import type {MarkdownParser, MarkdownStyleMap, OnCopyCode, OnLinkPress, RenderRu
 
 const CURSOR_BLINK_ON_MS = 600;
 const CURSOR_BLINK_OFF_MS = 600;
+const cursorStyles = StyleSheet.create({cursor: {height: 16, marginTop: 4, width: 2}});
 
 interface StreamingCursorProps {
     color: string;
@@ -20,7 +21,7 @@ interface StreamingCursorProps {
 }
 
 function StreamingCursor({color, style}: StreamingCursorProps): React.JSX.Element {
-    const opacity = useRef(new Animated.Value(1)).current;
+    const [opacity] = useState(() => new Animated.Value(1));
 
     useEffect(() => {
         const animation = Animated.loop(
@@ -38,12 +39,8 @@ function StreamingCursor({color, style}: StreamingCursorProps): React.JSX.Elemen
     return (
         <Animated.View
             style={[
-                {
-                    backgroundColor: color,
-                    height: 16,
-                    marginTop: 4,
-                    width: 2,
-                },
+                cursorStyles.cursor,
+                {backgroundColor: color},
                 style,
                 {opacity},
             ]}
