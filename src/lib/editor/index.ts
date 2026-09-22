@@ -18,9 +18,8 @@ export {default as MarkdownWysiwygEditor} from './MarkdownWysiwygEditor';
 export {applyMarkdownShortcut} from './utils/shortcuts';
 export {getSelectedText, normalizeSelection} from './utils/selection';
 export {insertTextAtSelection, removeTextBeforeSelection} from './utils/wysiwygEditing';
+export {applyDisplayEdit, applyInlineFormatWysiwyg} from './utils/wysiwygEdit';
 export {
-    applyDisplayEdit,
-    applyInlineFormatWysiwyg,
     buildWysiwygModel,
     cleanEmptyMarkers,
     displaySelectionToSource,
@@ -28,12 +27,15 @@ export {
     sourceOffsetToDisplay,
 } from './utils/wysiwygModel';
 
+export type {WysiwygEditOptions, WysiwygEditResult} from './utils/wysiwygEdit';
 export type {
     WysiwygBlock,
-    WysiwygEditResult,
+    WysiwygBlockMarker,
+    WysiwygBlockType,
     WysiwygInlineFormat,
     WysiwygModel,
     WysiwygSegment,
+    WysiwygSpan,
 } from './utils/wysiwygModel';
 export type {EditorToolbarProps} from './EditorToolbar';
 

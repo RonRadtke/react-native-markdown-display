@@ -14,8 +14,8 @@
         "build": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true}); require('fs').rmSync('lib', {recursive: true, force: true})\" && tsc -p tsconfig.json",
         "format": "prettier -w src",
         "format-check": "prettier --check src",
-        "lint": "ESLINT_USE_FLAT_CONFIG=false eslint --cache ./src",
-        "lint-fix": "ESLINT_USE_FLAT_CONFIG=false eslint --fix --cache ./src",
+        "lint": "eslint --cache ./src",
+        "lint-fix": "eslint --fix --cache ./src",
         "test": "jest",
         "typecheck": "tsc -p tsconfig.json --noEmit"
     },

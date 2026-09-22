@@ -10,8 +10,8 @@ import MarkdownWysiwygEditor from '../MarkdownWysiwygEditor';
 import styles from './style';
 import {normalizeSelection} from '../utils/selection';
 import {useCommittedValue} from '../utils/useCommittedValue';
+import {applyInlineFormatWysiwyg} from '../utils/wysiwygEdit';
 import {
-    applyInlineFormatWysiwyg,
     buildWysiwygModel,
     displaySelectionToSource,
     getFormatsAtDisplayOffset,

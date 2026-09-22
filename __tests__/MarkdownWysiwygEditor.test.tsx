@@ -148,6 +148,35 @@ describe('MarkdownWysiwygEditor', () => {
         expect(onChangeText).toHaveBeenCalledWith('**a**');
     });
 
+    test('continues typing outside a span closed by typed markdown', () => {
+        const ref = React.createRef<TextInput>();
+        function ControlledEditor(): React.JSX.Element {
+            const [value, setValue] = React.useState('');
+            return <MarkdownWysiwygEditor ref={ref} value={value} onChangeText={setValue} />;
+        }
+        let tree: renderer.ReactTestRenderer | undefined;
+        renderer.act(() => { tree = renderer.create(<ControlledEditor />); });
+        if (!tree) {
+            throw new Error('Failed to render controlled editor');
+        }
+        const type = (display: string, caret: number): void => {
+            renderer.act(() => { tree!.root.findByType(TextInput).props.onChangeText(display); });
+            renderer.act(() => {
+                tree!.root.findByType(TextInput).props.onSelectionChange({nativeEvent: {selection: {start: caret, end: caret}}});
+            });
+        };
+
+        type('*', 1);
+        type('*x', 2);
+        // The closing marker converts the text; native then reports the caret the surface set.
+        type('*x*', 1);
+        expect(tree.root.findAllByType(Text).map((node) => node.props.children).join('')).toBe('x');
+        expect(tree.root.findByType(TextInput).props.selection).toEqual({start: 1, end: 1});
+        type('xy', 2);
+        expect(tree.root.findAllByType(Text).map((node) => node.props.children).join('')).toBe('xy');
+        expect(tree.root.findAllByType(Text).map((node) => node.props.children)).toEqual(['x', 'y']);
+    });
+
     test('uses the native caret when deleting repeated display characters', () => {
         const onChangeText = jest.fn();
         const onSelectionChange = jest.fn();

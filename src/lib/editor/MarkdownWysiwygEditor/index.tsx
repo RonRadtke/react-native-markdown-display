@@ -10,8 +10,8 @@ import {
 
 import styles from './style';
 import {normalizeSelection} from '../utils/selection';
+import {applyDisplayEdit} from '../utils/wysiwygEdit';
 import {
-    applyDisplayEdit,
     buildWysiwygModel,
     type WysiwygBlock,
     type WysiwygInlineFormat,
@@ -108,6 +108,8 @@ const MarkdownWysiwygEditor = React.forwardRef<
 ) {
     const model = useMemo(() => buildWysiwygModel(value), [value]);
     const inputRef = useRef<TextInput | null>(null);
+    // Display caret at which typed markdown just closed a span; typing there continues outside it.
+    const caretOutsideRef = useRef<number | null>(null);
     const [nativeState, setNativeState] = useState<{
         generation: number;
         restoreFocus: boolean;
@@ -158,8 +160,13 @@ const MarkdownWysiwygEditor = React.forwardRef<
     };
 
     const handleChangeText = (nextDisplay: string): void => {
-        const result = applyDisplayEdit(value, nextDisplay, normalizedSelection);
+        const caretOutside = caretOutsideRef.current !== null &&
+            normalizedSelection.start === caretOutsideRef.current &&
+            normalizedSelection.end === caretOutsideRef.current;
+        const result = applyDisplayEdit(value, nextDisplay, normalizedSelection, {caretOutside});
         const focused = inputRef.current?.isFocused() ?? false;
+
+        caretOutsideRef.current = result.caretOutside ? result.selection.start : null;
 
         setNativeState((current) => ({
             ...current,
@@ -173,6 +180,12 @@ const MarkdownWysiwygEditor = React.forwardRef<
     const handleSelectionChange = (
         event: NativeSyntheticEvent<TextInputSelectionChangeEventData>,
     ): void => {
+        const {start, end} = event.nativeEvent.selection;
+
+        if (caretOutsideRef.current !== null && (start !== caretOutsideRef.current || end !== start)) {
+            caretOutsideRef.current = null;
+        }
+
         updateSelection(event.nativeEvent.selection);
     };
 

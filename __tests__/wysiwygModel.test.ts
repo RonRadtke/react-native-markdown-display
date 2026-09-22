@@ -1,7 +1,6 @@
 import MarkdownIt from 'markdown-it';
+import {applyDisplayEdit, applyInlineFormatWysiwyg} from '../src/lib/editor/utils/wysiwygEdit';
 import {
-    applyDisplayEdit,
-    applyInlineFormatWysiwyg,
     buildWysiwygModel,
     cleanEmptyMarkers,
     displaySelectionToSource,
@@ -136,7 +135,7 @@ describe('offset mapping', () => {
 describe('cleanEmptyMarkers', () => {
     test('removes empty marker pairs', () => {
         expect(cleanEmptyMarkers('****')).toBe('');
-        expect(cleanEmptyMarkers('**_++~~~~++_**')).toBe('');
+        expect(cleanEmptyMarkers('a ____ b ++++ c ~~~~')).toBe('a  b  c ');
     });
 
     test.each([
@@ -372,7 +371,7 @@ describe('applyInlineFormatWysiwyg', () => {
         ['__Hello__', 'bold', 'Hello', 'Hello'],
         ['**_Hi_**', 'bold', '_Hi_', '<em>Hi</em>'],
         ['**_Hi_**', 'italic', '**Hi**', '<strong>Hi</strong>'],
-        ['``a`b``', 'inline-code', 'a\\`b', 'a`b'],
+        ['``a`b``', 'inline-code', 'a`b', 'a`b'],
         ['`Hi`', 'bold', '**`Hi`**', '<strong><code>Hi</code></strong>'],
     ] as const)('toggles parsed formatting in %s', (source, format, expected, html) => {
         const display = buildWysiwygModel(source).display;

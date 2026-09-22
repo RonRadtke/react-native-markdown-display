@@ -70,24 +70,44 @@ prop (`'plaintext' | 'wysiwyg'`) plus an optional built-in toggle:
   styled `Text` spans (bold, italic, underline, strikethrough, inline code).
 
 Markdown is always the source of truth in both modes. The WYSIWYG surface keeps
-the markdown source authoritative while presenting marker-free display text:
+the markdown source authoritative while presenting marker-free display text.
 
-- `utils/wysiwygModel.ts` is a pure module that parses the source into a display
-  string plus a per-character source-offset map and grouped styled segments.
-- `applyDisplayEdit` uses the previous display selection to locate edits,
-  falling back to a common prefix/suffix diff for native replacements elsewhere.
-  It preserves paired delimiters around surviving content, removes spans emptied
-  by the edit, and joins matching spans when their separating text is deleted.
-  Line breaks close and reopen inline formatting, and joining blocks removes the
-  second block's prefix. Lines whose delimiter boundaries become invalid are
-  serialized again; untouched valid syntax and literal code remain unchanged.
-  Its optional third argument accepts the previous display selection, and the
-  native editor supplies it automatically.
-- `applyInlineFormatWysiwyg` toggles formats on selected display characters and
-  serializes the affected lines. It keeps block prefixes outside inline formats,
-  preserves nested styles, and treats code contents as literal text. Delimiter
-  choice, escaped punctuation, and character references keep the stored Markdown
-  valid at word boundaries without adding visible characters.
+The fidelity contract, enforced by `__tests__/wysiwygFidelity.test.ts`: text the
+user types or pastes reaches `value` byte for byte, lines the user did not touch
+are never rewritten, and the editor hides exactly the markers the renderer
+consumes so the sent message looks like the editor did.
+
+- `utils/wysiwygModel.ts` parses the source into a display string, per-character
+  source ranges and formats, grouped styled segments, and the recognised inline
+  spans and block prefixes. Inline parsing is a port of markdown-it's rules
+  (delimiter runs with CommonMark flanking, the rule of three, backtick runs,
+  escapes, entities, `~~` and the `ins` plugin's `++`), using markdown-it's own
+  character classes, so `snake_case`, `2 * 3`, `C++` and `a*b*c` parse exactly
+  as the message bubble renders them. Lines are parsed independently and cached
+  by text, and whole models are cached by source, so a keystroke re-parses only
+  the line it touched and both editor components share one model per value.
+- `utils/wysiwygEdit.ts` translates display edits back onto the source. It
+  classifies the surviving source bytes into units (display characters, hidden
+  delimiters, block prefixes, newlines), inserts the typed text between them,
+  and verifies by re-parsing that every surviving span is still recognised.
+  Text typed after a character continues its formatting; trailing whitespace
+  moves outside closing delimiters; code spans are not extended by typing at
+  their end; a newline closes open spans and reopens them on the next line;
+  Enter continues list and quote prefixes and exits an empty one; deleting a
+  glyph or the newline before a prefix removes the whole prefix; spans emptied
+  by a deletion lose their delimiters and matching neighbours are joined.
+- Markdown typed by hand takes effect: when typed marker characters change the
+  parse without altering visible text, the keystrokes are kept verbatim. The
+  result's `caretOutside` flag tells the component that the next keystroke at
+  that caret belongs after the span that was just closed, so `*b*` then `c`
+  gives `*b*c`. When an edit would break surviving formatting, the pipeline
+  escapes the typed markers, switches `_`/`*` delimiter families, and only as a
+  last resort re-serializes the edited lines (choosing markers, escaping, and
+  finally character references for boundaries CommonMark cannot express, such
+  as bold code directly followed by a letter).
+- `applyInlineFormatWysiwyg` toggles formats on the selected display characters
+  (or the word around a collapsed caret) and re-serializes only those lines,
+  keeping block prefixes, other lines and literal characters as they were.
 - `displaySelectionToSource` / `sourceOffsetToDisplay` translate selections
   between the two coordinate spaces. Selections are clamped after value changes
   and translated for both toolbar and parent-controlled mode changes.
@@ -98,15 +118,23 @@ the markdown source authoritative while presenting marker-free display text:
   React Native does not support combining both. Accepted edits retain the input
   instance. If a parent rejects an edit, the surface replaces its native input
   to restore the source text and selection, and restores focus when needed.
+  Like a controlled React Native `TextInput`, the parent must commit `value`
+  synchronously; a debounced or asynchronous parent is indistinguishable from a
+  rejection.
 
 Known limitations (next steps):
 
-- Headings hide their prefixes and lists show synthetic markers. Quotes, tables,
-  links, and fenced code blocks are still edited as literal visible text.
-- Native styling, selection, and IME behavior need validation on iOS and Android
-  devices. Replacing the input after a rejected edit can reset native undo and
-  composition state; tests cover the component recovery path using native mocks.
-- Intraword underscores are treated as italic markers when balanced.
+- Headings hide their prefixes and lists show synthetic markers (with their
+  indentation). Quotes, tables, links, images, HTML and fenced code blocks are
+  edited as literal visible text; link URLs and indented code blocks are
+  inline-parsed like prose, so their display may hide emphasis the renderer
+  keeps literal. The stored value is never affected.
+- Inline spans are matched per line. Emphasis that CommonMark would carry across
+  a soft line break within a paragraph shows its markers in the editor.
+- Native styling, selection, IME, autocorrect and undo behavior need validation
+  on iOS and Android devices; see `doc/wysiwyg-device-checklist.md`. Replacing
+  the input after a rejected edit can reset native undo and composition state;
+  tests cover the component recovery path using native mocks.
 
 ## Design Principles
 

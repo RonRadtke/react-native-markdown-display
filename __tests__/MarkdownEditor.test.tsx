@@ -64,7 +64,8 @@ describe('MarkdownEditor', () => {
         });
         await renderer.act(async () => { await tree.root.findByType(EditorToolbar).props.onCommand('bold'); });
 
-        expect(onChangeText).toHaveBeenCalledWith('Hi**text**');
+        // The stale range is clamped to a caret, which formats the word around it.
+        expect(onChangeText).toHaveBeenCalledWith('**Hi**');
     });
 
     test.each([{editable: false}, {readOnly: true}])('disables commands and custom actions with %s', async (props) => {
