@@ -14,7 +14,7 @@ Markdown rendering and editing primitives for React Native, running only in JS. 
 - ⚡ **Native rendering pipeline**: markdown is parsed with `markdown-it`, normalized into an AST, and rendered with React Native components.
 - 🧱 **No WebView dependency**: content participates in your React Native layout, styling, theming, navigation, and event handling.
 - 🧩 **Typed customization surface**: override styles, render rules, link handling, parser behavior, and image handling with TypeScript-friendly APIs.
-- ✍️ **Viewer and editor pieces**: use `<Markdown>` for display, `MarkdownStream` for streaming text, or `MarkdownTextInput` / `MarkdownComposer` for authoring.
+- ✍️ **Viewer and editor pieces**: use `<Markdown>` for display, `MarkdownStream` for streaming text, or `MarkdownTextInput` / `MarkdownComposer` / `MarkdownEditor` for authoring.
 - 🔌 **Extensible markdown support**: bring your own `markdown-it` instance or opt into bundled plugins such as underline.
 
 This package is intended as a modern replacement for `react-native-markdown-renderer`, with stricter typing and a maintained native rendering architecture.
@@ -88,6 +88,7 @@ export default function App(): React.JSX.Element {
 | ⏱️ Render actively streaming markdown text | `MarkdownStream` |
 | ⌨️ Add a markdown-aware text input | `MarkdownTextInput` |
 | 🧰 Ship an opinionated markdown composer with toolbar and preview | `MarkdownComposer` |
+| 🖋️ Edit markdown in a rich-text (WYSIWYG) surface with a plain-text toggle | `MarkdownEditor` |
 | 🔎 Preview an editor value with the same renderer | `MarkdownPreview` |
 
 ## 📝 Supported Markdown
@@ -118,7 +119,7 @@ The viewer is designed to be customized at the right layer:
 ## 📚 Documentation
 
 - [Viewer guide](VIEWER.md): rendering, styles, custom rules, `MarkdownIt`, preprocessing, and streaming
-- [Input guide](INPUT.md): `MarkdownTextInput`, `MarkdownComposer`, toolbars, prompts, shortcuts, and previews
+- [Input guide](INPUT.md): `MarkdownTextInput`, `MarkdownComposer`, `MarkdownEditor` rich text mode, toolbars, prompts, shortcuts, and previews
 - [Editor architecture note](doc/markdown-editor-architecture.md): internal editor model and design notes
 - [Example app](example/README.md): local example project
 
