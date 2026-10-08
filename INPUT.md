@@ -542,12 +542,58 @@ Composer-specific props:
 | `mergeStyle` | `true` | Merge preview styles with defaults instead of replacing them |
 | `onLinkPress` | default link opener | Override link handling in preview |
 
+## Rich Text Mode (`MarkdownEditor`)
+
+`MarkdownEditor` combines the plain-text input with a WYSIWYG surface and a built-in mode toggle. The value is markdown in both modes; the rich mode hides inline markers and heading prefixes, shows list bullets, and styles bold, italic, underline, strikethrough and inline code in place.
+
+```tsx
+import React, {useState} from 'react';
+import {MarkdownEditor, type MarkdownEditorMode} from '@ronradtke/react-native-markdown-display';
+
+export function Composer() {
+    const [value, setValue] = useState('');
+    const [mode, setMode] = useState<MarkdownEditorMode>('wysiwyg');
+
+    return (
+        <MarkdownEditor
+            mode={mode}
+            onChangeText={setValue}
+            onModeChange={setMode}
+            placeholder="Message..."
+            value={value}
+        />
+    );
+}
+```
+
+| Prop | Default | Description |
+| --- | --- | --- |
+| `value` | required | Markdown string; commit it synchronously, like a controlled `TextInput` |
+| `onChangeText` | required | Called with the updated markdown |
+| `mode` | internal, starts in `'plaintext'` | Controlled mode: `'plaintext'` or `'wysiwyg'` |
+| `onModeChange` | `undefined` | Called when the built-in toggle changes the mode |
+| `showModeToggle` | `true` | Renders the plain/rich toggle |
+| `toolbarItems` | expanded toolbar | Toolbar items for both modes |
+| `formatStyles` | built-in | Per-format `TextStyle` overrides for the rich surface |
+| `editorStyle` / `textStyle` / `containerStyle` | `undefined` | Styles for the surface, its text and the outer container |
+| `resolveCommandPayload` | `undefined` | Async or sync payload resolver used before applying a command |
+
+What the rich mode guarantees:
+
+- Typed and pasted text reaches `value` unchanged. Identifiers such as `my_var`, expressions such as `2 * 3 * 4`, paths, URLs and code are never rewritten.
+- Markdown typed by hand takes effect as soon as it is valid: typing `**bold**` shows bold text, and the keystrokes stay in the value. Typing continues after the closed span.
+- Lines you do not touch are never rewritten. Only the edited line is adjusted when a delimiter must move to stay valid.
+- Enter continues bullet, ordered and quote prefixes and exits an empty one, as in plain-text mode.
+- Toolbar commands format the selection, or the word around the caret when nothing is selected, and rewrite only those lines.
+
+Quotes, tables, links, images, HTML and fenced code blocks are shown as literal text in rich mode. `MarkdownWysiwygEditor` is also exported on its own for custom layouts, together with the pure helpers `buildWysiwygModel`, `applyDisplayEdit`, `applyInlineFormatWysiwyg`, `displaySelectionToSource` and `sourceOffsetToDisplay`.
+
 ## Current Editing Model
 
 The editor stays within standard markdown text and selection transforms. That keeps it portable and deterministic, but it also means:
 
 - the stored value is always markdown text
 - formatting is applied by inserting/removing markdown markers
-- preview is the place where formatted output is rendered
+- preview and the rich-text surface render formatted output; the value never changes shape
 
 If you need architecture-level background, see [doc/markdown-editor-architecture.md](doc/markdown-editor-architecture.md).

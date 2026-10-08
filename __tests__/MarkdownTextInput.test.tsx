@@ -3,8 +3,82 @@ import renderer from 'react-test-renderer';
 import {Text, TextInput} from 'react-native';
 
 import {type MarkdownManagedTextInputProps, MarkdownTextInput} from '../src';
+import type {MarkdownTextInputCommandPayload} from '../src';
+
+const renderInput = (props: React.ComponentProps<typeof MarkdownTextInput>): renderer.ReactTestRenderer => {
+    let tree: renderer.ReactTestRenderer | undefined;
+    renderer.act(() => { tree = renderer.create(<MarkdownTextInput {...props} />); });
+    if (!tree) {
+        throw new Error('Failed to render MarkdownTextInput');
+    }
+    return tree;
+};
 
 describe('MarkdownTextInput', () => {
+    test('uses the current value, selection, and callbacks when a pending command resolves', async () => {
+        let resolvePayload: (payload: MarkdownTextInputCommandPayload | null) => void = () => {};
+        const pendingPayload = new Promise<MarkdownTextInputCommandPayload | null>((resolve) => { resolvePayload = resolve; });
+        const oldOnChangeText = jest.fn();
+        const onChangeText = jest.fn();
+        const onCommand = jest.fn();
+        const tree = renderInput({value: 'Hello', onChangeText: oldOnChangeText, resolveCommandPayload: () => pendingPayload});
+        const button = tree.root.find((node) => node.props.accessibilityLabel === 'Bold' && typeof node.props.onPress === 'function');
+        renderer.act(() => { button.props.onPress(); });
+        renderer.act(() => {
+            tree.update(<MarkdownTextInput value="Hello!" selection={{start: 5, end: 6}} onChangeText={onChangeText} onCommand={onCommand} />);
+        });
+        await renderer.act(async () => {
+            resolvePayload({command: 'bold'});
+            await pendingPayload;
+        });
+
+        expect(oldOnChangeText).not.toHaveBeenCalled();
+        expect(onChangeText).toHaveBeenCalledWith('Hello**!**');
+        expect(onCommand).toHaveBeenCalledWith({command: 'bold'}, {value: 'Hello**!**', selection: {start: 7, end: 8}});
+    });
+
+    test.each([{editable: false}, {readOnly: true}])('disables toolbar commands and actions with %s', async (props) => {
+        const onChangeText = jest.fn();
+        const resolveCommandPayload = jest.fn();
+        const tree = renderInput({
+            ...props,
+            value: 'Hello',
+            onChangeText,
+            resolveCommandPayload,
+            toolbarItems: [{command: 'bold', label: 'Bold'}, {action: {type: 'insert', markdown: '!'}, label: 'Insert'}],
+        });
+        const buttons = tree.root.findAll((node) => typeof node.props.onPress === 'function');
+        await renderer.act(async () => {
+            for (const button of buttons) {
+                expect(button.props.disabled).toBe(true);
+                button.props.onPress();
+            }
+        });
+        expect(resolveCommandPayload).not.toHaveBeenCalled();
+        expect(onChangeText).not.toHaveBeenCalled();
+    });
+
+    test.each(['disabled', 'unmounted'])('cancels pending input commands when %s', async (change) => {
+        let resolvePayload: (payload: MarkdownTextInputCommandPayload | null) => void = () => {};
+        const pendingPayload = new Promise<MarkdownTextInputCommandPayload | null>((resolve) => { resolvePayload = resolve; });
+        const onChangeText = jest.fn();
+        const tree = renderInput({value: 'Hello', onChangeText, resolveCommandPayload: () => pendingPayload});
+        const button = tree.root.find((node) => node.props.accessibilityLabel === 'Bold' && typeof node.props.onPress === 'function');
+        renderer.act(() => { button.props.onPress(); });
+        renderer.act(() => {
+            if (change === 'disabled') {
+                tree.update(<MarkdownTextInput value="Hello" readOnly onChangeText={onChangeText} />);
+            } else {
+                tree.unmount();
+            }
+        });
+        await renderer.act(async () => {
+            resolvePayload({command: 'bold'});
+            await pendingPayload;
+        });
+        expect(onChangeText).not.toHaveBeenCalled();
+    });
+
     test('uses the command payload resolver for link commands', async () => {
         const onChangeText = jest.fn();
         const resolveCommandPayload = jest.fn(async () => ({

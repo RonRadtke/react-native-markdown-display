@@ -41,6 +41,8 @@ This library serves a dual role in an AI chat interface (similar to Claude or Ch
 | Table dialog | Done | Built-in native `Alert`-based prompt; dimension validation |
 | `onCommand` hook | Done | Intercept any toolbar command before it applies |
 | `toolbarItems` prop | Done | Restrict or reorder toolbar buttons |
+| `MarkdownEditor` (rich text mode) | Model done, device validation pending | Native `TextInput` with hidden markers; CommonMark-faithful parser shared with the renderer's rules; typed/pasted text reaches `value` unchanged; see `doc/wysiwyg-device-checklist.md` |
+| `MarkdownWysiwygEditor` | Same | Standalone rich surface used by `MarkdownEditor` |
 
 ### Example App
 

@@ -3,7 +3,7 @@ import {Alert, FlatList, KeyboardAvoidingView, type ListRenderItemInfo, Platform
 import {MaterialDesignIcons} from '@react-native-vector-icons/material-design-icons';
 import markdownItContainer from 'markdown-it-container';
 
-import Markdown, {createMarkdownIt, MarkdownComposer, MarkdownStream, type MarkdownStyleMap, type MarkdownToolbarItem, type OnCopyCode, type RenderRules} from '../src';
+import Markdown, {createMarkdownIt, MarkdownEditor, type MarkdownEditorMode, MarkdownStream, type MarkdownStyleMap, type MarkdownToolbarItem, type OnCopyCode, type RenderRules} from '../src';
 
 interface ChatMessage {
     author: 'demo' | 'you';
@@ -237,8 +237,8 @@ function App(): React.JSX.Element {
     const streamPositionRef = useRef(0);
     const streamIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [draft, setDraft] = useState('');
+    const [editorMode, setEditorMode] = useState<MarkdownEditorMode>('plaintext');
     const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
-    const composerPreviewStyle = useMemo(() => getMarkdownStyles(false, isDark), [isDark]);
 
     const startStreamingDemo = useCallback((): void => {
         if (streamIntervalRef.current) {
@@ -498,18 +498,16 @@ function App(): React.JSX.Element {
 
                     <View style={[styles.composerShell, {backgroundColor: chrome.composerBg, borderTopColor: chrome.composerBorder}]}>
                         <View style={styles.composerCard}>
-                            <MarkdownComposer
-                                expandedToolbarItems={composerToolbarItems}
-                                minimizedToolbarItems={[]}
+                            <MarkdownEditor
+                                mode={editorMode}
                                 onChangeText={setDraft}
-                                placeholder="Write a markdown message..."
-                                previewEnabled
-                                previewLabel="Message preview"
-                                previewProps={{
-                                    markdownit: warningMarkdownIt,
-                                    rules: warningRules,
-                                    style: composerPreviewStyle,
-                                }}
+                                onModeChange={setEditorMode}
+                                placeholder={
+                                    editorMode === 'wysiwyg'
+                                        ? 'Write a rich-text message...'
+                                        : 'Write a markdown message...'
+                                }
+                                toolbarItems={composerToolbarItems}
                                 value={draft}
                             />
                         </View>

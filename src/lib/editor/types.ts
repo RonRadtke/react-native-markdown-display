@@ -44,6 +44,7 @@ export interface MarkdownTextInputCommandPayload {
     table?: MarkdownTablePayload;
 }
 
+/** Resolved commands use the editor's current value and selection when they finish. */
 export type MarkdownCommandPayloadResolver = (command: MarkdownCommand) => MarkdownTextInputCommandPayload | Promise<MarkdownTextInputCommandPayload | null> | null;
 
 interface MarkdownToolbarBaseItem {
@@ -127,6 +128,43 @@ export interface MarkdownComposerProps extends Omit<MarkdownTextInputProps, 'mul
     previewToggleLabels?: {hide: ReactNode; show: ReactNode};
     renderExpandButtonLabel?: (mode: MarkdownComposerMode) => ReactNode;
     textInputStyle?: StyleProp<TextStyle>;
+}
+
+export type MarkdownWysiwygFormat = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'inline-code';
+
+export type MarkdownWysiwygFormatStyles = Partial<Record<MarkdownWysiwygFormat, StyleProp<TextStyle>>>;
+
+export interface MarkdownWysiwygEditorProps extends Omit<TextInputProps, 'children' | 'onChangeText' | 'onSelectionChange' | 'selection' | 'style' | 'value'> {
+    editorStyle?: StyleProp<ViewStyle>;
+    /** Per-format text styles applied to rendered inline spans. */
+    formatStyles?: MarkdownWysiwygFormatStyles | undefined;
+    /** Receives markdown source after an edit to the rendered display text. */
+    onChangeText: (value: string) => void;
+    /** Reports the caret/selection in display (marker-free) coordinates. */
+    onSelectionChange?: (selection: MarkdownSelection) => void;
+    /** Controlled display selection, also used to locate edits in repeated text. */
+    selection?: MarkdownSelection;
+    textStyle?: StyleProp<TextStyle>;
+    /** Controlled markdown source. Rejected edits restore the native text and caret. */
+    value: string;
+}
+
+export type MarkdownEditorMode = 'plaintext' | 'wysiwyg';
+
+export interface MarkdownEditorProps extends Omit<TextInputProps, 'children' | 'onChangeText' | 'onSelectionChange' | 'selection' | 'style' | 'value'> {
+    containerStyle?: StyleProp<ViewStyle>;
+    editorStyle?: StyleProp<ViewStyle>;
+    formatStyles?: MarkdownWysiwygFormatStyles | undefined;
+    /** Controlled editing mode. Changes preserve the selection across coordinate spaces. */
+    mode?: MarkdownEditorMode;
+    onChangeText: (value: string) => void;
+    onModeChange?: (mode: MarkdownEditorMode) => void;
+    resolveCommandPayload?: MarkdownCommandPayloadResolver;
+    /** Render a built-in plain-text/rich mode toggle. Defaults to true. */
+    showModeToggle?: boolean;
+    textStyle?: StyleProp<TextStyle>;
+    toolbarItems?: readonly MarkdownToolbarItem[];
+    value: string;
 }
 
 export interface MarkdownPreviewProps extends MarkdownRenderOptions {
