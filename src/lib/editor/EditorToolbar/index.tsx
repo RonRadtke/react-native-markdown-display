@@ -3,51 +3,17 @@ import {Pressable, Text, View} from 'react-native';
 
 import styles from './style';
 
-import type {
-    MarkdownCommand,
-    MarkdownToolbarAction,
-    MarkdownToolbarButtonItem,
-    MarkdownToolbarCommandItem,
-    MarkdownToolbarItem,
-    MarkdownToolbarMenuItem,
-} from '../types';
+import type {MarkdownCommand, MarkdownToolbarAction, MarkdownToolbarButtonItem, MarkdownToolbarCommandItem, MarkdownToolbarItem, MarkdownToolbarMenuItem} from '../types';
 
-const DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS: Record<MarkdownCommand, string> = {
-    bold: 'Bold',
-    italic: 'Italic',
-    underline: 'Underline',
-    strikethrough: 'Strikethrough',
-    'inline-code': 'Inline code',
-    'heading-one': 'Heading one',
-    'heading-two': 'Heading two',
-    'heading-three': 'Heading three',
-    blockquote: 'Block quote',
-    'bullet-list': 'Bullet list',
-    'ordered-list': 'Ordered list',
-    'code-block': 'Code block',
-    link: 'Insert link',
-    table: 'Insert table',
-};
+const DEFAULT_TOOLBAR_ACCESSIBILITY_LABELS: Record<MarkdownCommand, string> = {bold: 'Bold', italic: 'Italic', underline: 'Underline', strikethrough: 'Strikethrough', 'inline-code': 'Inline code', 'heading-one': 'Heading one', 'heading-two': 'Heading two', 'heading-three': 'Heading three', blockquote: 'Block quote', 'bullet-list': 'Bullet list', 'ordered-list': 'Ordered list', 'code-block': 'Code block', link: 'Insert link', table: 'Insert table'};
 
-const isToolbarMenuItem = (
-    item: MarkdownToolbarItem,
-): item is MarkdownToolbarMenuItem => 'items' in item;
+const isToolbarMenuItem = (item: MarkdownToolbarItem): item is MarkdownToolbarMenuItem => 'items' in item;
 
-const isToolbarCommandItem = (
-    item: MarkdownToolbarButtonItem,
-): item is MarkdownToolbarCommandItem => 'command' in item;
+const isToolbarCommandItem = (item: MarkdownToolbarButtonItem): item is MarkdownToolbarCommandItem => 'command' in item;
 
-const getToolbarMenuAccessibilityLabel = (
-    item: MarkdownToolbarMenuItem,
-): string =>
-    item.accessibilityLabel ??
-    (typeof item.label === 'string' || typeof item.label === 'number'
-        ? `${item.label} menu`
-        : 'Toolbar menu');
+const getToolbarMenuAccessibilityLabel = (item: MarkdownToolbarMenuItem): string => item.accessibilityLabel ?? (typeof item.label === 'string' || typeof item.label === 'number' ? `${item.label} menu` : 'Toolbar menu');
 
-const getToolbarButtonAccessibilityLabel = (
-    item: MarkdownToolbarButtonItem,
-): string => {
+const getToolbarButtonAccessibilityLabel = (item: MarkdownToolbarButtonItem): string => {
     if (item.accessibilityLabel) {
         return item.accessibilityLabel;
     }
@@ -63,22 +29,9 @@ const getToolbarButtonAccessibilityLabel = (
     return 'Toolbar action';
 };
 
-const getToolbarButtonKey = (
-    item: MarkdownToolbarButtonItem,
-    index: number,
-): string =>
-    isToolbarCommandItem(item)
-        ? `command:${item.command}:${index}`
-        : `action:${index}`;
+const getToolbarButtonKey = (item: MarkdownToolbarButtonItem, index: number): string => (isToolbarCommandItem(item) ? `command:${item.command}:${index}` : `action:${index}`);
 
-const renderToolbarLabel = (
-    label: MarkdownToolbarItem['label'],
-): React.ReactNode =>
-    typeof label === 'string' || typeof label === 'number' ? (
-        <Text style={styles.toolbarButtonText}>{label}</Text>
-    ) : (
-        <View style={styles.toolbarButtonContent}>{label}</View>
-    );
+const renderToolbarLabel = (label: MarkdownToolbarItem['label']): React.ReactNode => (typeof label === 'string' || typeof label === 'number' ? <Text style={styles.toolbarButtonText}>{label}</Text> : <View style={styles.toolbarButtonContent}>{label}</View>);
 
 export interface EditorToolbarProps {
     /** Inline commands currently active at the selection, highlighted as toggled on. */
@@ -93,13 +46,7 @@ export interface EditorToolbarProps {
  * Shared toolbar used by the markdown editor. Renders command buttons, custom
  * insert/wrap actions, and grouped dropdown menus.
  */
-function EditorToolbar({
-    activeCommands,
-    disabled = false,
-    items,
-    onAction,
-    onCommand,
-}: EditorToolbarProps): React.JSX.Element | null {
+function EditorToolbar({activeCommands, disabled = false, items, onAction, onCommand}: EditorToolbarProps): React.JSX.Element | null {
     const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
 
     if (items.length === 0) {
@@ -121,10 +68,7 @@ function EditorToolbar({
         onAction(item.action);
     };
 
-    const isCommandActive = (item: MarkdownToolbarButtonItem): boolean =>
-        isToolbarCommandItem(item) &&
-        activeCommands !== undefined &&
-        activeCommands.has(item.command);
+    const isCommandActive = (item: MarkdownToolbarButtonItem): boolean => isToolbarCommandItem(item) && activeCommands !== undefined && activeCommands.has(item.command);
 
     return (
         <View style={styles.toolbar}>
@@ -133,41 +77,14 @@ function EditorToolbar({
                     const isMenuOpen = openMenuIndex === index;
 
                     return (
-                        <View
-                            key={`menu:${index}`}
-                            style={styles.toolbarMenuContainer}
-                        >
-                            <Pressable
-                                accessibilityLabel={getToolbarMenuAccessibilityLabel(item)}
-                                accessibilityRole="button"
-                                accessibilityState={{disabled, expanded: isMenuOpen}}
-                                disabled={disabled}
-                                onPress={() =>
-                                    setOpenMenuIndex((currentIndex) =>
-                                        currentIndex === index ? null : index,
-                                    )
-                                }
-                                style={[
-                                    styles.toolbarButton,
-                                    isMenuOpen ? styles.toolbarButtonActive : null,
-                                ]}
-                            >
+                        <View key={`menu:${index}`} style={styles.toolbarMenuContainer}>
+                            <Pressable accessibilityLabel={getToolbarMenuAccessibilityLabel(item)} accessibilityRole="button" accessibilityState={{disabled, expanded: isMenuOpen}} disabled={disabled} onPress={() => setOpenMenuIndex(currentIndex => (currentIndex === index ? null : index))} style={[styles.toolbarButton, isMenuOpen ? styles.toolbarButtonActive : null]}>
                                 {renderToolbarLabel(item.label)}
                             </Pressable>
                             {isMenuOpen ? (
                                 <View style={styles.toolbarMenu}>
                                     {item.items.map((menuItem, menuItemIndex) => (
-                                        <Pressable
-                                            accessibilityLabel={getToolbarButtonAccessibilityLabel(
-                                                menuItem,
-                                            )}
-                                            accessibilityRole="button"
-                                            accessibilityState={{disabled}}
-                                            disabled={disabled}
-                                            key={getToolbarButtonKey(menuItem, menuItemIndex)}
-                                            onPress={() => handleButtonPress(menuItem)}
-                                            style={styles.toolbarMenuButton}
-                                        >
+                                        <Pressable accessibilityLabel={getToolbarButtonAccessibilityLabel(menuItem)} accessibilityRole="button" accessibilityState={{disabled}} disabled={disabled} key={getToolbarButtonKey(menuItem, menuItemIndex)} onPress={() => handleButtonPress(menuItem)} style={styles.toolbarMenuButton}>
                                             {renderToolbarLabel(menuItem.label)}
                                         </Pressable>
                                     ))}
@@ -178,18 +95,7 @@ function EditorToolbar({
                 }
 
                 return (
-                    <Pressable
-                        accessibilityLabel={getToolbarButtonAccessibilityLabel(item)}
-                        accessibilityRole="button"
-                        accessibilityState={{disabled, selected: isCommandActive(item)}}
-                        disabled={disabled}
-                        key={getToolbarButtonKey(item, index)}
-                        onPress={() => handleButtonPress(item)}
-                        style={[
-                            styles.toolbarButton,
-                            isCommandActive(item) ? styles.toolbarButtonActive : null,
-                        ]}
-                    >
+                    <Pressable accessibilityLabel={getToolbarButtonAccessibilityLabel(item)} accessibilityRole="button" accessibilityState={{disabled, selected: isCommandActive(item)}} disabled={disabled} key={getToolbarButtonKey(item, index)} onPress={() => handleButtonPress(item)} style={[styles.toolbarButton, isCommandActive(item) ? styles.toolbarButtonActive : null]}>
                         {renderToolbarLabel(item.label)}
                     </Pressable>
                 );

@@ -7,7 +7,7 @@ import type {TokenLike} from '../types';
 export function cleanupTokens(tokens: TokenLike[]): TokenLike[] {
     const flattenedTokens = flattenInlineTokens(tokens);
 
-    flattenedTokens.forEach((token) => {
+    flattenedTokens.forEach(token => {
         token.type = getTokenTypeByToken(token);
 
         if (token.type === 'image' || token.type === 'hardbreak') {
@@ -32,13 +32,8 @@ export function cleanupTokens(tokens: TokenLike[]): TokenLike[] {
     return flattenedTokens.reduce<TokenLike[]>((acc, token) => {
         if (token.type === 'link' && token.nesting === 1) {
             stack.push(token);
-        }
-        else if (
-            stack.length > 0 &&
-            token.type === 'link' &&
-            token.nesting === -1
-        ) {
-            if (stack.some((stackToken) => stackToken.block)) {
+        } else if (stack.length > 0 && token.type === 'link' && token.nesting === -1) {
+            if (stack.some(stackToken => stackToken.block)) {
                 stack[0]!.type = 'blocklink';
                 stack[0]!.block = true;
                 token.type = 'blocklink';
@@ -54,11 +49,9 @@ export function cleanupTokens(tokens: TokenLike[]): TokenLike[] {
                     acc.push(nextToken);
                 }
             }
-        }
-        else if (stack.length > 0) {
+        } else if (stack.length > 0) {
             stack.push(token);
-        }
-        else {
+        } else {
             acc.push(token);
         }
 

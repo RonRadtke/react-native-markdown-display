@@ -13,12 +13,7 @@ export type WysiwygInlineFormat = MarkdownInlineFormat;
  * Block style applied to a run of display characters. Heading levels and the
  * synthetic list marker each have their own key; everything else is `null`.
  */
-export type WysiwygBlock =
-    | 'heading-one'
-    | 'heading-two'
-    | 'heading-three'
-    | 'list-marker'
-    | null;
+export type WysiwygBlock = 'heading-one' | 'heading-two' | 'heading-three' | 'list-marker' | null;
 
 export interface WysiwygSegment {
     block: WysiwygBlock;
@@ -104,11 +99,7 @@ const FENCE_RE = /^[ \t]*(`{3,}|~{3,})(.*)$/;
 const HEADING_RE = /^(#{1,6}) /;
 const LIST_RE = /^([ \t]*)([-*+]|\d{1,9}[.)]) /;
 
-const HEADING_BLOCK_KEYS: readonly WysiwygBlock[] = [
-    'heading-one',
-    'heading-two',
-    'heading-three',
-];
+const HEADING_BLOCK_KEYS: readonly WysiwygBlock[] = ['heading-one', 'heading-two', 'heading-three'];
 
 export const BULLET_GLYPH = '• ';
 
@@ -120,12 +111,7 @@ const UNDERSCORE = 0x5f;
 const TILDE = 0x7e;
 const PLUS = 0x2b;
 
-const DELIMITER_FORMATS: Record<number, WysiwygInlineFormat> = {
-    [PLUS]: 'underline',
-    [STAR]: 'italic',
-    [TILDE]: 'strikethrough',
-    [UNDERSCORE]: 'italic',
-};
+const DELIMITER_FORMATS: Record<number, WysiwygInlineFormat> = {[PLUS]: 'underline', [STAR]: 'italic', [TILDE]: 'strikethrough', [UNDERSCORE]: 'italic'};
 
 interface Delimiter {
     close: boolean;
@@ -192,11 +178,7 @@ interface ParsedLine {
     spans: readonly WysiwygSpan[];
 }
 
-const scanDelims = (
-    line: string,
-    start: number,
-    canSplitWord: boolean,
-): {canClose: boolean; canOpen: boolean; length: number} => {
+const scanDelims = (line: string, start: number, canSplitWord: boolean): {canClose: boolean; canOpen: boolean; length: number} => {
     const max = line.length;
     const marker = line.charCodeAt(start);
     const lastChar = start > 0 ? line.charCodeAt(start - 1) : 0x20;
@@ -214,11 +196,7 @@ const scanDelims = (
     const leftFlanking = !isNextWhiteSpace && (!isNextPunct || isLastWhiteSpace || isLastPunct);
     const rightFlanking = !isLastWhiteSpace && (!isLastPunct || isNextWhiteSpace || isNextPunct);
 
-    return {
-        canClose: rightFlanking && (canSplitWord || !leftFlanking || isNextPunct),
-        canOpen: leftFlanking && (canSplitWord || !rightFlanking || isLastPunct),
-        length: pos - start,
-    };
+    return {canClose: rightFlanking && (canSplitWord || !leftFlanking || isNextPunct), canOpen: leftFlanking && (canSplitWord || !rightFlanking || isLastPunct), length: pos - start};
 };
 
 /** Port of markdown-it's `balance_pairs` rule. */
@@ -268,15 +246,10 @@ const processDelimiters = (delimiters: Delimiter[]): void => {
             }
 
             if (opener.open && opener.end < 0) {
-                const isOddMatch =
-                    (opener.close || closer.open) &&
-                    (opener.length + closer.length) % 3 === 0 &&
-                    (opener.length % 3 !== 0 || closer.length % 3 !== 0);
+                const isOddMatch = (opener.close || closer.open) && (opener.length + closer.length) % 3 === 0 && (opener.length % 3 !== 0 || closer.length % 3 !== 0);
 
                 if (!isOddMatch) {
-                    const lastJump = openerIdx > 0 && !delimiters[openerIdx - 1]!.open
-                        ? jumps[openerIdx - 1]! + 1
-                        : 0;
+                    const lastJump = openerIdx > 0 && !delimiters[openerIdx - 1]!.open ? jumps[openerIdx - 1]! + 1 : 0;
 
                     jumps[closerIdx] = closerIdx - openerIdx + lastJump;
                     jumps[openerIdx] = lastJump;
@@ -333,10 +306,7 @@ const decodeEntity = (line: string, start: number): {end: number; text: string} 
         const digits = match[1]!;
         const code = digits[0]!.toLowerCase() === 'x' ? parseInt(digits.slice(1), 16) : parseInt(digits, 10);
 
-        return {
-            end: start + match[0].length,
-            text: utils.isValidEntityCode(code) ? utils.fromCodePoint(code) : utils.fromCodePoint(0xfffd),
-        };
+        return {end: start + match[0].length, text: utils.isValidEntityCode(code) ? utils.fromCodePoint(code) : utils.fromCodePoint(0xfffd)};
     }
 
     const match = NAMED_ENTITY_RE.exec(line.slice(start));
@@ -407,13 +377,7 @@ const tokenizeInline = (line: string, contentStart: number): {delimiters: Delimi
             const content = line.slice(runEnd, closer);
             const padding = /^ (.+) $/.test(content) ? 1 : 0;
 
-            tokens.push({
-                contentEnd: closer - padding,
-                contentStart: runEnd + padding,
-                end: closer + length,
-                kind: 'code',
-                start: pos,
-            });
+            tokens.push({contentEnd: closer - padding, contentStart: runEnd + padding, end: closer + length, kind: 'code', start: pos});
             pos = closer + length;
             continue;
         }
@@ -422,22 +386,8 @@ const tokenizeInline = (line: string, contentStart: number): {delimiters: Delimi
             const scanned = scanDelims(line, pos, code === STAR);
 
             for (let offset = 0; offset < scanned.length; offset += 1) {
-                tokens.push({
-                    end: pos + offset + 1,
-                    format: DELIMITER_FORMATS[code]!,
-                    kind: 'delim',
-                    role: 'literal',
-                    start: pos + offset,
-                    text: String.fromCharCode(code),
-                });
-                delimiters.push({
-                    close: scanned.canClose,
-                    end: -1,
-                    length: scanned.length,
-                    marker: code,
-                    open: scanned.canOpen,
-                    token: tokens.length - 1,
-                });
+                tokens.push({end: pos + offset + 1, format: DELIMITER_FORMATS[code]!, kind: 'delim', role: 'literal', start: pos + offset, text: String.fromCharCode(code)});
+                delimiters.push({close: scanned.canClose, end: -1, length: scanned.length, marker: code, open: scanned.canOpen, token: tokens.length - 1});
             }
 
             pos += scanned.length;
@@ -462,28 +412,14 @@ const tokenizeInline = (line: string, contentStart: number): {delimiters: Delimi
             }
 
             for (; offset < scanned.length; offset += 2) {
-                tokens.push({
-                    end: pos + offset + 2,
-                    format: DELIMITER_FORMATS[code]!,
-                    kind: 'delim',
-                    role: 'literal',
-                    start: pos + offset,
-                    text: character + character,
-                });
+                tokens.push({end: pos + offset + 2, format: DELIMITER_FORMATS[code]!, kind: 'delim', role: 'literal', start: pos + offset, text: character + character});
 
                 // markdown-it-ins skips delimiters that can neither open nor close.
                 if (code === PLUS && !scanned.canOpen && !scanned.canClose) {
                     continue;
                 }
 
-                delimiters.push({
-                    close: scanned.canClose,
-                    end: -1,
-                    length: 0,
-                    marker: code,
-                    open: scanned.canOpen,
-                    token: tokens.length - 1,
-                });
+                delimiters.push({close: scanned.canClose, end: -1, length: 0, marker: code, open: scanned.canOpen, token: tokens.length - 1});
             }
 
             pos += scanned.length;
@@ -530,11 +466,7 @@ const pairDelimiters = (tokens: LineToken[], delimiters: Delimiter[]): void => {
 
         const previous = index > 0 ? delimiters[index - 1]! : null;
         const following = delimiters[start.end + 1];
-        const isStrong = previous !== null && following !== undefined &&
-            previous.end === start.end + 1 &&
-            previous.marker === start.marker &&
-            previous.token === start.token - 1 &&
-            following.token === end.token + 1;
+        const isStrong = previous !== null && following !== undefined && previous.end === start.end + 1 && previous.marker === start.marker && previous.token === start.token - 1 && following.token === end.token + 1;
 
         if (isStrong) {
             const strongOpener = delimiterToken(tokens, previous.token);
@@ -565,16 +497,7 @@ const detectBlock = (line: string): LineBlock | null => {
     if (heading) {
         const level = heading[1]!.length;
 
-        return {
-            displayLength: 0,
-            indent: '',
-            key: HEADING_BLOCK_KEYS[Math.min(level, 3) - 1]!,
-            level,
-            marker: heading[1]!,
-            markerLength: level + 1,
-            ordinal: null,
-            type: 'heading',
-        };
+        return {displayLength: 0, indent: '', key: HEADING_BLOCK_KEYS[Math.min(level, 3) - 1]!, level, marker: heading[1]!, markerLength: level + 1, ordinal: null, type: 'heading'};
     }
 
     const list = LIST_RE.exec(line);
@@ -587,16 +510,7 @@ const detectBlock = (line: string): LineBlock | null => {
     const marker = list[2]!;
     const ordered = /^\d/.test(marker);
 
-    return {
-        displayLength: indent.length + (ordered ? marker.length + 1 : BULLET_GLYPH.length),
-        indent,
-        key: null,
-        level: 0,
-        marker,
-        markerLength: list[0].length,
-        ordinal: ordered ? Number(marker.slice(0, -1)) : null,
-        type: ordered ? 'ordered' : 'bullet',
-    };
+    return {displayLength: indent.length + (ordered ? marker.length + 1 : BULLET_GLYPH.length), indent, key: null, level: 0, marker, markerLength: list[0].length, ordinal: ordered ? Number(marker.slice(0, -1)) : null, type: ordered ? 'ordered' : 'bullet'};
 };
 
 const parseLine = (line: string, literal: boolean): ParsedLine => {
@@ -613,15 +527,7 @@ const parseLine = (line: string, literal: boolean): ParsedLine => {
             const glyph = block.indent + (block.type === 'ordered' ? `${block.marker} ` : BULLET_GLYPH);
 
             for (const character of glyph) {
-                chars.push({
-                    block: 'list-marker',
-                    end: contentStart,
-                    formats: NO_FORMATS,
-                    literal: false,
-                    start: 0,
-                    synthetic: true,
-                    text: character,
-                });
+                chars.push({block: 'list-marker', end: contentStart, formats: NO_FORMATS, literal: false, start: 0, synthetic: true, text: character});
             }
         }
     }
@@ -646,15 +552,7 @@ const parseLine = (line: string, literal: boolean): ParsedLine => {
         // Escapes and character references share one source range; plain runs
         // (such as an unmatched ~~) map every character to its own byte.
         for (let offset = 0; offset < text.length; offset += 1) {
-            chars.push({
-                block: blockKey,
-                end: plain ? start + offset + 1 : end,
-                formats: charFormats,
-                literal: !plain,
-                start: plain ? start + offset : start,
-                synthetic: false,
-                text: text[offset]!,
-            });
+            chars.push({block: blockKey, end: plain ? start + offset + 1 : end, formats: charFormats, literal: !plain, start: plain ? start + offset : start, synthetic: false, text: text[offset]!});
         }
     };
     const closeSpan = (token: DelimiterToken): void => {
@@ -664,16 +562,8 @@ const parseLine = (line: string, literal: boolean): ParsedLine => {
             throw new Error('Closing delimiter without an opener');
         }
 
-        spans.push({
-            closeEnd: token.end,
-            closeStart: token.start,
-            displayEnd: chars.length,
-            displayStart: open.displayStart,
-            format: open.format,
-            openEnd: open.openEnd,
-            openStart: open.openStart,
-        });
-        formats = stack.map((entry) => entry.format);
+        spans.push({closeEnd: token.end, closeStart: token.start, displayEnd: chars.length, displayStart: open.displayStart, format: open.format, openEnd: open.openEnd, openStart: open.openStart});
+        formats = stack.map(entry => entry.format);
     };
 
     for (let index = 0; index < tokens.length; index += 1) {
@@ -686,15 +576,7 @@ const parseLine = (line: string, literal: boolean): ParsedLine => {
                 pushChar(line[offset]!, offset, offset + 1, codeFormats);
             }
 
-            spans.push({
-                closeEnd: token.end,
-                closeStart: token.contentEnd,
-                displayEnd: chars.length,
-                displayStart: chars.length - (token.contentEnd - token.contentStart),
-                format: 'inline-code',
-                openEnd: token.contentStart,
-                openStart: token.start,
-            });
+            spans.push({closeEnd: token.end, closeStart: token.contentEnd, displayEnd: chars.length, displayStart: chars.length - (token.contentEnd - token.contentStart), format: 'inline-code', openEnd: token.contentStart, openStart: token.start});
             continue;
         }
 
@@ -724,7 +606,7 @@ const parseLine = (line: string, literal: boolean): ParsedLine => {
         switch (token.role) {
             case 'open':
                 stack.push({displayStart: chars.length, format: token.format, openEnd: token.end, openStart: token.start});
-                formats = stack.map((entry) => entry.format);
+                formats = stack.map(entry => entry.format);
                 break;
             case 'close':
                 closeSpan(token);
@@ -746,7 +628,7 @@ const MODEL_CACHE_LIMIT = 16;
 const lineCache = new Map<string, ParsedLine>();
 const modelCache = new Map<string, WysiwygModel>();
 
-const remember = <T,>(cache: Map<string, T>, key: string, value: T, limit: number): T => {
+const remember = <T>(cache: Map<string, T>, key: string, value: T, limit: number): T => {
     cache.set(key, value);
 
     if (cache.size > limit) {
@@ -771,8 +653,7 @@ const parseLineCached = (line: string, literal: boolean): ParsedLine => {
     return remember(lineCache, key, parseLine(line, literal), LINE_CACHE_LIMIT);
 };
 
-const formatsKey = (formats: readonly WysiwygInlineFormat[]): string =>
-    [...formats].sort().join('|');
+const formatsKey = (formats: readonly WysiwygInlineFormat[]): string => [...formats].sort().join('|');
 
 /**
  * Parse markdown into a WYSIWYG model. Inline markers are hidden, heading
@@ -818,9 +699,7 @@ export const buildWysiwygModel = (source: string): WysiwygModel => {
         const textEnd = hasCarriageReturn ? lineEnd - 1 : lineEnd;
         const lineText = source.slice(lineStart, textEnd);
         const possibleFence = FENCE_RE.exec(lineText);
-        const fenceMatch = possibleFence?.[1]?.[0] === '`' && possibleFence[2]!.includes('`')
-            ? null
-            : possibleFence;
+        const fenceMatch = possibleFence?.[1]?.[0] === '`' && possibleFence[2]!.includes('`') ? null : possibleFence;
         const literal = fence !== null || fenceMatch !== null;
 
         if (fenceMatch) {
@@ -828,11 +707,7 @@ export const buildWysiwygModel = (source: string): WysiwygModel => {
 
             if (fence === null) {
                 fence = marker;
-            } else if (
-                marker[0] === fence[0] &&
-                marker.length >= fence.length &&
-                fenceMatch[2]!.trim().length === 0
-            ) {
+            } else if (marker[0] === fence[0] && marker.length >= fence.length && fenceMatch[2]!.trim().length === 0) {
                 fence = null;
             }
         }
@@ -841,17 +716,7 @@ export const buildWysiwygModel = (source: string): WysiwygModel => {
         const displayOffset = displayChars.length;
 
         if (parsed.block) {
-            blocks.push({
-                displayEnd: displayOffset + parsed.block.displayLength,
-                displayStart: displayOffset,
-                indent: parsed.block.indent,
-                level: parsed.block.level,
-                marker: parsed.block.marker,
-                ordinal: parsed.block.ordinal,
-                sourceEnd: lineStart + parsed.block.markerLength,
-                sourceStart: lineStart,
-                type: parsed.block.type,
-            });
+            blocks.push({displayEnd: displayOffset + parsed.block.displayLength, displayStart: displayOffset, indent: parsed.block.indent, level: parsed.block.level, marker: parsed.block.marker, ordinal: parsed.block.ordinal, sourceEnd: lineStart + parsed.block.markerLength, sourceStart: lineStart, type: parsed.block.type});
         }
 
         for (const char of parsed.chars) {
@@ -859,15 +724,7 @@ export const buildWysiwygModel = (source: string): WysiwygModel => {
         }
 
         for (const span of parsed.spans) {
-            spans.push({
-                closeEnd: lineStart + span.closeEnd,
-                closeStart: lineStart + span.closeStart,
-                displayEnd: displayOffset + span.displayEnd,
-                displayStart: displayOffset + span.displayStart,
-                format: span.format,
-                openEnd: lineStart + span.openEnd,
-                openStart: lineStart + span.openStart,
-            });
+            spans.push({closeEnd: lineStart + span.closeEnd, closeStart: lineStart + span.closeStart, displayEnd: displayOffset + span.displayEnd, displayStart: displayOffset + span.displayStart, format: span.format, openEnd: lineStart + span.openEnd, openStart: lineStart + span.openStart});
         }
 
         if (hasCarriageReturn) {
@@ -900,19 +757,7 @@ export const buildWysiwygModel = (source: string): WysiwygModel => {
         segments[segments.length - 1]!.text += displayChars[charIndex]!;
     }
 
-    return remember(modelCache, source, {
-        blocks,
-        charFormats,
-        charLiteral,
-        charMarkerEnd,
-        charMarkerStart,
-        charSource,
-        charSynthetic,
-        display: displayChars.join(''),
-        segments,
-        source,
-        spans,
-    }, MODEL_CACHE_LIMIT);
+    return remember(modelCache, source, {blocks, charFormats, charLiteral, charMarkerEnd, charMarkerStart, charSource, charSynthetic, display: displayChars.join(''), segments, source, spans}, MODEL_CACHE_LIMIT);
 };
 
 /**
@@ -920,18 +765,11 @@ export const buildWysiwygModel = (source: string): WysiwygModel => {
  * the selection are covered without swallowing the hidden markers that wrap
  * them; a selection edge on a synthetic marker covers the whole raw marker.
  */
-export const displaySelectionToSource = (
-    model: WysiwygModel,
-    selection: MarkdownSelection,
-): MarkdownSelection => {
+export const displaySelectionToSource = (model: WysiwygModel, selection: MarkdownSelection): MarkdownSelection => {
     const normalized = normalizeSelection(model.display, selection);
     const length = model.charSource.length;
-    const start = normalized.start < length
-        ? model.charMarkerStart[normalized.start]!
-        : length === 0 ? model.source.length : model.charMarkerEnd[length - 1]!;
-    const end = normalized.end > normalized.start
-        ? model.charMarkerEnd[normalized.end - 1]!
-        : start;
+    const start = normalized.start < length ? model.charMarkerStart[normalized.start]! : length === 0 ? model.source.length : model.charMarkerEnd[length - 1]!;
+    const end = normalized.end > normalized.start ? model.charMarkerEnd[normalized.end - 1]! : start;
 
     return {end, start};
 };
@@ -940,10 +778,7 @@ export const displaySelectionToSource = (
  * Map a markdown source offset onto a display offset by counting display
  * characters that end at or before it.
  */
-export const sourceOffsetToDisplay = (
-    model: WysiwygModel,
-    sourceOffset: number,
-): number => {
+export const sourceOffsetToDisplay = (model: WysiwygModel, sourceOffset: number): number => {
     let low = 0;
     let high = model.charMarkerEnd.length;
 
@@ -965,10 +800,7 @@ export const sourceOffsetToDisplay = (
  * The format of the character before the caret is preferred so that the toolbar
  * reflects the span the caret sits at the end of.
  */
-export const getFormatsAtDisplayOffset = (
-    model: WysiwygModel,
-    displayOffset: number,
-): readonly WysiwygInlineFormat[] => {
+export const getFormatsAtDisplayOffset = (model: WysiwygModel, displayOffset: number): readonly WysiwygInlineFormat[] => {
     if (model.charFormats.length === 0) {
         return NO_FORMATS;
     }
@@ -1009,14 +841,7 @@ export const cleanEmptyMarkers = (source: string): string => {
             const character = model.display[runStart]!;
             let runEnd = runStart;
 
-            while (
-                runEnd < model.display.length &&
-                model.display[runEnd] === character &&
-                DOUBLED_MARKER_RE.test(character) &&
-                !model.charLiteral[runEnd] &&
-                !model.charFormats[runEnd]!.includes('inline-code') &&
-                (runEnd === runStart || model.charMarkerStart[runEnd] === model.charMarkerEnd[runEnd - 1])
-            ) {
+            while (runEnd < model.display.length && model.display[runEnd] === character && DOUBLED_MARKER_RE.test(character) && !model.charLiteral[runEnd] && !model.charFormats[runEnd]!.includes('inline-code') && (runEnd === runStart || model.charMarkerStart[runEnd] === model.charMarkerEnd[runEnd - 1])) {
                 runEnd += 1;
             }
 

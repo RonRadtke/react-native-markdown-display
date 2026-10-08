@@ -6,8 +6,6 @@ module.exports = {
     trailingComma: 'all',
     tabWidth: 4,
     objectWrap: 'collapse',
-    plugins: ['prettier-plugin-organize-imports'],
-    jsxBracketSameLine: true,
     singleAttributePerLine: false,
     printWidth: 9999,
 };

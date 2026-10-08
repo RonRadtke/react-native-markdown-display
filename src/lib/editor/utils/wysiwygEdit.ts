@@ -1,12 +1,5 @@
 import {normalizeSelection} from './selection';
-import {
-    BULLET_GLYPH,
-    buildWysiwygModel,
-    sourceOffsetToDisplay,
-    type WysiwygInlineFormat,
-    type WysiwygModel,
-    type WysiwygSpan,
-} from './wysiwygModel';
+import {BULLET_GLYPH, buildWysiwygModel, sourceOffsetToDisplay, type WysiwygInlineFormat, type WysiwygModel, type WysiwygSpan} from './wysiwygModel';
 
 import type {MarkdownCommandResult, MarkdownSelection} from '../types';
 
@@ -73,52 +66,25 @@ interface DelimiterUnit {
 
 type Unit = CharUnit | RawUnit | DelimiterUnit;
 
-const raw = (text: string, options: Partial<Omit<RawUnit, 'kind' | 'text'>> = {}): RawUnit => ({
-    caret: false,
-    display: '',
-    kind: 'raw',
-    newline: false,
-    text,
-    touched: false,
-    ...options,
-});
+const raw = (text: string, options: Partial<Omit<RawUnit, 'kind' | 'text'>> = {}): RawUnit => ({caret: false, display: '', kind: 'raw', newline: false, text, touched: false, ...options});
 
 const newlineUnit = (): RawUnit => raw('\n', {display: '\n', newline: true, touched: true});
 
 const stripMarkers = (text: string): string => text.replace(/[\\`*_~+]/g, '');
 
-const chars = (text: string, formats: readonly WysiwygInlineFormat[]): CharUnit[] =>
-    Array.from({length: text.length}, (_unit, index) => ({
-        displayIndex: -1,
-        formats,
-        inserted: true,
-        kind: 'char' as const,
-        literal: false,
-        source: text[index]!,
-        text: text[index]!,
-    }));
+const chars = (text: string, formats: readonly WysiwygInlineFormat[]): CharUnit[] => Array.from({length: text.length}, (_unit, index) => ({displayIndex: -1, formats, inserted: true, kind: 'char' as const, literal: false, source: text[index]!, text: text[index]!}));
 
-const unitDisplayLength = (unit: Unit): number =>
-    unit.kind === 'char' ? unit.text.length : unit.kind === 'raw' ? unit.display.length : 0;
+const unitDisplayLength = (unit: Unit): number => (unit.kind === 'char' ? unit.text.length : unit.kind === 'raw' ? unit.display.length : 0);
 
-const formatsKey = (formats: readonly WysiwygInlineFormat[]): string =>
-    [...formats].sort().join('|');
+const formatsKey = (formats: readonly WysiwygInlineFormat[]): string => [...formats].sort().join('|');
 
-const findDisplayEdit = (
-    previous: string,
-    next: string,
-    selection: MarkdownSelection | undefined,
-): DisplayEdit => {
+const findDisplayEdit = (previous: string, next: string, selection: MarkdownSelection | undefined): DisplayEdit => {
     const lengthChange = next.length - previous.length;
 
     const matchRange = (start: number, end: number): DisplayEdit | null => {
         const insertedLength = lengthChange + end - start;
 
-        if (
-            start < 0 || end > previous.length || insertedLength < 0 ||
-            previous.slice(0, start) !== next.slice(0, start) ||
-            previous.slice(end) !== next.slice(start + insertedLength)
-        ) {
+        if (start < 0 || end > previous.length || insertedLength < 0 || previous.slice(0, start) !== next.slice(0, start) || previous.slice(end) !== next.slice(start + insertedLength)) {
             return null;
         }
 
@@ -136,8 +102,7 @@ const findDisplayEdit = (
         if (start === end && lengthChange < 0) {
             // Prefer backspace; try forward delete when the preceding text
             // does not match. Both may otherwise look identical in repeated text.
-            const deletion = matchRange(start + lengthChange, start) ??
-                matchRange(start, start - lengthChange);
+            const deletion = matchRange(start + lengthChange, start) ?? matchRange(start, start - lengthChange);
 
             if (deletion) {
                 return deletion;
@@ -156,18 +121,11 @@ const findDisplayEdit = (
 
     let suffix = 0;
 
-    while (
-        suffix < Math.min(previous.length - start, next.length - start) &&
-        previous[previous.length - 1 - suffix] === next[next.length - 1 - suffix]
-    ) {
+    while (suffix < Math.min(previous.length - start, next.length - start) && previous[previous.length - 1 - suffix] === next[next.length - 1 - suffix]) {
         suffix += 1;
     }
 
-    return {
-        start,
-        end: previous.length - suffix,
-        inserted: next.slice(start, next.length - suffix),
-    };
+    return {start, end: previous.length - suffix, inserted: next.slice(start, next.length - suffix)};
 };
 
 interface Plan {
@@ -178,11 +136,7 @@ interface Plan {
     removed: Uint8Array;
 }
 
-const createPlan = (model: WysiwygModel): Plan => ({
-    inserts: new Map(),
-    owner: model.spans.map((_span, index) => index),
-    removed: new Uint8Array(model.source.length),
-});
+const createPlan = (model: WysiwygModel): Plan => ({inserts: new Map(), owner: model.spans.map((_span, index) => index), removed: new Uint8Array(model.source.length)});
 
 const insertAt = (plan: Plan, index: number, units: Unit[]): void => {
     const slot = plan.inserts.get(index);
@@ -232,25 +186,14 @@ const unitsFromPlan = (model: WysiwygModel, plan: Plan): Unit[] => {
         const previousStart = index > 0 ? model.charMarkerStart[index - 1]! : -1;
         const previous = starts.get(previousStart);
 
-        if (
-            previous && previous.kind === 'char' && !plan.removed[start] &&
-            ends.get(previousStart) === start && /[\uD800-\uDBFF]$/.test(previous.text) && /^[\uDC00-\uDFFF]/.test(text)
-        ) {
+        if (previous && previous.kind === 'char' && !plan.removed[start] && ends.get(previousStart) === start && /[\uD800-\uDBFF]$/.test(previous.text) && /^[\uDC00-\uDFFF]/.test(text)) {
             previous.text += text;
             previous.source += source.slice(start, end);
             ends.set(previousStart, end);
             continue;
         }
 
-        place(start, end, {
-            displayIndex: index,
-            formats: model.charFormats[index]!,
-            inserted: false,
-            kind: 'char',
-            literal: model.charLiteral[index]!,
-            source: source.slice(start, end),
-            text,
-        });
+        place(start, end, {displayIndex: index, formats: model.charFormats[index]!, inserted: false, kind: 'char', literal: model.charLiteral[index]!, source: source.slice(start, end), text});
     }
 
     model.spans.forEach((span, index) => {
@@ -265,9 +208,7 @@ const unitsFromPlan = (model: WysiwygModel, plan: Plan): Unit[] => {
     });
 
     for (const block of model.blocks) {
-        place(block.sourceStart, block.sourceEnd, raw(source.slice(block.sourceStart, block.sourceEnd), {
-            display: model.display.slice(block.displayStart, block.displayEnd),
-        }));
+        place(block.sourceStart, block.sourceEnd, raw(source.slice(block.sourceStart, block.sourceEnd), {display: model.display.slice(block.displayStart, block.displayEnd)}));
     }
 
     const units: Unit[] = [];
@@ -290,7 +231,7 @@ const unitsFromPlan = (model: WysiwygModel, plan: Plan): Unit[] => {
     return units;
 };
 
-const unitText = (unit: Unit): string => unit.kind === 'char' ? unit.source : unit.text;
+const unitText = (unit: Unit): string => (unit.kind === 'char' ? unit.source : unit.text);
 
 const assemble = (units: readonly Unit[]): {caret: number; starts: number[]; value: string} => {
     const starts: number[] = [];
@@ -332,8 +273,7 @@ const expectedSpanKeys = (units: readonly Unit[], starts: readonly number[]): Ma
     return expected;
 };
 
-const actualSpanKeys = (model: WysiwygModel): Set<string> =>
-    new Set(model.spans.map((span) => `${span.openStart}:${span.closeStart}:${span.format}`));
+const actualSpanKeys = (model: WysiwygModel): Set<string> => new Set(model.spans.map(span => `${span.openStart}:${span.closeStart}:${span.format}`));
 
 /** Unit indexes of delimiters whose span the parser no longer recognises. */
 const missingDelimiters = (units: readonly Unit[]): number[] => {
@@ -394,15 +334,9 @@ const MARKER_CHOICES: readonly {bold: '**' | '__'; italic: '*' | '_'}[] = [
 ];
 
 /** Cheapest rewrites first: plain markers, then escaping, then boundary encoding. */
-const SERIALIZE_OPTIONS: readonly SerializeOptions[] = [
-    ...MARKER_CHOICES.map((choice) => ({...choice, encodeBoundaries: false, escapeAll: false})),
-    ...MARKER_CHOICES.map((choice) => ({...choice, encodeBoundaries: false, escapeAll: true})),
-    ...MARKER_CHOICES.map((choice) => ({...choice, encodeBoundaries: true, escapeAll: true})),
-];
+const SERIALIZE_OPTIONS: readonly SerializeOptions[] = [...MARKER_CHOICES.map(choice => ({...choice, encodeBoundaries: false, escapeAll: false})), ...MARKER_CHOICES.map(choice => ({...choice, encodeBoundaries: false, escapeAll: true})), ...MARKER_CHOICES.map(choice => ({...choice, encodeBoundaries: true, escapeAll: true}))];
 
-type SerializedPart =
-    | {kind: 'text' | 'code'; text: string}
-    | {kind: 'delimiter'; opening: boolean; text: string};
+type SerializedPart = {kind: 'text' | 'code'; text: string} | {kind: 'delimiter'; opening: boolean; text: string};
 
 /** Approximation of markdown-it's flanking rules for a delimiter between two characters. */
 const validDelimiterBoundary = (marker: string, opening: boolean, before: string, after: string): boolean => {
@@ -414,9 +348,7 @@ const validDelimiterBoundary = (marker: string, opening: boolean, before: string
     const rightFlanking = !beforeWhitespace && (!beforePunctuation || afterWhitespace || afterPunctuation);
     const underscore = marker[0] === '_';
 
-    return opening
-        ? leftFlanking && (!underscore || !rightFlanking || beforePunctuation)
-        : rightFlanking && (!underscore || !leftFlanking || afterPunctuation);
+    return opening ? leftFlanking && (!underscore || !rightFlanking || beforePunctuation) : rightFlanking && (!underscore || !leftFlanking || afterPunctuation);
 };
 
 /**
@@ -480,15 +412,13 @@ const serializeCode = (content: string): string => {
         }
     }
 
-    const needsPadding = content.startsWith('`') || content.endsWith('`') ||
-        (content.startsWith(' ') && content.endsWith(' ') && content.trim().length > 0);
+    const needsPadding = content.startsWith('`') || content.endsWith('`') || (content.startsWith(' ') && content.endsWith(' ') && content.trim().length > 0);
     const padding = needsPadding ? ' ' : '';
 
     return marker + padding + content + padding + marker;
 };
 
-const orderedFormats = (formats: readonly WysiwygInlineFormat[]): WysiwygInlineFormat[] =>
-    INLINE_ORDER.filter((format) => formats.includes(format));
+const orderedFormats = (formats: readonly WysiwygInlineFormat[]): WysiwygInlineFormat[] => INLINE_ORDER.filter(format => formats.includes(format));
 
 /** Serialize one line of display characters with the given marker choice. */
 const serializeChars = (line: readonly CharUnit[], options: SerializeOptions): string => {
@@ -569,7 +499,7 @@ const serializeChars = (line: readonly CharUnit[], options: SerializeOptions): s
         encodeInvalidBoundaries(parts);
     }
 
-    return parts.map((part) => part.text).join('');
+    return parts.map(part => part.text).join('');
 };
 
 const splitLines = (units: readonly Unit[]): Unit[][] => {
@@ -586,8 +516,7 @@ const splitLines = (units: readonly Unit[]): Unit[][] => {
     return lines;
 };
 
-const isTouched = (line: readonly Unit[]): boolean =>
-    line.some((unit) => (unit.kind === 'char' && unit.inserted) || (unit.kind === 'raw' && unit.touched));
+const isTouched = (line: readonly Unit[]): boolean => line.some(unit => (unit.kind === 'char' && unit.inserted) || (unit.kind === 'raw' && unit.touched));
 
 /**
  * Re-serialize the touched lines from their display characters, trying marker
@@ -645,8 +574,7 @@ const reserializeTouchedLines = (units: readonly Unit[]): Unit[] => {
     return fallback ?? [...units];
 };
 
-const swapFamily = (text: string): string =>
-    text[0] === '_' ? text.replace(/_/g, '*') : text.replace(/\*/g, '_');
+const swapFamily = (text: string): string => (text[0] === '_' ? text.replace(/_/g, '*') : text.replace(/\*/g, '_'));
 
 /**
  * Produce the next source from a unit list: accept it when every promised span
@@ -655,7 +583,7 @@ const swapFamily = (text: string): string =>
  * families and finally re-serialize the edited lines.
  */
 const realize = (units: Unit[], expectedDisplay: string | null): WysiwygEditResult => {
-    const typedMarkers = units.some((unit) => unit.kind === 'char' && unit.inserted && MARKER_CLASS_RE.test(unit.text));
+    const typedMarkers = units.some(unit => unit.kind === 'char' && unit.inserted && MARKER_CLASS_RE.test(unit.text));
     let missing = missingDelimiters(units);
 
     if (missing.length > 0 && typedMarkers && expectedDisplay !== null) {
@@ -667,11 +595,7 @@ const realize = (units: Unit[], expectedDisplay: string | null): WysiwygEditResu
     }
 
     if (missing.length > 0 && typedMarkers) {
-        const escaped = units.map((unit): Unit =>
-            unit.kind === 'char' && unit.inserted && MARKER_CLASS_RE.test(unit.text)
-                ? {...unit, literal: true, source: `\\${unit.text}`}
-                : unit,
-        );
+        const escaped = units.map((unit): Unit => (unit.kind === 'char' && unit.inserted && MARKER_CLASS_RE.test(unit.text) ? {...unit, literal: true, source: `\\${unit.text}`} : unit));
         const escapedMissing = missingDelimiters(escaped);
 
         if (escapedMissing.length < missing.length) {
@@ -681,11 +605,7 @@ const realize = (units: Unit[], expectedDisplay: string | null): WysiwygEditResu
     }
 
     for (let attempt = 0; attempt < 2 && missing.length > 0; attempt += 1) {
-        const swapped = units.map((unit, index): Unit =>
-            missing.includes(index) && (unit.kind === 'open' || unit.kind === 'close') && (unit.format === 'bold' || unit.format === 'italic')
-                ? {...unit, text: swapFamily(unit.text)}
-                : unit,
-        );
+        const swapped = units.map((unit, index): Unit => (missing.includes(index) && (unit.kind === 'open' || unit.kind === 'close') && (unit.format === 'bold' || unit.format === 'italic') ? {...unit, text: swapFamily(unit.text)} : unit));
         const swappedMissing = missingDelimiters(swapped);
 
         if (swappedMissing.length < missing.length) {
@@ -723,18 +643,12 @@ const realize = (units: Unit[], expectedDisplay: string | null): WysiwygEditResu
         displayCaret = sourceOffsetToDisplay(nextModel, caret);
     }
 
-    return {
-        caretOutside: typedMarkers && expectedDisplay !== null && nextModel.display !== expectedDisplay,
-        display: nextModel.display,
-        selection: {end: displayCaret, start: displayCaret},
-        value,
-    };
+    return {caretOutside: typedMarkers && expectedDisplay !== null && nextModel.display !== expectedDisplay, display: nextModel.display, selection: {end: displayCaret, start: displayCaret}, value};
 };
 
-const spanFormats = (spans: readonly WysiwygSpan[]): WysiwygInlineFormat[] => spans.map((span) => span.format);
+const spanFormats = (spans: readonly WysiwygSpan[]): WysiwygInlineFormat[] => spans.map(span => span.format);
 
-const lineStartOf = (source: string, index: number): number =>
-    index === 0 ? 0 : source.lastIndexOf('\n', index - 1) + 1;
+const lineStartOf = (source: string, index: number): number => (index === 0 ? 0 : source.lastIndexOf('\n', index - 1) + 1);
 
 const lineEndOf = (source: string, index: number): number => {
     const newline = source.indexOf('\n', index);
@@ -755,19 +669,14 @@ interface Continuation {
 /** List and quote continuation for a single Enter, mirroring the plain-text shortcuts. */
 const findContinuation = (model: WysiwygModel, lineStart: number): Continuation | null => {
     const lineEnd = lineEndOf(model.source, lineStart);
-    const block = model.blocks.find((candidate) => candidate.sourceStart === lineStart);
+    const block = model.blocks.find(candidate => candidate.sourceStart === lineStart);
 
     if (block && block.type !== 'heading') {
         const empty = model.source.slice(block.sourceEnd, lineEnd).trim().length === 0;
         const ordinal = block.ordinal === null ? null : block.ordinal + 1;
         const marker = ordinal === null ? `${block.marker} ` : `${ordinal}${block.marker.slice(-1)} `;
 
-        return {
-            display: block.indent + (ordinal === null ? BULLET_GLYPH : marker),
-            exitEnd: empty ? block.sourceEnd : -1,
-            exitStart: block.sourceStart,
-            prefix: block.indent + marker,
-        };
+        return {display: block.indent + (ordinal === null ? BULLET_GLYPH : marker), exitEnd: empty ? block.sourceEnd : -1, exitStart: block.sourceStart, prefix: block.indent + marker};
     }
 
     const quote = QUOTE_RE.exec(model.source.slice(lineStart, lineEnd).replace(/\r$/, ''));
@@ -780,12 +689,7 @@ const findContinuation = (model: WysiwygModel, lineStart: number): Continuation 
     const empty = quote[2]!.trim().length === 0;
     const prefix = marker.endsWith(' ') ? marker : `${marker} `;
 
-    return {
-        display: prefix,
-        exitEnd: empty ? lineStart + marker.length : -1,
-        exitStart: lineStart,
-        prefix,
-    };
+    return {display: prefix, exitEnd: empty ? lineStart + marker.length : -1, exitStart: lineStart, prefix};
 };
 
 const trailingWhitespaceStart = (text: string): number => {
@@ -818,8 +722,7 @@ const planDisplayEdit = (model: WysiwygModel, edit: DisplayEdit, caretOutside: b
     const plan = createPlan(model);
     const {source, spans} = model;
     const replacing = edit.end > edit.start;
-    const containing = (displayIndex: number): WysiwygSpan[] =>
-        spans.filter((span) => span.displayStart <= displayIndex && displayIndex < span.displayEnd);
+    const containing = (displayIndex: number): WysiwygSpan[] => spans.filter(span => span.displayStart <= displayIndex && displayIndex < span.displayEnd);
 
     // 1. Deleted characters, joined block prefixes and emptied spans.
     let sourceStart: number;
@@ -848,7 +751,7 @@ const planDisplayEdit = (model: WysiwygModel, edit: DisplayEdit, caretOutside: b
             }
         });
 
-        context = containing(edit.start).filter((span) => plan.owner[spans.indexOf(span)] !== -1);
+        context = containing(edit.start).filter(span => plan.owner[spans.indexOf(span)] !== -1);
     } else {
         const previous = edit.start - 1;
         const previousText = previous >= 0 ? model.display[previous]! : '\n';
@@ -858,10 +761,8 @@ const planDisplayEdit = (model: WysiwygModel, edit: DisplayEdit, caretOutside: b
             if (previous >= 0 && model.charSynthetic[previous]) {
                 sourceStart = model.charMarkerEnd[previous]!;
             } else {
-                const lineStart = edit.start < model.display.length
-                    ? lineStartOf(source, model.charMarkerStart[edit.start]!)
-                    : lineStartOf(source, source.length);
-                const block = model.blocks.find((candidate) => candidate.sourceStart === lineStart);
+                const lineStart = edit.start < model.display.length ? lineStartOf(source, model.charMarkerStart[edit.start]!) : lineStartOf(source, source.length);
+                const block = model.blocks.find(candidate => candidate.sourceStart === lineStart);
 
                 sourceStart = block ? block.sourceEnd : lineStart;
             }
@@ -873,8 +774,7 @@ const planDisplayEdit = (model: WysiwygModel, edit: DisplayEdit, caretOutside: b
 
             // Code spans are not extended by typing at their end, and neither
             // is any span once typed markdown has just closed it.
-            const exits = (span: WysiwygSpan): boolean =>
-                span.displayEnd === edit.start && (caretOutside || span.format === 'inline-code');
+            const exits = (span: WysiwygSpan): boolean => span.displayEnd === edit.start && (caretOutside || span.format === 'inline-code');
 
             for (const span of context) {
                 if (exits(span)) {
@@ -882,7 +782,7 @@ const planDisplayEdit = (model: WysiwygModel, edit: DisplayEdit, caretOutside: b
                 }
             }
 
-            context = context.filter((span) => !exits(span));
+            context = context.filter(span => !exits(span));
         }
 
         sourceEnd = sourceStart;
@@ -895,11 +795,7 @@ const planDisplayEdit = (model: WysiwygModel, edit: DisplayEdit, caretOutside: b
                 return;
             }
 
-            const rightIndex = spans.findIndex((right, index) =>
-                plan.owner[index] === index && right.displayStart >= edit.end && right.format === left.format &&
-                source.slice(right.openStart, right.openEnd) === source.slice(left.openStart, left.openEnd) &&
-                right.openStart >= left.closeEnd && plan.removed.slice(left.closeEnd, right.openStart).every((flag) => flag === 1) &&
-                formatsKey(model.charFormats[left.displayEnd - 1]!) === formatsKey(model.charFormats[right.displayStart]!));
+            const rightIndex = spans.findIndex((right, index) => plan.owner[index] === index && right.displayStart >= edit.end && right.format === left.format && source.slice(right.openStart, right.openEnd) === source.slice(left.openStart, left.openEnd) && right.openStart >= left.closeEnd && plan.removed.slice(left.closeEnd, right.openStart).every(flag => flag === 1) && formatsKey(model.charFormats[left.displayEnd - 1]!) === formatsKey(model.charFormats[right.displayStart]!));
 
             if (rightIndex === -1) {
                 return;
@@ -912,8 +808,8 @@ const planDisplayEdit = (model: WysiwygModel, edit: DisplayEdit, caretOutside: b
     }
 
     // 3. Where the inserted text goes relative to the surrounding delimiters.
-    const closing = context.filter((span) => span.displayEnd <= edit.end && span.format !== 'inline-code');
-    const straddling = context.filter((span) => span.displayEnd > edit.end);
+    const closing = context.filter(span => span.displayEnd <= edit.end && span.format !== 'inline-code');
+    const straddling = context.filter(span => span.displayEnd > edit.end);
     let closersEnd = sourceStart;
 
     for (const span of closing) {
@@ -997,21 +893,11 @@ const planDisplayEdit = (model: WysiwygModel, edit: DisplayEdit, caretOutside: b
  * the edit are preserved unless a delimiter has to move or be repaired to keep
  * the surviving formatting valid; only the edited lines are ever rewritten.
  */
-export const applyDisplayEdit = (
-    previousSource: string,
-    nextDisplay: string,
-    previousSelection?: MarkdownSelection,
-    options: WysiwygEditOptions = {},
-): WysiwygEditResult => {
+export const applyDisplayEdit = (previousSource: string, nextDisplay: string, previousSelection?: MarkdownSelection, options: WysiwygEditOptions = {}): WysiwygEditResult => {
     const model = buildWysiwygModel(previousSource);
 
     if (nextDisplay === model.display) {
-        return {
-            caretOutside: options.caretOutside === true,
-            display: model.display,
-            selection: normalizeSelection(model.display, previousSelection),
-            value: previousSource,
-        };
+        return {caretOutside: options.caretOutside === true, display: model.display, selection: normalizeSelection(model.display, previousSelection), value: previousSource};
     }
 
     const edit = findDisplayEdit(model.display, nextDisplay, previousSelection);
@@ -1025,11 +911,7 @@ export const applyDisplayEdit = (
  * they sit on are serialized again; block prefixes and other lines are kept.
  * A collapsed selection formats the word around the caret.
  */
-export const applyInlineFormatWysiwyg = (
-    source: string,
-    displaySelection: MarkdownSelection,
-    format: WysiwygInlineFormat,
-): WysiwygEditResult => {
+export const applyInlineFormatWysiwyg = (source: string, displaySelection: MarkdownSelection, format: WysiwygInlineFormat): WysiwygEditResult => {
     const model = buildWysiwygModel(source);
     let selection = normalizeSelection(model.display, displaySelection);
 
@@ -1051,8 +933,7 @@ export const applyInlineFormatWysiwyg = (
 
     for (let index = selection.start; index < selection.end; index += 1) {
         const text = model.display[index]!;
-        const skip = model.charSynthetic[index] ||
-            (format === 'inline-code' ? text === '\n' || text === '\r' : WHITESPACE_RE.test(text));
+        const skip = model.charSynthetic[index] || (format === 'inline-code' ? text === '\n' || text === '\r' : WHITESPACE_RE.test(text));
 
         if (!skip) {
             selected.add(index);
@@ -1063,14 +944,14 @@ export const applyInlineFormatWysiwyg = (
         return {caretOutside: false, display: model.display, selection, value: source};
     }
 
-    const remove = [...selected].every((index) => model.charFormats[index]!.includes(format));
+    const remove = [...selected].every(index => model.charFormats[index]!.includes(format));
     const units = unitsFromPlan(model, createPlan(model));
     const toggled = units.map((unit): Unit => {
         if (unit.kind !== 'char' || !selected.has(unit.displayIndex)) {
             return unit;
         }
 
-        const formats = unit.formats.filter((active) => active !== format);
+        const formats = unit.formats.filter(active => active !== format);
 
         return {...unit, formats: remove ? formats : [...formats, format], inserted: true};
     });

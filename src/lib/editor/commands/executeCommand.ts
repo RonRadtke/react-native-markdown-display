@@ -1,26 +1,13 @@
-import {
-    applyBlockFormat,
-    applyInlineFormat,
-    applyLinkFormat,
-    applyTableFormat,
-} from './formatMarkdown';
+import {applyBlockFormat, applyInlineFormat, applyLinkFormat, applyTableFormat} from './formatMarkdown';
 
-import type {
-    MarkdownCommandResult,
-    MarkdownSelection,
-    MarkdownTextInputCommandPayload,
-} from '../types';
+import type {MarkdownCommandResult, MarkdownSelection, MarkdownTextInputCommandPayload} from '../types';
 
 /**
  * Dispatch a markdown command to the matching pure transform. Shared by the
  * plain-text input and the WYSIWYG editor so command behaviour stays identical
  * across editing modes.
  */
-export const executeCommand = (
-    value: string,
-    selection: MarkdownSelection | undefined,
-    payload: MarkdownTextInputCommandPayload,
-): MarkdownCommandResult => {
+export const executeCommand = (value: string, selection: MarkdownSelection | undefined, payload: MarkdownTextInputCommandPayload): MarkdownCommandResult => {
     switch (payload.command) {
         case 'bold':
         case 'italic':
@@ -42,18 +29,12 @@ export const executeCommand = (
             return applyTableFormat(value, selection, payload.table);
         default: {
             const exhaustiveCheck: never = payload.command;
-            throw new Error(
-                `Unsupported markdown command: ${String(exhaustiveCheck)}`,
-            );
+            throw new Error(`Unsupported markdown command: ${String(exhaustiveCheck)}`);
         }
     }
 };
 
-const INLINE_COMMANDS: ReadonlySet<MarkdownTextInputCommandPayload['command']> =
-    new Set(['bold', 'italic', 'underline', 'strikethrough', 'inline-code']);
+const INLINE_COMMANDS: ReadonlySet<MarkdownTextInputCommandPayload['command']> = new Set(['bold', 'italic', 'underline', 'strikethrough', 'inline-code']);
 
 /** Whether a command maps to an inline (character-level) markdown format. */
-export const isInlineCommand = (
-    command: MarkdownTextInputCommandPayload['command'],
-): command is import('../types').MarkdownInlineFormat =>
-    INLINE_COMMANDS.has(command);
+export const isInlineCommand = (command: MarkdownTextInputCommandPayload['command']): command is import('../types').MarkdownInlineFormat => INLINE_COMMANDS.has(command);

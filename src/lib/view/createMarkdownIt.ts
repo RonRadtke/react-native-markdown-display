@@ -8,20 +8,14 @@ export interface CreateMarkdownItOptions {
     underline?: boolean;
 }
 
-export const createMarkdownIt = (
-    {
-        plugins = [],
-        typographer = true,
-        underline = false,
-    }: CreateMarkdownItOptions = {},
-): MarkdownIt => {
+export const createMarkdownIt = ({plugins = [], typographer = true, underline = false}: CreateMarkdownItOptions = {}): MarkdownIt => {
     const markdownIt = MarkdownIt({typographer});
 
     if (underline) {
         markdownIt.use(underlinePlugin);
     }
 
-    plugins.forEach((plugin) => {
+    plugins.forEach(plugin => {
         markdownIt.use(plugin);
     });
 

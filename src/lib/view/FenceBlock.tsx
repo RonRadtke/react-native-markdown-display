@@ -15,13 +15,7 @@ interface FenceBlockProps {
     onCopyCode?: OnCopyCode | undefined;
 }
 
-const FenceBlock = React.memo(function FenceBlock({
-    code,
-    colorScheme = 'light',
-    language,
-    styles,
-    onCopyCode,
-}: FenceBlockProps) {
+const FenceBlock = React.memo(function FenceBlock({code, colorScheme = 'light', language, styles, onCopyCode}: FenceBlockProps) {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
@@ -40,21 +34,8 @@ const FenceBlock = React.memo(function FenceBlock({
                 <View style={styles._VIEW_SAFE_fence_header}>
                     <Text style={styles.fence_language_label}>{language}</Text>
                     {onCopyCode !== undefined && (
-                        <Pressable
-                            accessibilityLabel="Copy code"
-                            accessibilityRole="button"
-                            onPress={handleCopy}
-                            style={styles._VIEW_SAFE_fence_copy_button}
-                        >
-                            {copied ? (
-                                <Text style={styles.fence_copy_text}>Copied!</Text>
-                            ) : (
-                                <MaterialDesignIcons
-                                    color={iconColor}
-                                    name="content-copy"
-                                    size={15}
-                                />
-                            )}
+                        <Pressable accessibilityLabel="Copy code" accessibilityRole="button" onPress={handleCopy} style={styles._VIEW_SAFE_fence_copy_button}>
+                            {copied ? <Text style={styles.fence_copy_text}>Copied!</Text> : <MaterialDesignIcons color={iconColor} name="content-copy" size={15} />}
                         </Pressable>
                     )}
                 </View>
@@ -65,31 +46,19 @@ const FenceBlock = React.memo(function FenceBlock({
                         <View style={styles._VIEW_SAFE_fence_code}>
                             {tokens.map((line, lineIndex) => (
                                 <View key={lineIndex} style={localStyles.codeLine}>
-                                    {line.filter(token => !token.empty).map((token, tokenIndex) => {
-                                        const tokenProps = getTokenProps({token});
-                                        const tokenColor = tokenProps.style?.color;
-                                        const tokenFontStyle = tokenProps.style?.fontStyle;
-                                        const tokenFontWeight = tokenProps.style?.fontWeight;
-                                        return (
-                                            <Text
-                                                key={tokenIndex}
-                                                style={[
-                                                    styles.fence_token,
-                                                    tokenColor != null
-                                                        ? {color: String(tokenColor)}
-                                                        : null,
-                                                    tokenFontStyle != null
-                                                        ? {fontStyle: tokenFontStyle as 'normal' | 'italic'}
-                                                        : null,
-                                                    tokenFontWeight != null
-                                                        ? {fontWeight: String(tokenFontWeight) as 'bold' | 'normal'}
-                                                        : null,
-                                                ]}
-                                            >
-                                                {tokenProps.children}
-                                            </Text>
-                                        );
-                                    })}
+                                    {line
+                                        .filter(token => !token.empty)
+                                        .map((token, tokenIndex) => {
+                                            const tokenProps = getTokenProps({token});
+                                            const tokenColor = tokenProps.style?.color;
+                                            const tokenFontStyle = tokenProps.style?.fontStyle;
+                                            const tokenFontWeight = tokenProps.style?.fontWeight;
+                                            return (
+                                                <Text key={tokenIndex} style={[styles.fence_token, tokenColor != null ? {color: String(tokenColor)} : null, tokenFontStyle != null ? {fontStyle: tokenFontStyle as 'normal' | 'italic'} : null, tokenFontWeight != null ? {fontWeight: String(tokenFontWeight) as 'bold' | 'normal'} : null]}>
+                                                    {tokenProps.children}
+                                                </Text>
+                                            );
+                                        })}
                                 </View>
                             ))}
                         </View>
@@ -100,10 +69,6 @@ const FenceBlock = React.memo(function FenceBlock({
     );
 });
 
-const localStyles = StyleSheet.create({
-    codeLine: {
-        flexDirection: 'row',
-    },
-});
+const localStyles = StyleSheet.create({codeLine: {flexDirection: 'row'}});
 
 export default FenceBlock;

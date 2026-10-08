@@ -9,47 +9,32 @@ import openUrl from './util/openUrl';
 
 import FenceBlock from './FenceBlock';
 
-import type {ASTNode, MarkdownStyleObject, OnCopyCode, OnLinkPress, RenderRuleExtra, RenderRules, TextComponent,} from './types';
+import type {ASTNode, MarkdownStyleObject, OnCopyCode, OnLinkPress, RenderRuleExtra, RenderRules, TextComponent} from './types';
 
 type StylePropertyValue = MarkdownStyleObject[keyof MarkdownStyleObject];
 
-const trimTrailingNewLine = (content: string): string =>
-    content.endsWith('\n') ? content.slice(0, -1) : content;
+const trimTrailingNewLine = (content: string): string => (content.endsWith('\n') ? content.slice(0, -1) : content);
 
 const getStyleObject = (value?: RenderRuleExtra): MarkdownStyleObject => {
-    if (
-        value &&
-        typeof value === 'object' &&
-        !Array.isArray(value) &&
-        typeof value !== 'function'
-    ) {
+    if (value && typeof value === 'object' && !Array.isArray(value) && typeof value !== 'function') {
         return value as MarkdownStyleObject;
     }
 
     return {};
 };
 
-const getOnLinkPress = (value?: RenderRuleExtra): OnLinkPress | undefined =>
-    typeof value === 'function' ? value as OnLinkPress : undefined;
+const getOnLinkPress = (value?: RenderRuleExtra): OnLinkPress | undefined => (typeof value === 'function' ? (value as OnLinkPress) : undefined);
 
-const getAllowedImageHandlers = (value?: RenderRuleExtra): string[] =>
-    Array.isArray(value)
-        ? value.filter((item): item is string => typeof item === 'string')
-        : [];
+const getAllowedImageHandlers = (value?: RenderRuleExtra): string[] => (Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []);
 
-const getDefaultImageHandler = (value?: RenderRuleExtra): string | null =>
-    typeof value === 'string' ? value : value === null ? null : null;
+const getDefaultImageHandler = (value?: RenderRuleExtra): string | null => (typeof value === 'string' ? value : value === null ? null : null);
 
-const pickTextStyles = (
-    inheritedStyles: MarkdownStyleObject,
-): MarkdownStyleObject => {
+const pickTextStyles = (inheritedStyles: MarkdownStyleObject): MarkdownStyleObject => {
     const textStyles: MarkdownStyleObject = {};
 
     for (const propertyName of Object.keys(inheritedStyles)) {
         if (textStyleProps.includes(propertyName)) {
-            (textStyles as Record<string, StylePropertyValue>)[propertyName] = (
-                inheritedStyles as Record<string, StylePropertyValue>
-            )[propertyName];
+            (textStyles as Record<string, StylePropertyValue>)[propertyName] = (inheritedStyles as Record<string, StylePropertyValue>)[propertyName];
         }
     }
 
@@ -57,8 +42,7 @@ const pickTextStyles = (
 };
 
 const getBlockLinkAccessibilityLabel = (node: ASTNode): string | undefined => {
-    const imageAlt = node.children.find((child) => child.type === 'image')
-        ?.attributes.alt;
+    const imageAlt = node.children.find(child => child.type === 'image')?.attributes.alt;
 
     if (imageAlt && imageAlt.trim().length > 0) {
         return imageAlt;
@@ -112,9 +96,7 @@ const renderRules = (Text: TextComponent): RenderRules => ({
             {children}
         </View>
     ),
-    hr: (node, _children, _parent, styles) => (
-        <View key={node.key} style={styles._VIEW_SAFE_hr}/>
-    ),
+    hr: (node, _children, _parent, styles) => <View key={node.key} style={styles._VIEW_SAFE_hr} />,
     strong: (node, children, _parent, styles) => (
         <Text key={node.key} style={styles.strong}>
             {children}
@@ -150,30 +132,14 @@ const renderRules = (Text: TextComponent): RenderRules => ({
             {children}
         </View>
     ),
-    list_item: (
-        node,
-        children,
-        parent,
-        styles,
-        inheritedStyles?: RenderRuleExtra,
-    ) => {
-        const textStyles = pickTextStyles({
-            ...getStyleObject(inheritedStyles),
-            ...(StyleSheet.flatten(styles.list_item) ?? {}),
-        });
+    list_item: (node, children, parent, styles, inheritedStyles?: RenderRuleExtra) => {
+        const textStyles = pickTextStyles({...getStyleObject(inheritedStyles), ...(StyleSheet.flatten(styles.list_item) ?? {})});
 
         if (hasParents(parent, 'bullet_list')) {
             return (
                 <View key={node.key} style={styles._VIEW_SAFE_list_item}>
-                    <Text
-                        style={[textStyles, styles.bullet_list_icon]}
-                        accessible={false}
-                    >
-                        {Platform.select({
-                            android: '\u2022',
-                            ios: '\u00B7',
-                            default: '\u2022',
-                        })}
+                    <Text style={[textStyles, styles.bullet_list_icon]} accessible={false}>
+                        {Platform.select({android: '\u2022', ios: '\u00B7', default: '\u2022'})}
                     </Text>
                     <View style={styles._VIEW_SAFE_bullet_list_content}>{children}</View>
                 </View>
@@ -181,13 +147,9 @@ const renderRules = (Text: TextComponent): RenderRules => ({
         }
 
         if (hasParents(parent, 'ordered_list')) {
-            const orderedList = parent.find(
-                (parentNode) => parentNode.type === 'ordered_list',
-            );
+            const orderedList = parent.find(parentNode => parentNode.type === 'ordered_list');
             const startValue = Number(orderedList?.attributes.start);
-            const listItemNumber = Number.isFinite(startValue)
-                ? startValue + node.index
-                : node.index + 1;
+            const listItemNumber = Number.isFinite(startValue) ? startValue + node.index : node.index + 1;
 
             return (
                 <View key={node.key} style={styles._VIEW_SAFE_list_item}>
@@ -206,55 +168,19 @@ const renderRules = (Text: TextComponent): RenderRules => ({
             </View>
         );
     },
-    code_inline: (
-        node,
-        _children,
-        _parent,
-        styles,
-        inheritedStyles?: RenderRuleExtra,
-    ) => (
-        <Text
-            key={node.key}
-            style={[getStyleObject(inheritedStyles), styles.code_inline]}
-        >
+    code_inline: (node, _children, _parent, styles, inheritedStyles?: RenderRuleExtra) => (
+        <Text key={node.key} style={[getStyleObject(inheritedStyles), styles.code_inline]}>
             {node.content}
         </Text>
     ),
-    code_block: (
-        node,
-        _children,
-        _parent,
-        styles,
-        inheritedStyles?: RenderRuleExtra,
-    ) => (
-        <Text
-            key={node.key}
-            style={[getStyleObject(inheritedStyles), styles.code_block]}
-        >
+    code_block: (node, _children, _parent, styles, inheritedStyles?: RenderRuleExtra) => (
+        <Text key={node.key} style={[getStyleObject(inheritedStyles), styles.code_block]}>
             {trimTrailingNewLine(node.content)}
         </Text>
     ),
-    fence: (
-        node,
-        _children,
-        _parent,
-        styles,
-        onCopyCode?: RenderRuleExtra,
-        colorScheme?: RenderRuleExtra,
-    ) => {
-        const language = typeof node.sourceInfo === 'string'
-            ? node.sourceInfo.trim().split(/\s+/)[0] ?? ''
-            : '';
-        return (
-            <FenceBlock
-                key={node.key}
-                code={trimTrailingNewLine(node.content)}
-                colorScheme={colorScheme === 'dark' ? 'dark' : 'light'}
-                language={language}
-                styles={styles}
-                onCopyCode={typeof onCopyCode === 'function' ? onCopyCode as OnCopyCode : undefined}
-            />
-        );
+    fence: (node, _children, _parent, styles, onCopyCode?: RenderRuleExtra, colorScheme?: RenderRuleExtra) => {
+        const language = typeof node.sourceInfo === 'string' ? (node.sourceInfo.trim().split(/\s+/)[0] ?? '') : '';
+        return <FenceBlock key={node.key} code={trimTrailingNewLine(node.content)} colorScheme={colorScheme === 'dark' ? 'dark' : 'light'} language={language} styles={styles} onCopyCode={typeof onCopyCode === 'function' ? (onCopyCode as OnCopyCode) : undefined} />;
     },
     table: (node, children, _parent, styles) => (
         <View key={node.key} style={styles._VIEW_SAFE_table}>
@@ -286,46 +212,17 @@ const renderRules = (Text: TextComponent): RenderRules => ({
             {children}
         </View>
     ),
-    link: (
-        node,
-        children,
-        _parent,
-        styles,
-        onLinkPress?: RenderRuleExtra,
-    ): ReactNode => (
-        <Pressable
-            accessibilityRole="link"
-            key={node.key}
-            onPress={() => openUrl(node.attributes.href, getOnLinkPress(onLinkPress))}
-        >
+    link: (node, children, _parent, styles, onLinkPress?: RenderRuleExtra): ReactNode => (
+        <Pressable accessibilityRole="link" key={node.key} onPress={() => openUrl(node.attributes.href, getOnLinkPress(onLinkPress))}>
             <Text style={styles.link}>{children}</Text>
         </Pressable>
     ),
-    blocklink: (
-        node,
-        children,
-        _parent,
-        styles,
-        onLinkPress?: RenderRuleExtra,
-    ): ReactNode => (
-        <Pressable
-            accessibilityLabel={getBlockLinkAccessibilityLabel(node)}
-            accessibilityRole="link"
-            key={node.key}
-            onPress={() => openUrl(node.attributes.href, getOnLinkPress(onLinkPress))}
-            style={styles.blocklink}
-        >
+    blocklink: (node, children, _parent, styles, onLinkPress?: RenderRuleExtra): ReactNode => (
+        <Pressable accessibilityLabel={getBlockLinkAccessibilityLabel(node)} accessibilityRole="link" key={node.key} onPress={() => openUrl(node.attributes.href, getOnLinkPress(onLinkPress))} style={styles.blocklink}>
             <View style={styles.image}>{children}</View>
         </Pressable>
     ),
-    image: (
-        node,
-        _children,
-        _parent,
-        styles,
-        allowedImageHandlers?: RenderRuleExtra,
-        defaultImageHandler?: RenderRuleExtra,
-    ) => {
+    image: (node, _children, _parent, styles, allowedImageHandlers?: RenderRuleExtra, defaultImageHandler?: RenderRuleExtra) => {
         const src = node.attributes.src;
         const alt = node.attributes.alt;
         const handlers = getAllowedImageHandlers(allowedImageHandlers);
@@ -335,21 +232,13 @@ const renderRules = (Text: TextComponent): RenderRules => ({
             return null;
         }
 
-        const show = handlers.some((value) =>
-            src.toLowerCase().startsWith(value.toLowerCase()),
-        );
+        const show = handlers.some(value => src.toLowerCase().startsWith(value.toLowerCase()));
 
         if (!show && fallbackHandler === null) {
             return null;
         }
 
-        const imageProps: IFitImageProps = {
-            indicator: true,
-            style: styles._VIEW_SAFE_image,
-            source: {
-                uri: show ? src : `${fallbackHandler}${src}`,
-            },
-        };
+        const imageProps: IFitImageProps = {indicator: true, style: styles._VIEW_SAFE_image, source: {uri: show ? src : `${fallbackHandler}${src}`}};
 
         if (alt) {
             imageProps.accessible = true;
@@ -358,13 +247,7 @@ const renderRules = (Text: TextComponent): RenderRules => ({
 
         return <FitImage key={node.key} {...imageProps} />;
     },
-    text: (
-        node,
-        _children,
-        _parent,
-        styles,
-        inheritedStyles?: RenderRuleExtra,
-    ) => (
+    text: (node, _children, _parent, styles, inheritedStyles?: RenderRuleExtra) => (
         <Text key={node.key} style={[getStyleObject(inheritedStyles), styles.text]}>
             {node.content}
         </Text>

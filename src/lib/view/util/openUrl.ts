@@ -2,10 +2,7 @@ import {Linking} from 'react-native';
 
 import type {OnLinkPress} from '../types';
 
-export default function openUrl(
-    url: string | undefined,
-    customCallback?: OnLinkPress,
-): void {
+export default function openUrl(url: string | undefined, customCallback?: OnLinkPress): void {
     if (!url) {
         return;
     }
